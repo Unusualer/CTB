@@ -1,0 +1,188 @@
+/* Admin Topbar Styles */
+.admin-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #fff;
+    padding: 0 1.5rem;
+    height: 70px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+}
+
+.sidebar-toggle {
+    font-size: 1.25rem;
+    cursor: pointer;
+    color: #555;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.sidebar-toggle:hover {
+    background-color: #f5f5f5;
+    color: #2c3e50;
+}
+
+.topbar-search {
+    display: flex;
+    align-items: center;
+    background-color: #f5f7fa;
+    border-radius: 25px;
+    padding: 0.5rem 1rem;
+    flex: 0 0 300px;
+    margin-left: 1rem;
+}
+
+.topbar-search i {
+    color: #94a3b8;
+    margin-right: 0.5rem;
+}
+
+.topbar-search input {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    color: #334155;
+}
+
+.topbar-search input::placeholder {
+    color: #94a3b8;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+}
+
+.notification-item {
+    position: relative;
+    margin-right: 1.5rem;
+    font-size: 1.25rem;
+    color: #555;
+    cursor: pointer;
+}
+
+.notification-item .badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #e74c3c;
+    color: white;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    height: 18px;
+    width: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-profile {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    padding: 0.5rem;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.admin-profile:hover {
+    background-color: #f5f7fa;
+}
+
+.admin-profile.active {
+    background-color: #f5f7fa;
+}
+
+.admin-profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ecf0f1;
+}
+
+.admin-info {
+    margin-left: 0.75rem;
+    line-height: 1.2;
+}
+
+.admin-name {
+    display: block;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.admin-role {
+    font-size: 0.75rem;
+    color: #7f8c8d;
+}
+
+.profile-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+    padding: 0.5rem 0;
+    display: none;
+    z-index: 1000;
+    margin-top: 0.5rem;
+}
+
+.admin-profile.active .profile-dropdown {
+    display: block;
+}
+
+.profile-dropdown a {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    color: #2c3e50;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.profile-dropdown a:hover {
+    background-color: #f5f7fa;
+}
+
+.profile-dropdown a i {
+    width: 20px;
+    margin-right: 0.75rem;
+    color: #7f8c8d;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .topbar-search {
+        flex: 0 0 200px;
+    }
+
+    .admin-info {
+        display: none;
+    }
+}
+
+@media (max-width: 576px) {
+    .topbar-search {
+        display: none;
+    }
+
+    .admin-topbar {
+        padding: 0 1rem;
+    }
+}
