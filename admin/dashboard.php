@@ -187,9 +187,9 @@ $page_title = "Admin Dashboard";
                         </a>
                     </li>
                     <li>
-                        <a href="settings.php">
-                            <i class="fas fa-cog"></i>
-                            <span>Settings</span>
+                        <a href="maintenance-new.php">
+                            <i class="fas fa-tools"></i>
+                            <span>Maintenance</span>
                         </a>
                     </li>
                 </ul>

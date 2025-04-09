@@ -92,9 +92,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <div class="sidebar-menu-category">Settings</div>
         <ul class="sidebar-menu-items list-unstyled">
             <li class="sidebar-menu-item">
-                <a href="maintenance.php" class="sidebar-menu-link <?php echo $current_page == 'maintenance.php' ? 'active' : ''; ?>">
-                    <i class="fas fa-tools sidebar-menu-icon"></i>
-                    <span class="sidebar-menu-text">Maintenance</span>
+                <a href="settings.php" class="sidebar-menu-link <?php echo $current_page == 'settings.php' ? 'active' : ''; ?>">
+                    <i class="fas fa-cogs sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">Settings</span>
                 </a>
             </li>
             <li class="sidebar-menu-item">

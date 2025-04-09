@@ -12,111 +12,175 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 }
 
 // Initialize variables
-$success_message = '';
-$error_message = '';
+$search = $_GET['search'] ?? '';
+$user_filter = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
+$action_filter = $_GET['action'] ?? '';
+$entity_type_filter = $_GET['entity_type'] ?? '';
+$date_from = $_GET['date_from'] ?? '';
+$date_to = $_GET['date_to'] ?? '';
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$items_per_page = 10;
+$offset = ($page - 1) * $items_per_page;
 
-// Handle form submission for new maintenance update
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    try {
-        $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
-        // Get form data
-        $title = trim($_POST['title']);
-        $description = trim($_POST['description']);
-        $start_date = trim($_POST['start_date']);
-        $end_date = trim($_POST['end_date']);
-        $status = trim($_POST['status']);
-        $affected_areas = trim($_POST['affected_areas']);
-        
-        // Validate inputs
-        if (empty($title)) {
-            throw new Exception("Title cannot be empty");
-        }
-        
-        if (empty($description)) {
-            throw new Exception("Description cannot be empty");
-        }
-        
-        if (empty($start_date)) {
-            throw new Exception("Start date cannot be empty");
-        }
-        
-        // Insert new maintenance record
-        $stmt = $db->prepare("
-            INSERT INTO maintenance_updates 
-            (title, description, start_date, end_date, status, affected_areas, created_by, created_at) 
-            VALUES 
-            (:title, :description, :start_date, :end_date, :status, :affected_areas, :created_by, NOW())
-        ");
-        
-        $stmt->execute([
-            ':title' => $title,
-            ':description' => $description,
-            ':start_date' => $start_date,
-            ':end_date' => $end_date,
-            ':status' => $status,
-            ':affected_areas' => $affected_areas,
-            ':created_by' => $_SESSION['user_id']
-        ]);
-        
-        // Log the activity
-        logActivity($db, $_SESSION['user_id'], 'create', 'maintenance_update', $db->lastInsertId(), "Added new maintenance update: $title");
-        
-        $success_message = "Maintenance update added successfully";
-        
-    } catch (Exception $e) {
-        $error_message = $e->getMessage();
-    }
-}
-
-// Get maintenance updates from database
+// Fetch activity logs with filters
 try {
     $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    // Check if maintenance_updates table exists, if not create it
-    $db->query("
-        CREATE TABLE IF NOT EXISTS maintenance_updates (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            title VARCHAR(255) NOT NULL,
-            description TEXT NOT NULL,
-            start_date DATE NOT NULL,
-            end_date DATE,
-            status ENUM('scheduled', 'in-progress', 'completed', 'postponed', 'cancelled') NOT NULL DEFAULT 'scheduled',
-            affected_areas TEXT,
-            created_by INT NOT NULL,
-            created_at DATETIME NOT NULL,
-            updated_at DATETIME NULL,
-            FOREIGN KEY (created_by) REFERENCES users(id)
-        )
-    ");
+    // Build the query - select activity logs with user info
+    $query = "SELECT a.*, 
+              u.name as user_name, 
+              u.email as user_email 
+              FROM activity_log a 
+              LEFT JOIN users u ON a.user_id = u.id 
+              WHERE 1=1";
+    $count_query = "SELECT COUNT(*) as total FROM activity_log a WHERE 1=1";
+    $params = [];
     
-    // Fetch maintenance updates
-    $stmt = $db->query("
-        SELECT m.*, u.name as admin_name 
-        FROM maintenance_updates m
-        JOIN users u ON m.created_by = u.id
-        ORDER BY 
-            CASE 
-                WHEN m.status = 'in-progress' THEN 1
-                WHEN m.status = 'scheduled' THEN 2
-                WHEN m.status = 'postponed' THEN 3
-                WHEN m.status = 'completed' THEN 4
-                WHEN m.status = 'cancelled' THEN 5
-            END,
-            m.start_date DESC
-    ");
+    // Apply filters
+    if (!empty($search)) {
+        $query .= " AND (a.details LIKE :search OR u.name LIKE :search)";
+        $count_query .= " AND (a.details LIKE :search OR u.name LIKE :search)";
+        $params[':search'] = "%$search%";
+    }
     
-    $maintenance_updates = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    if ($user_filter > 0) {
+        $query .= " AND a.user_id = :user_id";
+        $count_query .= " AND a.user_id = :user_id";
+        $params[':user_id'] = $user_filter;
+    }
+    
+    if (!empty($action_filter)) {
+        $query .= " AND a.action = :action";
+        $count_query .= " AND a.action = :action";
+        $params[':action'] = $action_filter;
+    }
+    
+    if (!empty($entity_type_filter)) {
+        $query .= " AND a.entity_type = :entity_type";
+        $count_query .= " AND a.entity_type = :entity_type";
+        $params[':entity_type'] = $entity_type_filter;
+    }
+    
+    if (!empty($date_from)) {
+        $query .= " AND DATE(a.created_at) >= :date_from";
+        $count_query .= " AND DATE(a.created_at) >= :date_from";
+        $params[':date_from'] = $date_from;
+    }
+    
+    if (!empty($date_to)) {
+        $query .= " AND DATE(a.created_at) <= :date_to";
+        $count_query .= " AND DATE(a.created_at) <= :date_to";
+        $params[':date_to'] = $date_to;
+    }
+    
+    // Add ordering and limit
+    $query .= " ORDER BY a.created_at DESC LIMIT :offset, :limit";
+    
+    // Get total count
+    $count_stmt = $db->prepare($count_query);
+    foreach ($params as $key => $value) {
+        $count_stmt->bindValue($key, $value);
+    }
+    $count_stmt->execute();
+    $total = $count_stmt->fetch(PDO::FETCH_ASSOC)['total'];
+    $total_pages = ceil($total / $items_per_page);
+    
+    // Get activity logs
+    $stmt = $db->prepare($query);
+    foreach ($params as $key => $value) {
+        $stmt->bindValue($key, $value);
+    }
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->bindValue(':limit', $items_per_page, PDO::PARAM_INT);
+    $stmt->execute();
+    $activity_logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Get unique actions for filter
+    $action_query = "SELECT DISTINCT action FROM activity_log ORDER BY action";
+    $action_stmt = $db->prepare($action_query);
+    $action_stmt->execute();
+    $actions = $action_stmt->fetchAll(PDO::FETCH_COLUMN);
+    
+    // Get unique entity types for filter
+    $entity_query = "SELECT DISTINCT entity_type FROM activity_log ORDER BY entity_type";
+    $entity_stmt = $db->prepare($entity_query);
+    $entity_stmt->execute();
+    $entity_types = $entity_stmt->fetchAll(PDO::FETCH_COLUMN);
+    
+    // Get users for filter
+    $users_query = "SELECT id, name FROM users ORDER BY name";
+    $users_stmt = $db->prepare($users_query);
+    $users_stmt->execute();
+    $users = $users_stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Get activity statistics
+    // Total activities count
+    $stats_query = "SELECT COUNT(*) as total_count FROM activity_log";
+    $stats_stmt = $db->prepare($stats_query);
+    $stats_stmt->execute();
+    $activity_stats = $stats_stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Activity counts by action
+    $action_stats_query = "SELECT action, COUNT(*) as count FROM activity_log GROUP BY action";
+    $action_stats_stmt = $db->prepare($action_stats_query);
+    $action_stats_stmt->execute();
+    $action_stats = [];
+    while ($row = $action_stats_stmt->fetch(PDO::FETCH_ASSOC)) {
+        $action_stats[$row['action']] = $row['count'];
+    }
+    
+    // Activity counts by entity type
+    $entity_stats_query = "SELECT entity_type, COUNT(*) as count FROM activity_log GROUP BY entity_type";
+    $entity_stats_stmt = $db->prepare($entity_stats_query);
+    $entity_stats_stmt->execute();
+    $entity_stats = [];
+    while ($row = $entity_stats_stmt->fetch(PDO::FETCH_ASSOC)) {
+        $entity_stats[$row['entity_type']] = $row['count'];
+    }
+    
+    // Recent activity statistics (last 24 hours)
+    $recent_query = "SELECT COUNT(*) as count FROM activity_log WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)";
+    $recent_stmt = $db->prepare($recent_query);
+    $recent_stmt->execute();
+    $recent_stats = $recent_stmt->fetch(PDO::FETCH_ASSOC);
     
 } catch (PDOException $e) {
-    $error_message = "Database error: " . $e->getMessage();
-    $maintenance_updates = [];
+    $_SESSION['error'] = "Database error: " . $e->getMessage();
+    $activity_logs = [];
+    $total = 0;
+    $total_pages = 0;
+    $actions = [];
+    $entity_types = [];
+    $users = [];
+    $activity_stats = ['total_count' => 0];
+    $action_stats = [];
+    $entity_stats = [];
+    $recent_stats = ['count' => 0];
+}
+
+// Helper function to get appropriate status class for badge
+function getActionBadgeClass($action) {
+    switch(strtolower($action)) {
+        case 'create':
+            return 'success';
+        case 'update':
+            return 'primary';
+        case 'delete':
+            return 'danger';
+        case 'login':
+            return 'info';
+        case 'logout':
+            return 'secondary';
+        case 'view':
+            return 'warning';
+        default:
+            return 'primary';
+    }
 }
 
 // Page title
-$page_title = "Maintenance Updates";
+$page_title = "Activity Log";
 ?>
 
 <!DOCTYPE html>
@@ -128,98 +192,6 @@ $page_title = "Maintenance Updates";
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
-    <style>
-        .maintenance-card {
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .maintenance-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .maintenance-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0;
-        }
-        
-        .status-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        
-        .status-scheduled {
-            background-color: #e0f7fa;
-            color: #0288d1;
-        }
-        
-        .status-in-progress {
-            background-color: #fff8e1;
-            color: #ffa000;
-        }
-        
-        .status-completed {
-            background-color: #e8f5e9;
-            color: #43a047;
-        }
-        
-        .status-postponed {
-            background-color: #f3e5f5;
-            color: #8e24aa;
-        }
-        
-        .status-cancelled {
-            background-color: #ffebee;
-            color: #e53935;
-        }
-        
-        .maintenance-dates {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 10px;
-            color: #666;
-            font-size: 14px;
-        }
-        
-        .maintenance-description {
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-        
-        .maintenance-meta {
-            display: flex;
-            justify-content: space-between;
-            color: #888;
-            font-size: 13px;
-        }
-        
-        .add-maintenance-form {
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        
-        .form-group-full {
-            grid-column: 1 / -1;
-        }
-    </style>
 </head>
 <body>
     <div class="admin-container">
@@ -272,16 +244,16 @@ $page_title = "Maintenance Updates";
                             <span>Payments</span>
                         </a>
                     </li>
-                    <li>
+                    <li class="active">
                         <a href="activity-log.php">
                             <i class="fas fa-history"></i>
                             <span>Activity Log</span>
                         </a>
                     </li>
-                    <li class="active">
-                        <a href="maintenance.php">
-                            <i class="fas fa-tools"></i>
-                            <span>Maintenance</span>
+                    <li>
+                        <a href="settings.php">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
                         </a>
                     </li>
                 </ul>
@@ -307,9 +279,10 @@ $page_title = "Maintenance Updates";
             <header class="topbar">
                 <div class="search-bar">
                     <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search..." disabled>
+                    <input type="text" placeholder="Search activity logs..." form="filter-form" name="search" value="<?php echo htmlspecialchars($search); ?>">
                 </div>
-                <div class="topbar-actions">
+                
+                <div class="topbar-right">
                     <div class="notifications">
                         <i class="fas fa-bell"></i>
                         <span class="badge">3</span>
@@ -322,156 +295,282 @@ $page_title = "Maintenance Updates";
             </header>
 
             <div class="page-header">
-                <h1><?php echo $page_title; ?></h1>
-                <p>Manage maintenance updates for the residential complex</p>
+                <h1>Activity Log</h1>
+                <div class="page-header-actions">
+                    <button class="btn btn-secondary" onclick="exportActivityLog()">
+                        <i class="fas fa-download"></i>
+                        Export Log
+                    </button>
+                </div>
             </div>
 
-            <?php if (!empty($success_message)): ?>
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i>
-                    <?php echo $success_message; ?>
-                </div>
-            <?php endif; ?>
-
-            <?php if (!empty($error_message)): ?>
-                <div class="alert alert-error">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <?php echo $error_message; ?>
-                </div>
-            <?php endif; ?>
-            
-            <section class="add-maintenance-form">
-                <h2><i class="fas fa-plus-circle"></i> Add New Maintenance Update</h2>
-                <form method="POST" action="">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="title">Title</label>
-                            <input type="text" id="title" name="title" required placeholder="E.g., Elevator Maintenance">
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon activities">
+                        <i class="fas fa-list-ul"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3>Total Activities</h3>
+                        <div class="stat-number"><?php echo isset($activity_stats['total_count']) ? number_format($activity_stats['total_count']) : 0; ?></div>
+                        <div class="stat-breakdown">
+                            <span>All time</span>
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="status">Status</label>
-                            <select id="status" name="status" required>
-                                <option value="scheduled">Scheduled</option>
-                                <option value="in-progress">In Progress</option>
-                                <option value="completed">Completed</option>
-                                <option value="postponed">Postponed</option>
-                                <option value="cancelled">Cancelled</option>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon recent">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3>Recent Activity</h3>
+                        <div class="stat-number"><?php echo isset($recent_stats['count']) ? number_format($recent_stats['count']) : 0; ?></div>
+                        <div class="stat-breakdown">
+                            <span>Last 24 hours</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon actions">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3>Top Actions</h3>
+                        <div class="stat-breakdown">
+                            <?php
+                            $top_actions = array_slice($action_stats, 0, 3, true);
+                            foreach ($top_actions as $action => $count) {
+                                $class = getActionBadgeClass($action);
+                                echo "<span><i class='fas fa-circle' style='color: var(--status-$class);'></i> " . ucfirst($action) . ": $count</span>";
+                            }
+                            ?>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon entities">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3>Entity Types</h3>
+                        <div class="stat-breakdown">
+                            <?php
+                            $top_entities = array_slice($entity_stats, 0, 3, true);
+                            foreach ($top_entities as $entity => $count) {
+                                echo "<span><i class='fas fa-circle'></i> " . ucfirst($entity) . ": $count</span>";
+                            }
+                            ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="card">
+                <div class="card-header user-filter-header">
+                    <h3>Activity Log</h3>
+                    <form id="filter-form" action="activity-log.php" method="GET" class="filter-form">
+                        <div class="filter-group">
+                            <label for="user_id">User:</label>
+                            <select name="user_id" id="user_id" onchange="this.form.submit()">
+                                <option value="0">All Users</option>
+                                <?php foreach ($users as $user): ?>
+                                    <option value="<?php echo $user['id']; ?>" <?php echo $user_filter === $user['id'] ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($user['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="start_date">Start Date</label>
-                            <input type="date" id="start_date" name="start_date" required>
+                        <div class="filter-group">
+                            <label for="action">Action:</label>
+                            <select name="action" id="action" onchange="this.form.submit()">
+                                <option value="">All Actions</option>
+                                <?php foreach ($actions as $action): ?>
+                                    <option value="<?php echo $action; ?>" <?php echo $action_filter === $action ? 'selected' : ''; ?>>
+                                        <?php echo ucfirst($action); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="end_date">End Date (Optional)</label>
-                            <input type="date" id="end_date" name="end_date">
+                        <div class="filter-group">
+                            <label for="entity_type">Entity Type:</label>
+                            <select name="entity_type" id="entity_type" onchange="this.form.submit()">
+                                <option value="">All Types</option>
+                                <?php foreach ($entity_types as $type): ?>
+                                    <option value="<?php echo $type; ?>" <?php echo $entity_type_filter === $type ? 'selected' : ''; ?>>
+                                        <?php echo ucfirst($type); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
-                        
-                        <div class="form-group-full">
-                            <label for="affected_areas">Affected Areas</label>
-                            <input type="text" id="affected_areas" name="affected_areas" placeholder="E.g., Building A, Swimming Pool, Main Entrance">
+                        <div class="filter-group">
+                            <label for="date_from">From:</label>
+                            <input type="date" id="date_from" name="date_from" value="<?php echo $date_from; ?>">
                         </div>
-                        
-                        <div class="form-group-full">
-                            <label for="description">Description</label>
-                            <textarea id="description" name="description" rows="4" required placeholder="Provide details about the maintenance work..."></textarea>
+                        <div class="filter-group">
+                            <label for="date_to">To:</label>
+                            <input type="date" id="date_to" name="date_to" value="<?php echo $date_to; ?>">
                         </div>
-                    </div>
-                    
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Save Maintenance Update
-                        </button>
-                    </div>
-                </form>
-            </section>
-            
-            <section class="maintenance-list">
-                <h2><i class="fas fa-clipboard-list"></i> Recent Maintenance Updates</h2>
-                
-                <?php if (empty($maintenance_updates)): ?>
-                    <div class="empty-state">
-                        <i class="fas fa-info-circle"></i>
-                        <p>No maintenance updates have been added yet.</p>
-                    </div>
-                <?php else: ?>
-                    <?php foreach ($maintenance_updates as $update): ?>
-                        <div class="maintenance-card">
-                            <div class="maintenance-header">
-                                <h3 class="maintenance-title"><?php echo htmlspecialchars($update['title']); ?></h3>
-                                <span class="status-badge status-<?php echo $update['status']; ?>">
-                                    <?php 
-                                        $status_labels = [
-                                            'scheduled' => 'Scheduled',
-                                            'in-progress' => 'In Progress',
-                                            'completed' => 'Completed',
-                                            'postponed' => 'Postponed',
-                                            'cancelled' => 'Cancelled'
-                                        ];
-                                        echo $status_labels[$update['status']];
-                                    ?>
-                                </span>
-                            </div>
-                            
-                            <div class="maintenance-dates">
-                                <div>
-                                    <i class="far fa-calendar-alt"></i> 
-                                    Start: <?php echo date('M d, Y', strtotime($update['start_date'])); ?>
-                                </div>
-                                <?php if (!empty($update['end_date'])): ?>
-                                <div>
-                                    <i class="far fa-calendar-check"></i> 
-                                    End: <?php echo date('M d, Y', strtotime($update['end_date'])); ?>
-                                </div>
+                        <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+                        <a href="activity-log.php" class="reset-link">Reset</a>
+                    </form>
+                </div>
+                <div class="card-body">
+                    <?php if (empty($activity_logs)): ?>
+                        <div class="empty-state">
+                            <i class="fas fa-history"></i>
+                            <p>No activity logs found. Try adjusting your filters.</p>
+                        </div>
+                    <?php else: ?>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>User</th>
+                                        <th>Action</th>
+                                        <th>Entity Type</th>
+                                        <th>Entity ID</th>
+                                        <th>Details</th>
+                                        <th>Date & Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($activity_logs as $log): ?>
+                                        <tr>
+                                            <td><?php echo $log['id']; ?></td>
+                                            <td>
+                                                <?php if (!empty($log['user_name'])): ?>
+                                                    <a href="view-user.php?id=<?php echo $log['user_id']; ?>" class="user-link">
+                                                        <?php echo htmlspecialchars($log['user_name']); ?>
+                                                    </a>
+                                                    <div class="text-muted small"><?php echo htmlspecialchars($log['user_email'] ?? ''); ?></div>
+                                                <?php else: ?>
+                                                    <span class="text-muted">User ID: <?php echo $log['user_id']; ?></span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <span class="status-indicator status-<?php echo getActionBadgeClass($log['action']); ?>">
+                                                    <?php echo ucfirst($log['action']); ?>
+                                                </span>
+                                            </td>
+                                            <td><?php echo ucfirst($log['entity_type']); ?></td>
+                                            <td>
+                                                <?php
+                                                    $entity_link = '';
+                                                    switch($log['entity_type']) {
+                                                        case 'user':
+                                                            $entity_link = "view-user.php?id={$log['entity_id']}";
+                                                            break;
+                                                        case 'property':
+                                                            $entity_link = "view-property.php?id={$log['entity_id']}";
+                                                            break;
+                                                        case 'ticket':
+                                                            $entity_link = "ticket-details.php?id={$log['entity_id']}";
+                                                            break;
+                                                        case 'payment':
+                                                            $entity_link = "view-payment.php?id={$log['entity_id']}";
+                                                            break;
+                                                    }
+                                                    
+                                                    if (!empty($entity_link)) {
+                                                        echo "<a href=\"$entity_link\">{$log['entity_id']}</a>";
+                                                    } else {
+                                                        echo $log['entity_id'];
+                                                    }
+                                                ?>
+                                            </td>
+                                            <td class="text-wrap"><?php echo htmlspecialchars($log['details']); ?></td>
+                                            <td><?php echo date('M d, Y g:i A', strtotime($log['created_at'])); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <?php if ($total_pages > 1): ?>
+                            <div class="pagination">
+                                <?php if ($page > 1): ?>
+                                    <a href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&user_id=<?php echo $user_filter; ?>&action=<?php echo urlencode($action_filter); ?>&entity_type=<?php echo urlencode($entity_type_filter); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>" class="pagination-link">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                <?php endif; ?>
+                                
+                                <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
+                                    <a href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&user_id=<?php echo $user_filter; ?>&action=<?php echo urlencode($action_filter); ?>&entity_type=<?php echo urlencode($entity_type_filter); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>" 
+                                       class="pagination-link <?php echo $i === $page ? 'active' : ''; ?>">
+                                        <?php echo $i; ?>
+                                    </a>
+                                <?php endfor; ?>
+                                
+                                <?php if ($page < $total_pages): ?>
+                                    <a href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&user_id=<?php echo $user_filter; ?>&action=<?php echo urlencode($action_filter); ?>&entity_type=<?php echo urlencode($entity_type_filter); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>" class="pagination-link">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
                                 <?php endif; ?>
                             </div>
-                            
-                            <div class="maintenance-description">
-                                <?php echo nl2br(htmlspecialchars($update['description'])); ?>
-                            </div>
-                            
-                            <?php if (!empty($update['affected_areas'])): ?>
-                            <div class="affected-areas">
-                                <strong><i class="fas fa-map-marker-alt"></i> Affected Areas:</strong> 
-                                <?php echo htmlspecialchars($update['affected_areas']); ?>
-                            </div>
-                            <?php endif; ?>
-                            
-                            <div class="maintenance-meta">
-                                <span>Added by <?php echo htmlspecialchars($update['admin_name']); ?></span>
-                                <span>Posted on <?php echo date('M d, Y, g:i A', strtotime($update['created_at'])); ?></span>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </section>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
         </main>
     </div>
 
     <script>
-        // Dark mode toggle functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const darkModeToggle = document.getElementById('darkModeToggle');
-            
-            // Check if user previously enabled dark mode
-            if (localStorage.getItem('darkMode') === 'enabled') {
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.body.classList.add('dark-mode');
+            darkModeToggle.checked = true;
+        }
+        
+        // Dark mode toggle event listener
+        darkModeToggle.addEventListener('change', function() {
+            if (this.checked) {
                 document.body.classList.add('dark-mode');
-                darkModeToggle.checked = true;
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('darkMode', null);
             }
-            
-            darkModeToggle.addEventListener('change', function() {
-                if (this.checked) {
-                    document.body.classList.add('dark-mode');
-                    localStorage.setItem('darkMode', 'enabled');
-                } else {
-                    document.body.classList.remove('dark-mode');
-                    localStorage.setItem('darkMode', null);
-                }
-            });
         });
+        
+        // Date filters functionality
+        const dateFrom = document.getElementById('date_from');
+        const dateTo = document.getElementById('date_to');
+        
+        dateFrom.addEventListener('change', function() {
+            if (dateTo.value && new Date(this.value) > new Date(dateTo.value)) {
+                dateTo.value = this.value;
+            }
+        });
+        
+        dateTo.addEventListener('change', function() {
+            if (dateFrom.value && new Date(this.value) < new Date(dateFrom.value)) {
+                dateFrom.value = this.value;
+            }
+        });
+        
+        // Export activity log
+        function exportActivityLog() {
+            // Get current filter parameters
+            const params = new URLSearchParams(window.location.search);
+            
+            // Set export flag
+            params.set('export', 'csv');
+            
+            // Create export URL
+            const exportUrl = 'export-activity-log.php?' + params.toString();
+            
+            // Open in new tab or initiate download
+            window.open(exportUrl, '_blank');
+        }
     </script>
 </body>
 </html> 

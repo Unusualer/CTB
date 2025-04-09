@@ -178,9 +178,9 @@ $new_messages = 0;  // This would be populated from a database query
                 <span class="menu-text">Profile</span>
             </a>
             
-            <a href="maintenance.php" class="menu-item <?php echo ($current_page == 'maintenance.php') ? 'active' : ''; ?>">
-                <div class="menu-icon"><i class="fas fa-tools"></i></div>
-                <span class="menu-text">Maintenance</span>
+            <a href="settings.php" class="menu-item <?php echo ($current_page == 'settings.php') ? 'active' : ''; ?>">
+                <div class="menu-icon"><i class="fas fa-cog"></i></div>
+                <span class="menu-text">System Settings</span>
             </a>
             
             <a href="../logout.php" class="menu-item">

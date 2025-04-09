@@ -31,8 +31,8 @@ try {
     $query = "SELECT a.*, 
               u.name as user_name, 
               u.email as user_email 
-              FROM activity_log a
-              LEFT JOIN users u ON a.user_id = u.id
+              FROM activity_log a 
+              LEFT JOIN users u ON a.user_id = u.id 
               WHERE 1=1";
     $count_query = "SELECT COUNT(*) as total FROM activity_log a WHERE 1=1";
     $params = [];
@@ -251,9 +251,9 @@ $page_title = "Activity Log";
                         </a>
                     </li>
                     <li>
-                        <a href="settings.php">
-                            <i class="fas fa-cog"></i>
-                            <span>Settings</span>
+                        <a href="maintenance-new.php">
+                            <i class="fas fa-tools"></i>
+                            <span>Maintenance</span>
                         </a>
                     </li>
                 </ul>
@@ -294,7 +294,7 @@ $page_title = "Activity Log";
                 </div>
             </header>
 
-    <div class="page-header">
+            <div class="page-header">
                 <h1>Activity Log</h1>
                 <div class="page-header-actions">
                     <button class="btn btn-secondary" onclick="exportActivityLog()">
@@ -330,8 +330,8 @@ $page_title = "Activity Log";
                             <span>Last 24 hours</span>
                         </div>
                     </div>
-    </div>
-    
+                </div>
+
                 <div class="stat-card">
                     <div class="stat-icon actions">
                         <i class="fas fa-edit"></i>
@@ -339,14 +339,14 @@ $page_title = "Activity Log";
                     <div class="stat-details">
                         <h3>Top Actions</h3>
                         <div class="stat-breakdown">
-            <?php 
+                            <?php
                             $top_actions = array_slice($action_stats, 0, 3, true);
                             foreach ($top_actions as $action => $count) {
                                 $class = getActionBadgeClass($action);
                                 echo "<span><i class='fas fa-circle' style='color: var(--status-$class);'></i> " . ucfirst($action) . ": $count</span>";
                             }
-            ?>
-        </div>
+                            ?>
+                        </div>
                     </div>
                 </div>
 
@@ -357,63 +357,63 @@ $page_title = "Activity Log";
                     <div class="stat-details">
                         <h3>Entity Types</h3>
                         <div class="stat-breakdown">
-            <?php 
+                            <?php
                             $top_entities = array_slice($entity_stats, 0, 3, true);
                             foreach ($top_entities as $entity => $count) {
                                 echo "<span><i class='fas fa-circle'></i> " . ucfirst($entity) . ": $count</span>";
                             }
-            ?>
-        </div>
+                            ?>
+                        </div>
                     </div>
                 </div>
             </div>
-    
+
             <!-- Filters -->
-    <div class="card">
+            <div class="card">
                 <div class="card-header user-filter-header">
                     <h3>Activity Log</h3>
                     <form id="filter-form" action="activity-log.php" method="GET" class="filter-form">
                         <div class="filter-group">
                             <label for="user_id">User:</label>
                             <select name="user_id" id="user_id" onchange="this.form.submit()">
-                        <option value="0">All Users</option>
+                                <option value="0">All Users</option>
                                 <?php foreach ($users as $user): ?>
                                     <option value="<?php echo $user['id']; ?>" <?php echo $user_filter === $user['id'] ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($user['name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+                                        <?php echo htmlspecialchars($user['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                         <div class="filter-group">
                             <label for="action">Action:</label>
                             <select name="action" id="action" onchange="this.form.submit()">
-                        <option value="">All Actions</option>
+                                <option value="">All Actions</option>
                                 <?php foreach ($actions as $action): ?>
                                     <option value="<?php echo $action; ?>" <?php echo $action_filter === $action ? 'selected' : ''; ?>>
                                         <?php echo ucfirst($action); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                         <div class="filter-group">
                             <label for="entity_type">Entity Type:</label>
                             <select name="entity_type" id="entity_type" onchange="this.form.submit()">
-                        <option value="">All Types</option>
+                                <option value="">All Types</option>
                                 <?php foreach ($entity_types as $type): ?>
                                     <option value="<?php echo $type; ?>" <?php echo $entity_type_filter === $type ? 'selected' : ''; ?>>
                                         <?php echo ucfirst($type); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                         <div class="filter-group">
                             <label for="date_from">From:</label>
                             <input type="date" id="date_from" name="date_from" value="<?php echo $date_from; ?>">
-                </div>
+                        </div>
                         <div class="filter-group">
                             <label for="date_to">To:</label>
                             <input type="date" id="date_to" name="date_to" value="<?php echo $date_to; ?>">
-                </div>
+                        </div>
                         <button type="submit" class="btn btn-primary btn-sm">Apply</button>
                         <a href="activity-log.php" class="reset-link">Reset</a>
                     </form>
@@ -423,40 +423,40 @@ $page_title = "Activity Log";
                         <div class="empty-state">
                             <i class="fas fa-history"></i>
                             <p>No activity logs found. Try adjusting your filters.</p>
-        </div>
+                        </div>
                     <?php else: ?>
-            <div class="table-responsive">
+                        <div class="table-responsive">
                             <table class="table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>User</th>
-                            <th>Action</th>
-                            <th>Entity Type</th>
-                            <th>Entity ID</th>
-                            <th>Details</th>
-                            <th>Date & Time</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>User</th>
+                                        <th>Action</th>
+                                        <th>Entity Type</th>
+                                        <th>Entity ID</th>
+                                        <th>Details</th>
+                                        <th>Date & Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                                     <?php foreach ($activity_logs as $log): ?>
-                                <tr>
-                                    <td><?php echo $log['id']; ?></td>
-                                    <td>
+                                        <tr>
+                                            <td><?php echo $log['id']; ?></td>
+                                            <td>
                                                 <?php if (!empty($log['user_name'])): ?>
                                                     <a href="view-user.php?id=<?php echo $log['user_id']; ?>" class="user-link">
                                                         <?php echo htmlspecialchars($log['user_name']); ?>
                                                     </a>
                                                     <div class="text-muted small"><?php echo htmlspecialchars($log['user_email'] ?? ''); ?></div>
-                                        <?php else: ?>
-                                            <span class="text-muted">User ID: <?php echo $log['user_id']; ?></span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
+                                                <?php else: ?>
+                                                    <span class="text-muted">User ID: <?php echo $log['user_id']; ?></span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
                                                 <span class="status-indicator status-<?php echo getActionBadgeClass($log['action']); ?>">
                                                     <?php echo ucfirst($log['action']); ?>
-                                        </span>
-                                    </td>
+                                                </span>
+                                            </td>
                                             <td><?php echo ucfirst($log['entity_type']); ?></td>
                                             <td>
                                                 <?php
@@ -483,30 +483,30 @@ $page_title = "Activity Log";
                                                     }
                                                 ?>
                                             </td>
-                                    <td class="text-wrap"><?php echo htmlspecialchars($log['details']); ?></td>
+                                            <td class="text-wrap"><?php echo htmlspecialchars($log['details']); ?></td>
                                             <td><?php echo date('M d, Y g:i A', strtotime($log['created_at'])); ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-            
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+
                         <!-- Pagination -->
                         <?php if ($total_pages > 1): ?>
                             <div class="pagination">
-                        <?php if ($page > 1): ?>
+                                <?php if ($page > 1): ?>
                                     <a href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&user_id=<?php echo $user_filter; ?>&action=<?php echo urlencode($action_filter); ?>&entity_type=<?php echo urlencode($entity_type_filter); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>" class="pagination-link">
                                         <i class="fas fa-chevron-left"></i>
-                                </a>
-                        <?php endif; ?>
-                        
+                                    </a>
+                                <?php endif; ?>
+                                
                                 <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
                                     <a href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&user_id=<?php echo $user_filter; ?>&action=<?php echo urlencode($action_filter); ?>&entity_type=<?php echo urlencode($entity_type_filter); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>" 
                                        class="pagination-link <?php echo $i === $page ? 'active' : ''; ?>">
-                                    <?php echo $i; ?>
-                                </a>
-                        <?php endfor; ?>
-                        
+                                        <?php echo $i; ?>
+                                    </a>
+                                <?php endfor; ?>
+                                
                                 <?php if ($page < $total_pages): ?>
                                     <a href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&user_id=<?php echo $user_filter; ?>&action=<?php echo urlencode($action_filter); ?>&entity_type=<?php echo urlencode($entity_type_filter); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>" class="pagination-link">
                                         <i class="fas fa-chevron-right"></i>
@@ -514,11 +514,11 @@ $page_title = "Activity Log";
                                 <?php endif; ?>
                             </div>
                         <?php endif; ?>
-            <?php endif; ?>
-        </div>
-    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
         </main>
-</div>
+    </div>
 
     <script>
         // Dark mode toggle
