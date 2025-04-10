@@ -24,9 +24,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="../assets/css/fontawesome.min.css">
-    <link rel="stylesheet" href="admin-topbar.css">
-    <link rel="stylesheet" href="admin-sidebar.css">
-    <link rel="stylesheet" href="admin-main.css">
+    <link rel="stylesheet" href="css/admin-style.css">
     
     <!-- Page specific CSS if any -->
     <?php if (isset($pageCss)): ?>

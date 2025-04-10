@@ -11,19 +11,46 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
+// Check if payment ID is provided
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    $_SESSION['error'] = "Invalid payment ID.";
+    header("Location: payments.php");
+    exit();
+}
+
+$payment_id = intval($_GET['id']);
+
 // Initialize variables
 $error = '';
 $success = '';
-$payment = [
-    'user_id' => '',
-    'property_id' => '',
-    'amount' => '',
-    'payment_method' => 'credit_card',
-    'month' => date('Y-m-d'),
-    'status' => 'completed',
-    'transaction_id' => '',
-    'description' => ''
-];
+$payment = [];
+
+// Get payment details
+try {
+    $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    $query = "SELECT p.*, p.type as payment_method 
+              FROM payments p 
+              WHERE p.id = :id";
+    
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':id', $payment_id, PDO::PARAM_INT);
+    $stmt->execute();
+    
+    if ($stmt->rowCount() === 0) {
+        $_SESSION['error'] = "Payment not found.";
+        header("Location: payments.php");
+        exit();
+    }
+    
+    $payment = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+} catch (PDOException $e) {
+    $_SESSION['error'] = "Database error: " . $e->getMessage();
+    header("Location: payments.php");
+    exit();
+}
 
 // Process form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -32,39 +59,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
         // Validate and sanitize input
-        $user_id = !empty($_POST['user_id']) ? intval($_POST['user_id']) : null;
         $property_id = !empty($_POST['property_id']) ? intval($_POST['property_id']) : null;
         $amount = !empty($_POST['amount']) ? floatval($_POST['amount']) : 0;
         $payment_method = !empty($_POST['payment_method']) ? $_POST['payment_method'] : 'credit_card';
         $month = !empty($_POST['month']) ? $_POST['month'] : date('Y-m-d');
         $status = !empty($_POST['status']) ? $_POST['status'] : 'completed';
-        $transaction_id = !empty($_POST['transaction_id']) ? $_POST['transaction_id'] : null;
         $description = !empty($_POST['description']) ? $_POST['description'] : null;
         
-        // Generate a unique payment ID
-        $payment_id = 'PAY-' . date('YmdHis') . '-' . substr(md5(uniqid()), 0, 6);
-        
         // Validate required fields
-        if (empty($user_id) || empty($amount) || $amount <= 0) {
-            throw new Exception("User and amount are required fields. Amount must be greater than zero.");
+        if (empty($property_id) || empty($amount) || $amount <= 0) {
+            throw new Exception("Property and amount are required fields. Amount must be greater than zero.");
         }
         
-        // Insert payment record
-        $query = "INSERT INTO payments (
-                    property_id, 
-                    amount, 
-                    month, 
-                    status, 
-                    type, 
-                    created_at
-                ) VALUES (
-                    :property_id, 
-                    :amount, 
-                    :month, 
-                    :status, 
-                    :payment_method, 
-                    NOW()
-                )";
+        // Update payment record
+        $query = "UPDATE payments SET 
+                    property_id = :property_id, 
+                    amount = :amount, 
+                    month = :month, 
+                    status = :status, 
+                    type = :payment_method
+                  WHERE id = :id";
                 
         $stmt = $db->prepare($query);
         $stmt->bindParam(':property_id', $property_id);
@@ -72,70 +86,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bindParam(':month', $month);
         $stmt->bindParam(':status', $status);
         $stmt->bindParam(':payment_method', $payment_method);
+        $stmt->bindParam(':id', $payment_id);
         
         if ($stmt->execute()) {
-            $payment_record_id = $db->lastInsertId();
-            
             // Log activity
-            logActivity($db, $_SESSION['user_id'], 'payment', $payment_record_id, 'create', "Added new payment: $payment_id for $amount");
+            log_activity($db, $_SESSION['user_id'], 'update', 'payment', $payment_id, "Updated payment #$payment_id");
             
-            $success = "Payment added successfully!";
+            $success = "Payment updated successfully!";
             
-            // Clear form data
-            $payment = [
-                'user_id' => '',
-                'property_id' => '',
-                'amount' => '',
-                'payment_method' => 'credit_card',
-                'month' => date('Y-m-d'),
-                'status' => 'completed',
-                'transaction_id' => '',
-                'description' => ''
-            ];
+            // Refresh payment data
+            $query = "SELECT p.*, p.type as payment_method 
+                    FROM payments p 
+                    WHERE p.id = :id";
+            
+            $stmt = $db->prepare($query);
+            $stmt->bindParam(':id', $payment_id, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            $payment = $stmt->fetch(PDO::FETCH_ASSOC);
         } else {
-            throw new Exception("Failed to add payment. Please try again.");
+            throw new Exception("Failed to update payment. Please try again.");
         }
         
     } catch (PDOException $e) {
         $error = "Database error: " . $e->getMessage();
-        
-        // Preserve form data
-        $payment = [
-            'user_id' => $_POST['user_id'] ?? '',
-            'property_id' => $_POST['property_id'] ?? '',
-            'amount' => $_POST['amount'] ?? '',
-            'payment_method' => $_POST['payment_method'] ?? 'credit_card',
-            'month' => $_POST['month'] ?? date('Y-m-d'),
-            'status' => $_POST['status'] ?? 'completed',
-            'transaction_id' => $_POST['transaction_id'] ?? '',
-            'description' => $_POST['description'] ?? ''
-        ];
     } catch (Exception $e) {
         $error = $e->getMessage();
-        
-        // Preserve form data
-        $payment = [
-            'user_id' => $_POST['user_id'] ?? '',
-            'property_id' => $_POST['property_id'] ?? '',
-            'amount' => $_POST['amount'] ?? '',
-            'payment_method' => $_POST['payment_method'] ?? 'credit_card',
-            'month' => $_POST['month'] ?? date('Y-m-d'),
-            'status' => $_POST['status'] ?? 'completed',
-            'transaction_id' => $_POST['transaction_id'] ?? '',
-            'description' => $_POST['description'] ?? ''
-        ];
     }
 }
 
-// Fetch users for dropdown
+// Fetch properties for dropdown
 try {
     $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    $users_query = "SELECT id, name, email FROM users ORDER BY name";
-    $users_stmt = $db->prepare($users_query);
-    $users_stmt->execute();
-    $users = $users_stmt->fetchAll(PDO::FETCH_ASSOC);
     
     $properties_query = "SELECT id, identifier, type FROM properties ORDER BY identifier";
     $properties_stmt = $db->prepare($properties_query);
@@ -144,12 +127,11 @@ try {
     
 } catch (PDOException $e) {
     $error = "Database error: " . $e->getMessage();
-    $users = [];
     $properties = [];
 }
 
 // Page title
-$page_title = "Add New Payment";
+$page_title = "Edit Payment";
 ?>
 
 <!DOCTYPE html>
@@ -435,9 +417,9 @@ $page_title = "Add New Payment";
                         </a>
                     </li>
                     <li>
-                        <a href="settings.php">
-                            <i class="fas fa-cog"></i>
-                            <span>Settings</span>
+                        <a href="maintenance-new.php">
+                            <i class="fas fa-tools"></i>
+                            <span>Maintenance</span>
                         </a>
                     </li>
                 </ul>
@@ -463,7 +445,7 @@ $page_title = "Add New Payment";
             <div class="page-header">
                 <div class="breadcrumb">
                     <a href="payments.php">Payments</a>
-                    <span>Add New Payment</span>
+                    <span>Edit Payment</span>
                 </div>
             </div>
 
@@ -482,29 +464,15 @@ $page_title = "Add New Payment";
             <div class="content-wrapper">
                 <div class="card">
                     <div class="card-header">
-                        <h3><i class="fas fa-credit-card"></i> Add New Payment</h3>
+                        <h3><i class="fas fa-edit"></i> Edit Payment</h3>
                     </div>
                     <div class="card-body">
-                        <form action="add-payment.php" method="POST">
+                        <form action="edit-payment.php?id=<?php echo $payment_id; ?>" method="POST">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="user_id">User <span class="text-danger">*</span></label>
-                                    <select name="user_id" id="user_id" required>
-                                        <option value="">-- Select User --</option>
-                                        <?php foreach ($users as $user): ?>
-                                            <option value="<?php echo $user['id']; ?>" <?php echo $payment['user_id'] == $user['id'] ? 'selected' : ''; ?>>
-                                                <?php echo htmlspecialchars($user['name']); ?> (<?php echo htmlspecialchars($user['email']); ?>)
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="property_id">Property</label>
-                                    <select name="property_id" id="property_id">
-                                        <option value="">-- Select Property (Optional) --</option>
+                                    <label for="property_id">Property <span class="text-danger">*</span></label>
+                                    <select name="property_id" id="property_id" required>
+                                        <option value="">-- Select Property --</option>
                                         <?php foreach ($properties as $property): ?>
                                             <option value="<?php echo $property['id']; ?>" <?php echo $payment['property_id'] == $property['id'] ? 'selected' : ''; ?>>
                                                 <?php echo htmlspecialchars($property['identifier']); ?> - <?php echo htmlspecialchars($property['type']); ?>
@@ -552,22 +520,15 @@ $page_title = "Add New Payment";
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="transaction_id">Transaction ID</label>
-                                    <input type="text" name="transaction_id" id="transaction_id" value="<?php echo htmlspecialchars($payment['transaction_id']); ?>">
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
                                     <label for="description">Description</label>
-                                    <textarea name="description" id="description" rows="4"><?php echo htmlspecialchars($payment['description']); ?></textarea>
+                                    <textarea name="description" id="description" rows="4"><?php echo htmlspecialchars($payment['description'] ?? ''); ?></textarea>
                                 </div>
                             </div>
                             
                             <div class="form-actions">
                                 <a href="payments.php" class="btn btn-secondary">Cancel</a>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-plus-circle"></i> Add Payment
+                                    <i class="fas fa-save"></i> Update Payment
                                 </button>
                             </div>
                         </form>

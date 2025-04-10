@@ -28,10 +28,10 @@ try {
     // Prepare the query base
     $query = "SELECT u.*, 
               COUNT(DISTINCT p.id) as property_count, 
-              MAX(pay.payment_date) as last_payment_date
+              MAX(pay.month) as last_payment_date
               FROM users u
-              LEFT JOIN properties p ON u.id = p.resident_id
-              LEFT JOIN payments pay ON u.id = pay.user_id
+              LEFT JOIN properties p ON u.id = p.user_id
+              LEFT JOIN payments pay ON p.id = pay.property_id
               WHERE u.role = 'resident'";
     
     // Add filters

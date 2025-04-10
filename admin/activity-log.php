@@ -276,24 +276,6 @@ $page_title = "Activity Log";
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="topbar">
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search activity logs..." form="filter-form" name="search" value="<?php echo htmlspecialchars($search); ?>">
-                </div>
-                
-                <div class="topbar-right">
-                    <div class="notifications">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge">3</span>
-                    </div>
-                    <div class="messages">
-                        <i class="fas fa-envelope"></i>
-                        <span class="badge">5</span>
-                    </div>
-                </div>
-            </header>
-
             <div class="page-header">
                 <h1>Activity Log</h1>
                 <div class="page-header-actions">
@@ -369,53 +351,61 @@ $page_title = "Activity Log";
             </div>
 
             <!-- Filters -->
-            <div class="card">
+            <div class="card user-filter-card">
                 <div class="card-header user-filter-header">
-                    <h3>Activity Log</h3>
+                    <h3><i class="fas fa-filter"></i> Activity Log</h3>
                     <form id="filter-form" action="activity-log.php" method="GET" class="filter-form">
-                        <div class="filter-group">
-                            <label for="user_id">User:</label>
-                            <select name="user_id" id="user_id" onchange="this.form.submit()">
-                                <option value="0">All Users</option>
-                                <?php foreach ($users as $user): ?>
-                                    <option value="<?php echo $user['id']; ?>" <?php echo $user_filter === $user['id'] ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($user['name']); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
+                        <div class="filter-wrapper">
+                            <div class="search-filter">
+                                <div class="search-bar">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" placeholder="Search activity logs..." name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
+                                </div>
+                            </div>
+                            <div class="filter-group">
+                                <label for="user_id">User:</label>
+                                <select name="user_id" id="user_id" onchange="this.form.submit()">
+                                    <option value="0">All Users</option>
+                                    <?php foreach ($users as $user): ?>
+                                        <option value="<?php echo $user['id']; ?>" <?php echo $user_filter === $user['id'] ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($user['name']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="action">Action:</label>
+                                <select name="action" id="action" onchange="this.form.submit()">
+                                    <option value="">All Actions</option>
+                                    <?php foreach ($actions as $action): ?>
+                                        <option value="<?php echo $action; ?>" <?php echo $action_filter === $action ? 'selected' : ''; ?>>
+                                            <?php echo ucfirst($action); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="entity_type">Entity Type:</label>
+                                <select name="entity_type" id="entity_type" onchange="this.form.submit()">
+                                    <option value="">All Types</option>
+                                    <?php foreach ($entity_types as $type): ?>
+                                        <option value="<?php echo $type; ?>" <?php echo $entity_type_filter === $type ? 'selected' : ''; ?>>
+                                            <?php echo ucfirst($type); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="date_from">From:</label>
+                                <input type="date" id="date_from" name="date_from" value="<?php echo $date_from; ?>">
+                            </div>
+                            <div class="filter-group">
+                                <label for="date_to">To:</label>
+                                <input type="date" id="date_to" name="date_to" value="<?php echo $date_to; ?>">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+                            <a href="activity-log.php" class="reset-link">Reset</a>
                         </div>
-                        <div class="filter-group">
-                            <label for="action">Action:</label>
-                            <select name="action" id="action" onchange="this.form.submit()">
-                                <option value="">All Actions</option>
-                                <?php foreach ($actions as $action): ?>
-                                    <option value="<?php echo $action; ?>" <?php echo $action_filter === $action ? 'selected' : ''; ?>>
-                                        <?php echo ucfirst($action); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="entity_type">Entity Type:</label>
-                            <select name="entity_type" id="entity_type" onchange="this.form.submit()">
-                                <option value="">All Types</option>
-                                <?php foreach ($entity_types as $type): ?>
-                                    <option value="<?php echo $type; ?>" <?php echo $entity_type_filter === $type ? 'selected' : ''; ?>>
-                                        <?php echo ucfirst($type); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="date_from">From:</label>
-                            <input type="date" id="date_from" name="date_from" value="<?php echo $date_from; ?>">
-                        </div>
-                        <div class="filter-group">
-                            <label for="date_to">To:</label>
-                            <input type="date" id="date_to" name="date_to" value="<?php echo $date_to; ?>">
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-sm">Apply</button>
-                        <a href="activity-log.php" class="reset-link">Reset</a>
                     </form>
                 </div>
                 <div class="card-body">
@@ -520,27 +510,8 @@ $page_title = "Activity Log";
         </main>
     </div>
 
+    <script src="js/dark-mode.js"></script>
     <script>
-        // Dark mode toggle
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        
-        // Check for saved dark mode preference
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            document.body.classList.add('dark-mode');
-            darkModeToggle.checked = true;
-        }
-        
-        // Dark mode toggle event listener
-        darkModeToggle.addEventListener('change', function() {
-            if (this.checked) {
-                document.body.classList.add('dark-mode');
-                localStorage.setItem('darkMode', 'enabled');
-            } else {
-                document.body.classList.remove('dark-mode');
-                localStorage.setItem('darkMode', null);
-            }
-        });
-        
         // Date filters functionality
         const dateFrom = document.getElementById('date_from');
         const dateTo = document.getElementById('date_to');

@@ -11,145 +11,88 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-// Initialize variables
-$error = '';
-$success = '';
-$payment = [
-    'user_id' => '',
-    'property_id' => '',
-    'amount' => '',
-    'payment_method' => 'credit_card',
-    'month' => date('Y-m-d'),
-    'status' => 'completed',
-    'transaction_id' => '',
-    'description' => ''
-];
+$statuses = ['open', 'in_progress', 'closed', 'reopened'];
+$users = [];
 
-// Process form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    try {
-        $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
-        // Validate and sanitize input
-        $user_id = !empty($_POST['user_id']) ? intval($_POST['user_id']) : null;
-        $property_id = !empty($_POST['property_id']) ? intval($_POST['property_id']) : null;
-        $amount = !empty($_POST['amount']) ? floatval($_POST['amount']) : 0;
-        $payment_method = !empty($_POST['payment_method']) ? $_POST['payment_method'] : 'credit_card';
-        $month = !empty($_POST['month']) ? $_POST['month'] : date('Y-m-d');
-        $status = !empty($_POST['status']) ? $_POST['status'] : 'completed';
-        $transaction_id = !empty($_POST['transaction_id']) ? $_POST['transaction_id'] : null;
-        $description = !empty($_POST['description']) ? $_POST['description'] : null;
-        
-        // Generate a unique payment ID
-        $payment_id = 'PAY-' . date('YmdHis') . '-' . substr(md5(uniqid()), 0, 6);
-        
-        // Validate required fields
-        if (empty($user_id) || empty($amount) || $amount <= 0) {
-            throw new Exception("User and amount are required fields. Amount must be greater than zero.");
-        }
-        
-        // Insert payment record
-        $query = "INSERT INTO payments (
-                    property_id, 
-                    amount, 
-                    month, 
-                    status, 
-                    type, 
-                    created_at
-                ) VALUES (
-                    :property_id, 
-                    :amount, 
-                    :month, 
-                    :status, 
-                    :payment_method, 
-                    NOW()
-                )";
-                
-        $stmt = $db->prepare($query);
-        $stmt->bindParam(':property_id', $property_id);
-        $stmt->bindParam(':amount', $amount);
-        $stmt->bindParam(':month', $month);
-        $stmt->bindParam(':status', $status);
-        $stmt->bindParam(':payment_method', $payment_method);
-        
-        if ($stmt->execute()) {
-            $payment_record_id = $db->lastInsertId();
-            
-            // Log activity
-            logActivity($db, $_SESSION['user_id'], 'payment', $payment_record_id, 'create', "Added new payment: $payment_id for $amount");
-            
-            $success = "Payment added successfully!";
-            
-            // Clear form data
-            $payment = [
-                'user_id' => '',
-                'property_id' => '',
-                'amount' => '',
-                'payment_method' => 'credit_card',
-                'month' => date('Y-m-d'),
-                'status' => 'completed',
-                'transaction_id' => '',
-                'description' => ''
-            ];
-        } else {
-            throw new Exception("Failed to add payment. Please try again.");
-        }
-        
-    } catch (PDOException $e) {
-        $error = "Database error: " . $e->getMessage();
-        
-        // Preserve form data
-        $payment = [
-            'user_id' => $_POST['user_id'] ?? '',
-            'property_id' => $_POST['property_id'] ?? '',
-            'amount' => $_POST['amount'] ?? '',
-            'payment_method' => $_POST['payment_method'] ?? 'credit_card',
-            'month' => $_POST['month'] ?? date('Y-m-d'),
-            'status' => $_POST['status'] ?? 'completed',
-            'transaction_id' => $_POST['transaction_id'] ?? '',
-            'description' => $_POST['description'] ?? ''
-        ];
-    } catch (Exception $e) {
-        $error = $e->getMessage();
-        
-        // Preserve form data
-        $payment = [
-            'user_id' => $_POST['user_id'] ?? '',
-            'property_id' => $_POST['property_id'] ?? '',
-            'amount' => $_POST['amount'] ?? '',
-            'payment_method' => $_POST['payment_method'] ?? 'credit_card',
-            'month' => $_POST['month'] ?? date('Y-m-d'),
-            'status' => $_POST['status'] ?? 'completed',
-            'transaction_id' => $_POST['transaction_id'] ?? '',
-            'description' => $_POST['description'] ?? ''
-        ];
-    }
-}
-
-// Fetch users for dropdown
+// Get all users for the dropdown
 try {
     $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    $users_query = "SELECT id, name, email FROM users ORDER BY name";
-    $users_stmt = $db->prepare($users_query);
+    $users_stmt = $db->prepare("SELECT id, name, email FROM users ORDER BY name ASC");
     $users_stmt->execute();
     $users = $users_stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    $properties_query = "SELECT id, identifier, type FROM properties ORDER BY identifier";
-    $properties_stmt = $db->prepare($properties_query);
-    $properties_stmt->execute();
-    $properties = $properties_stmt->fetchAll(PDO::FETCH_ASSOC);
-    
 } catch (PDOException $e) {
-    $error = "Database error: " . $e->getMessage();
-    $users = [];
-    $properties = [];
+    $_SESSION['error'] = "Database error: " . $e->getMessage();
+}
+
+// Process form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Validate input
+    $user_id = !empty($_POST['user_id']) ? (int)$_POST['user_id'] : 0;
+    $subject = trim($_POST['subject'] ?? '');
+    $description = trim($_POST['description'] ?? '');
+    $status = trim($_POST['status'] ?? '');
+    
+    $errors = [];
+    
+    // Validate user_id
+    if (empty($user_id)) {
+        $errors[] = "User is required.";
+    }
+    
+    // Validate subject
+    if (empty($subject)) {
+        $errors[] = "Subject is required.";
+    }
+    
+    // Validate description
+    if (empty($description)) {
+        $errors[] = "Description is required.";
+    }
+    
+    // Validate status
+    if (empty($status) || !in_array($status, $statuses)) {
+        $errors[] = "Valid status is required.";
+    }
+    
+    // If no errors, add ticket
+    if (empty($errors)) {
+        try {
+            $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
+            $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            
+            // Insert new ticket
+            $stmt = $db->prepare("INSERT INTO tickets (user_id, subject, description, status, created_at, updated_at) 
+                                 VALUES (:user_id, :subject, :description, :status, NOW(), NOW())");
+            
+            $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $stmt->bindParam(':subject', $subject);
+            $stmt->bindParam(':description', $description);
+            $stmt->bindParam(':status', $status);
+            
+            $stmt->execute();
+            
+            $ticket_id = $db->lastInsertId();
+            
+            // Log the activity
+            $admin_id = $_SESSION['user_id'];
+            log_activity($db, $admin_id, 'create', 'ticket', $ticket_id, "Created new ticket: $subject");
+            
+            $_SESSION['success'] = "Ticket created successfully.";
+            header("Location: tickets.php");
+            exit();
+            
+        } catch (PDOException $e) {
+            $_SESSION['error'] = "Database error: " . $e->getMessage();
+        }
+    } else {
+        $_SESSION['error'] = implode("<br>", $errors);
+    }
 }
 
 // Page title
-$page_title = "Add New Payment";
+$page_title = "Add New Ticket";
 ?>
 
 <!DOCTYPE html>
@@ -204,7 +147,7 @@ $page_title = "Add New Payment";
             display: inline-block;
         }
         
-        .text-danger {
+        .required {
             color: #ff5c75;
             font-weight: 700;
         }
@@ -230,7 +173,10 @@ $page_title = "Add New Payment";
             outline: none;
         }
         
-        .form-row {
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
             margin-bottom: 24px;
         }
         
@@ -340,7 +286,7 @@ $page_title = "Add New Payment";
             border-color: #3f4756;
         }
         
-        [data-theme="dark"] .text-danger {
+        [data-theme="dark"] .required {
             color: #ff7a8e;
         }
         
@@ -416,13 +362,13 @@ $page_title = "Add New Payment";
                             <span>Properties</span>
                         </a>
                     </li>
-                    <li>
+                    <li class="active">
                         <a href="tickets.php">
                             <i class="fas fa-ticket-alt"></i>
                             <span>Tickets</span>
                         </a>
                     </li>
-                    <li class="active">
+                    <li>
                         <a href="payments.php">
                             <i class="fas fa-credit-card"></i>
                             <span>Payments</span>
@@ -435,9 +381,9 @@ $page_title = "Add New Payment";
                         </a>
                     </li>
                     <li>
-                        <a href="settings.php">
-                            <i class="fas fa-cog"></i>
-                            <span>Settings</span>
+                        <a href="maintenance-new.php">
+                            <i class="fas fa-tools"></i>
+                            <span>Maintenance</span>
                         </a>
                     </li>
                 </ul>
@@ -462,112 +408,76 @@ $page_title = "Add New Payment";
         <main class="main-content">
             <div class="page-header">
                 <div class="breadcrumb">
-                    <a href="payments.php">Payments</a>
-                    <span>Add New Payment</span>
+                    <a href="tickets.php">Tickets</a>
+                    <span>Add New Ticket</span>
                 </div>
             </div>
 
-            <?php if (!empty($error)): ?>
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle"></i> <?php echo $error; ?>
+            <?php if (isset($_SESSION['success'])): ?>
+                <div class="alert alert-success">
+                    <?php 
+                        echo $_SESSION['success']; 
+                        unset($_SESSION['success']);
+                    ?>
                 </div>
             <?php endif; ?>
-            
-            <?php if (!empty($success)): ?>
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i> <?php echo $success; ?>
+
+            <?php if (isset($_SESSION['error'])): ?>
+                <div class="alert alert-danger">
+                    <?php 
+                        echo $_SESSION['error']; 
+                        unset($_SESSION['error']);
+                    ?>
                 </div>
             <?php endif; ?>
 
             <div class="content-wrapper">
-                <div class="card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-credit-card"></i> Add New Payment</h3>
+                <div class="card user-filter-card">
+                    <div class="card-header user-filter-header">
+                        <h3><i class="fas fa-ticket-alt"></i> Add New Ticket</h3>
                     </div>
                     <div class="card-body">
-                        <form action="add-payment.php" method="POST">
-                            <div class="form-row">
+                        <form action="add-ticket.php" method="POST" class="form">
+                            <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="user_id">User <span class="text-danger">*</span></label>
-                                    <select name="user_id" id="user_id" required>
-                                        <option value="">-- Select User --</option>
+                                    <label for="user_id">User <span class="required">*</span></label>
+                                    <select id="user_id" name="user_id" required>
+                                        <option value="" disabled <?php echo empty($user_id ?? '') ? 'selected' : ''; ?>>Select User</option>
                                         <?php foreach ($users as $user): ?>
-                                            <option value="<?php echo $user['id']; ?>" <?php echo $payment['user_id'] == $user['id'] ? 'selected' : ''; ?>>
-                                                <?php echo htmlspecialchars($user['name']); ?> (<?php echo htmlspecialchars($user['email']); ?>)
+                                            <option value="<?php echo $user['id']; ?>" <?php echo isset($user_id) && $user_id === $user['id'] ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($user['name'] . ' (' . $user['email'] . ')'); ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
-                            </div>
-                            
-                            <div class="form-row">
+                                
                                 <div class="form-group">
-                                    <label for="property_id">Property</label>
-                                    <select name="property_id" id="property_id">
-                                        <option value="">-- Select Property (Optional) --</option>
-                                        <?php foreach ($properties as $property): ?>
-                                            <option value="<?php echo $property['id']; ?>" <?php echo $payment['property_id'] == $property['id'] ? 'selected' : ''; ?>>
-                                                <?php echo htmlspecialchars($property['identifier']); ?> - <?php echo htmlspecialchars($property['type']); ?>
+                                    <label for="status">Status <span class="required">*</span></label>
+                                    <select id="status" name="status" required>
+                                        <option value="" disabled <?php echo empty($status ?? '') ? 'selected' : ''; ?>>Select Status</option>
+                                        <?php foreach ($statuses as $s): ?>
+                                            <option value="<?php echo $s; ?>" <?php echo isset($status) && $status === $s ? 'selected' : ''; ?>>
+                                                <?php echo ucfirst(str_replace('_', ' ', $s)); ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
-                            </div>
-                            
-                            <div class="form-row">
+                                
                                 <div class="form-group">
-                                    <label for="amount">Amount ($) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.01" min="0.01" name="amount" id="amount" value="<?php echo htmlspecialchars($payment['amount']); ?>" required>
+                                    <label for="subject">Subject <span class="required">*</span></label>
+                                    <input type="text" id="subject" name="subject" value="<?php echo htmlspecialchars($subject ?? ''); ?>" required>
                                 </div>
                             </div>
                             
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="payment_method">Payment Method <span class="text-danger">*</span></label>
-                                    <select name="payment_method" id="payment_method" required>
-                                        <option value="transfer" <?php echo $payment['payment_method'] === 'transfer' ? 'selected' : ''; ?>>Bank Transfer</option>
-                                        <option value="cheque" <?php echo $payment['payment_method'] === 'cheque' ? 'selected' : ''; ?>>Cheque</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="month">Payment Month <span class="text-danger">*</span></label>
-                                    <input type="date" name="month" id="month" value="<?php echo htmlspecialchars($payment['month']); ?>" required>
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="status">Status <span class="text-danger">*</span></label>
-                                    <select name="status" id="status" required>
-                                        <option value="paid" <?php echo $payment['status'] === 'paid' ? 'selected' : ''; ?>>Paid</option>
-                                        <option value="pending" <?php echo $payment['status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                                        <option value="cancelled" <?php echo $payment['status'] === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
-                                        <option value="failed" <?php echo $payment['status'] === 'failed' ? 'selected' : ''; ?>>Failed</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="transaction_id">Transaction ID</label>
-                                    <input type="text" name="transaction_id" id="transaction_id" value="<?php echo htmlspecialchars($payment['transaction_id']); ?>">
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="description">Description</label>
-                                    <textarea name="description" id="description" rows="4"><?php echo htmlspecialchars($payment['description']); ?></textarea>
-                                </div>
+                            <div class="form-group">
+                                <label for="description">Description <span class="required">*</span></label>
+                                <textarea id="description" name="description" rows="6" required><?php echo htmlspecialchars($description ?? ''); ?></textarea>
                             </div>
                             
                             <div class="form-actions">
-                                <a href="payments.php" class="btn btn-secondary">Cancel</a>
+                                <a href="tickets.php" class="btn btn-secondary">Cancel</a>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-plus-circle"></i> Add Payment
+                                    <i class="fas fa-plus-circle"></i> Create Ticket
                                 </button>
                             </div>
                         </form>

@@ -28,19 +28,20 @@ try {
     
     // Build the query - select payments with user and property info
     $query = "SELECT p.*, 
+              p.type as payment_method,
               u.name as user_name, 
               pr.identifier as property_identifier 
               FROM payments p 
-              LEFT JOIN users u ON p.user_id = u.id 
               LEFT JOIN properties pr ON p.property_id = pr.id 
+              LEFT JOIN users u ON pr.user_id = u.id 
               WHERE 1=1";
     $count_query = "SELECT COUNT(*) as total FROM payments p WHERE 1=1";
     $params = [];
     
     // Apply filters
     if (!empty($search)) {
-        $query .= " AND (p.payment_id LIKE :search OR u.name LIKE :search)";
-        $count_query .= " AND (p.payment_id LIKE :search OR u.name LIKE :search)";
+        $query .= " AND (p.id LIKE :search OR u.name LIKE :search)";
+        $count_query .= " AND (p.id LIKE :search OR u.name LIKE :search)";
         $params[':search'] = "%$search%";
     }
     
@@ -51,25 +52,25 @@ try {
     }
     
     if (!empty($payment_method_filter)) {
-        $query .= " AND p.payment_method = :payment_method";
-        $count_query .= " AND p.payment_method = :payment_method";
+        $query .= " AND p.type = :payment_method";
+        $count_query .= " AND p.type = :payment_method";
         $params[':payment_method'] = $payment_method_filter;
     }
     
     if (!empty($date_from)) {
-        $query .= " AND p.payment_date >= :date_from";
-        $count_query .= " AND p.payment_date >= :date_from";
+        $query .= " AND p.month >= :date_from";
+        $count_query .= " AND p.month >= :date_from";
         $params[':date_from'] = $date_from;
     }
     
     if (!empty($date_to)) {
-        $query .= " AND p.payment_date <= :date_to";
-        $count_query .= " AND p.payment_date <= :date_to";
+        $query .= " AND p.month <= :date_to";
+        $count_query .= " AND p.month <= :date_to";
         $params[':date_to'] = $date_to;
     }
     
     // Add ordering
-    $query .= " ORDER BY p.payment_date DESC LIMIT :offset, :limit";
+    $query .= " ORDER BY p.month DESC LIMIT :offset, :limit";
     
     // Get total count
     $count_stmt = $db->prepare($count_query);
@@ -115,9 +116,9 @@ try {
     }
     
     // Payment method statistics
-    $method_query = "SELECT payment_method, COUNT(*) as count
+    $method_query = "SELECT type as payment_method, COUNT(*) as count
                     FROM payments
-                    GROUP BY payment_method";
+                    GROUP BY type";
     $method_stmt = $db->prepare($method_query);
     $method_stmt->execute();
     $method_stats = [];
@@ -232,24 +233,6 @@ $page_title = "Payment Management";
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="topbar">
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search payments..." form="filter-form" name="search" value="<?php echo htmlspecialchars($search); ?>">
-                </div>
-                
-                <div class="topbar-right">
-                    <div class="notifications">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge">3</span>
-                    </div>
-                    <div class="messages">
-                        <i class="fas fa-envelope"></i>
-                        <span class="badge">5</span>
-                    </div>
-                </div>
-            </header>
-
             <div class="page-header">
                 <h1>Payment Management</h1>
                 <a href="add-payment.php" class="btn btn-primary">
@@ -316,40 +299,48 @@ $page_title = "Payment Management";
             </div>
 
             <!-- Filters -->
-            <div class="card">
+            <div class="card user-filter-card">
                 <div class="card-header user-filter-header">
-                    <h3>Payments List</h3>
+                    <h3><i class="fas fa-filter"></i> Payments List</h3>
                     <form id="filter-form" action="payments.php" method="GET" class="filter-form">
-                        <div class="filter-group">
-                            <label for="status">Status:</label>
-                            <select name="status" id="status" onchange="this.form.submit()">
-                                <option value="">All Statuses</option>
-                                <option value="completed" <?php echo $status_filter === 'completed' ? 'selected' : ''; ?>>Completed</option>
-                                <option value="pending" <?php echo $status_filter === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                                <option value="failed" <?php echo $status_filter === 'failed' ? 'selected' : ''; ?>>Failed</option>
-                                <option value="refunded" <?php echo $status_filter === 'refunded' ? 'selected' : ''; ?>>Refunded</option>
-                            </select>
+                        <div class="filter-wrapper">
+                            <div class="search-filter">
+                                <div class="search-bar">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" placeholder="Search payments..." name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
+                                </div>
+                            </div>
+                            <div class="filter-group">
+                                <label for="status">Status:</label>
+                                <select name="status" id="status" onchange="this.form.submit()">
+                                    <option value="">All Statuses</option>
+                                    <option value="completed" <?php echo $status_filter === 'completed' ? 'selected' : ''; ?>>Completed</option>
+                                    <option value="pending" <?php echo $status_filter === 'pending' ? 'selected' : ''; ?>>Pending</option>
+                                    <option value="failed" <?php echo $status_filter === 'failed' ? 'selected' : ''; ?>>Failed</option>
+                                    <option value="refunded" <?php echo $status_filter === 'refunded' ? 'selected' : ''; ?>>Refunded</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="payment_method">Method:</label>
+                                <select name="payment_method" id="payment_method" onchange="this.form.submit()">
+                                    <option value="">All Methods</option>
+                                    <option value="credit_card" <?php echo $payment_method_filter === 'credit_card' ? 'selected' : ''; ?>>Credit Card</option>
+                                    <option value="bank_transfer" <?php echo $payment_method_filter === 'bank_transfer' ? 'selected' : ''; ?>>Bank Transfer</option>
+                                    <option value="cash" <?php echo $payment_method_filter === 'cash' ? 'selected' : ''; ?>>Cash</option>
+                                    <option value="other" <?php echo $payment_method_filter === 'other' ? 'selected' : ''; ?>>Other</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="date_from">From:</label>
+                                <input type="date" id="date_from" name="date_from" value="<?php echo $date_from; ?>">
+                            </div>
+                            <div class="filter-group">
+                                <label for="date_to">To:</label>
+                                <input type="date" id="date_to" name="date_to" value="<?php echo $date_to; ?>">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+                            <a href="payments.php" class="reset-link">Reset</a>
                         </div>
-                        <div class="filter-group">
-                            <label for="payment_method">Method:</label>
-                            <select name="payment_method" id="payment_method" onchange="this.form.submit()">
-                                <option value="">All Methods</option>
-                                <option value="credit_card" <?php echo $payment_method_filter === 'credit_card' ? 'selected' : ''; ?>>Credit Card</option>
-                                <option value="bank_transfer" <?php echo $payment_method_filter === 'bank_transfer' ? 'selected' : ''; ?>>Bank Transfer</option>
-                                <option value="cash" <?php echo $payment_method_filter === 'cash' ? 'selected' : ''; ?>>Cash</option>
-                                <option value="other" <?php echo $payment_method_filter === 'other' ? 'selected' : ''; ?>>Other</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="date_from">From:</label>
-                            <input type="date" id="date_from" name="date_from" value="<?php echo $date_from; ?>">
-                        </div>
-                        <div class="filter-group">
-                            <label for="date_to">To:</label>
-                            <input type="date" id="date_to" name="date_to" value="<?php echo $date_to; ?>">
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-sm">Apply</button>
-                        <a href="payments.php" class="reset-link">Reset</a>
                     </form>
                 </div>
                 <div class="card-body">
@@ -378,7 +369,7 @@ $page_title = "Payment Management";
                                     <?php foreach ($payments as $payment): ?>
                                         <tr>
                                             <td><?php echo $payment['payment_id'] ?? $payment['id']; ?></td>
-                                            <td><?php echo date('M d, Y', strtotime($payment['payment_date'])); ?></td>
+                                            <td><?php echo date('M d, Y', strtotime($payment['month'])); ?></td>
                                             <td>$<?php echo number_format($payment['amount'], 2); ?></td>
                                             <td>
                                                 <?php if (isset($payment['user_id']) && $payment['user_id']): ?>
@@ -401,7 +392,9 @@ $page_title = "Payment Management";
                                             <td>
                                                 <?php 
                                                     $methodIcon = '';
-                                                    switch ($payment['payment_method']) {
+                                                    // Check if payment_method exists
+                                                    $payment_method = isset($payment['payment_method']) ? $payment['payment_method'] : 'other';
+                                                    switch ($payment_method) {
                                                         case 'credit_card': 
                                                             $methodIcon = '<i class="fas fa-credit-card"></i> ';
                                                             break;
@@ -414,7 +407,10 @@ $page_title = "Payment Management";
                                                         default: 
                                                             $methodIcon = '<i class="fas fa-money-check"></i> ';
                                                     }
-                                                    echo $methodIcon . ucfirst(str_replace('_', ' ', $payment['payment_method']));
+                                                    
+                                                    // Only replace if payment_method exists
+                                                    $paymentMethodDisplay = $payment_method ? ucfirst(str_replace('_', ' ', $payment_method)) : 'Other';
+                                                    echo $methodIcon . $paymentMethodDisplay;
                                                 ?>
                                             </td>
                                             <td>
@@ -497,27 +493,8 @@ $page_title = "Payment Management";
         </div>
     </div>
 
+    <script src="js/dark-mode.js"></script>
     <script>
-        // Dark mode toggle
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        
-        // Check for saved dark mode preference
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            document.body.classList.add('dark-mode');
-            darkModeToggle.checked = true;
-        }
-        
-        // Dark mode toggle event listener
-        darkModeToggle.addEventListener('change', function() {
-            if (this.checked) {
-                document.body.classList.add('dark-mode');
-                localStorage.setItem('darkMode', 'enabled');
-            } else {
-                document.body.classList.remove('dark-mode');
-                localStorage.setItem('darkMode', null);
-            }
-        });
-        
         // Date filters functionality
         const dateFrom = document.getElementById('date_from');
         const dateTo = document.getElementById('date_to');

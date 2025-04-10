@@ -70,14 +70,14 @@ try {
     // Get monthly payment data for chart (last 6 months)
     $stmt = $db->prepare("
         SELECT 
-            DATE_FORMAT(payment_date, '%Y-%m') as month,
+            DATE_FORMAT(month, '%Y-%m') as month,
             SUM(amount) as total_amount
         FROM 
             payments
         WHERE 
-            payment_date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+            month >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
         GROUP BY 
-            DATE_FORMAT(payment_date, '%Y-%m')
+            DATE_FORMAT(month, '%Y-%m')
         ORDER BY 
             month ASC
     ");
@@ -97,10 +97,9 @@ try {
     
     // Get recent tickets (5 most recent)
     $stmt = $db->prepare("
-        SELECT t.*, u.name, p.identifier as property_name
+        SELECT t.*, u.name
         FROM tickets t
         LEFT JOIN users u ON t.user_id = u.id
-        LEFT JOIN properties p ON t.property_id = p.id
         ORDER BY t.created_at DESC
         LIMIT 5
     ");
@@ -381,12 +380,8 @@ $page_title = "Admin Dashboard";
                                             <?php echo ucfirst($ticket['status']); ?>
                                         </div>
                                         <div class="ticket-details">
-                                            <h4><?php echo htmlspecialchars($ticket['title']); ?></h4>
+                                            <h4><?php echo htmlspecialchars($ticket['subject']); ?></h4>
                                             <p>
-                                                <span class="ticket-property">
-                                                    <i class="fas fa-building"></i>
-                                                    <?php echo htmlspecialchars($ticket['property_name']); ?>
-                                                </span>
                                                 <span class="ticket-user">
                                                     <i class="fas fa-user"></i>
                                                     <?php echo htmlspecialchars($ticket['name']); ?>

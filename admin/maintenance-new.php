@@ -279,24 +279,6 @@ $page_title = "Maintenance Updates";
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="topbar">
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search maintenance updates..." form="filter-form" name="search" value="<?php echo htmlspecialchars($search); ?>">
-                </div>
-                
-                <div class="topbar-right">
-                    <div class="notifications">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge">3</span>
-                    </div>
-                    <div class="messages">
-                        <i class="fas fa-envelope"></i>
-                        <span class="badge">5</span>
-                    </div>
-                </div>
-            </header>
-
             <div class="page-header">
                 <h1>Maintenance Updates</h1>
                 <a href="add-maintenance.php" class="btn btn-primary">
@@ -375,41 +357,48 @@ $page_title = "Maintenance Updates";
             </div>
 
             <!-- Filters -->
-            <div class="card">
+            <div class="card user-filter-card">
                 <div class="card-header user-filter-header">
-                    <h3>Maintenance List</h3>
+                    <h3><i class="fas fa-filter"></i> Maintenance List</h3>
                     <form id="filter-form" action="maintenance-new.php" method="GET" class="filter-form">
-                        <div class="filter-group">
-                            <label for="status">Status:</label>
-                            <select name="status" id="status" onchange="this.form.submit()">
-                                <option value="">All Statuses</option>
-                                <option value="scheduled" <?php echo $status_filter === 'scheduled' ? 'selected' : ''; ?>>Scheduled</option>
-                                <option value="in_progress" <?php echo $status_filter === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
-                                <option value="completed" <?php echo $status_filter === 'completed' ? 'selected' : ''; ?>>Completed</option>
-                                <option value="delayed" <?php echo $status_filter === 'delayed' ? 'selected' : ''; ?>>Delayed</option>
-                                <option value="cancelled" <?php echo $status_filter === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
-                            </select>
+                        <div class="filter-wrapper">
+                            <div class="search-filter">
+                                <div class="search-bar">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" placeholder="Search maintenance updates..." name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
+                                </div>
+                            </div>
+                            <div class="filter-group">
+                                <label for="status">Status:</label>
+                                <select name="status" id="status" onchange="this.form.submit()">
+                                    <option value="">All Statuses</option>
+                                    <option value="scheduled" <?php echo $status_filter === 'scheduled' ? 'selected' : ''; ?>>Scheduled</option>
+                                    <option value="in_progress" <?php echo $status_filter === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
+                                    <option value="completed" <?php echo $status_filter === 'completed' ? 'selected' : ''; ?>>Completed</option>
+                                    <option value="delayed" <?php echo $status_filter === 'delayed' ? 'selected' : ''; ?>>Delayed</option>
+                                    <option value="cancelled" <?php echo $status_filter === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="priority">Priority:</label>
+                                <select name="priority" id="priority" onchange="this.form.submit()">
+                                    <option value="">All Priorities</option>
+                                    <option value="low" <?php echo $priority_filter === 'low' ? 'selected' : ''; ?>>Low</option>
+                                    <option value="medium" <?php echo $priority_filter === 'medium' ? 'selected' : ''; ?>>Medium</option>
+                                    <option value="high" <?php echo $priority_filter === 'high' ? 'selected' : ''; ?>>High</option>
+                                    <option value="emergency" <?php echo $priority_filter === 'emergency' ? 'selected' : ''; ?>>Emergency</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="date_from">From:</label>
+                                <input type="date" id="date_from" name="date_from" value="<?php echo $date_from; ?>">
+                            </div>
+                            <div class="filter-group">
+                                <label for="date_to">To:</label>
+                                <input type="date" id="date_to" name="date_to" value="<?php echo $date_to; ?>">
+                            </div>
+                            <a href="maintenance-new.php" class="reset-link">Reset</a>
                         </div>
-                        <div class="filter-group">
-                            <label for="priority">Priority:</label>
-                            <select name="priority" id="priority" onchange="this.form.submit()">
-                                <option value="">All Priorities</option>
-                                <option value="low" <?php echo $priority_filter === 'low' ? 'selected' : ''; ?>>Low</option>
-                                <option value="medium" <?php echo $priority_filter === 'medium' ? 'selected' : ''; ?>>Medium</option>
-                                <option value="high" <?php echo $priority_filter === 'high' ? 'selected' : ''; ?>>High</option>
-                                <option value="emergency" <?php echo $priority_filter === 'emergency' ? 'selected' : ''; ?>>Emergency</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="date_from">From:</label>
-                            <input type="date" id="date_from" name="date_from" value="<?php echo $date_from; ?>">
-                        </div>
-                        <div class="filter-group">
-                            <label for="date_to">To:</label>
-                            <input type="date" id="date_to" name="date_to" value="<?php echo $date_to; ?>">
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-sm">Apply</button>
-                        <a href="maintenance-new.php" class="reset-link">Reset</a>
                     </form>
                 </div>
                 <div class="card-body">
@@ -520,73 +509,50 @@ $page_title = "Maintenance Updates";
         </div>
     </div>
 
+    <script src="js/dark-mode.js"></script>
     <script>
-        // Dark mode toggle
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        
-        // Check for saved dark mode preference
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            document.body.classList.add('dark-mode');
-            darkModeToggle.checked = true;
-        }
-        
-        // Dark mode toggle event listener
-        darkModeToggle.addEventListener('change', function() {
-            if (this.checked) {
-                document.body.classList.add('dark-mode');
-                localStorage.setItem('darkMode', 'enabled');
-            } else {
-                document.body.classList.remove('dark-mode');
-                localStorage.setItem('darkMode', null);
-            }
-        });
-        
         // Date filters functionality
         const dateFrom = document.getElementById('date_from');
         const dateTo = document.getElementById('date_to');
         
-        if (dateFrom && dateTo) {
-            dateFrom.addEventListener('change', function() {
-                if (dateTo.value && new Date(this.value) > new Date(dateTo.value)) {
-                    dateTo.value = this.value;
-                }
-            });
-            
-            dateTo.addEventListener('change', function() {
-                if (dateFrom.value && new Date(this.value) < new Date(dateFrom.value)) {
-                    dateFrom.value = this.value;
-                }
-            });
-        }
+        dateFrom.addEventListener('change', function() {
+            if (dateTo.value && new Date(this.value) > new Date(dateTo.value)) {
+                dateTo.value = this.value;
+            }
+        });
         
-        // Delete modal functionality
+        dateTo.addEventListener('change', function() {
+            if (dateFrom.value && new Date(this.value) < new Date(dateFrom.value)) {
+                dateFrom.value = this.value;
+            }
+        });
+        
+        // Delete maintenance modal functionality
         const modal = document.getElementById('deleteModal');
         const deleteButtons = document.querySelectorAll('.delete-maintenance');
         const closeButtons = document.querySelectorAll('.close, .close-modal');
         const deleteForm = document.getElementById('deleteForm');
         const deleteMaintenanceIdInput = document.getElementById('deleteMaintenanceId');
         
-        if (modal && deleteButtons.length > 0) {
-            deleteButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const maintenanceId = this.getAttribute('data-id');
-                    deleteMaintenanceIdInput.value = maintenanceId;
-                    modal.style.display = 'block';
-                });
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const maintenanceId = this.getAttribute('data-id');
+                deleteMaintenanceIdInput.value = maintenanceId;
+                modal.style.display = 'block';
             });
-            
-            closeButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    modal.style.display = 'none';
-                });
+        });
+        
+        closeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                modal.style.display = 'none';
             });
-            
-            window.addEventListener('click', function(event) {
-                if (event.target == modal) {
-                    modal.style.display = 'none';
-                }
-            });
-        }
+        });
+        
+        window.addEventListener('click', function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html> 

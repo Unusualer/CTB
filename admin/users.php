@@ -196,24 +196,6 @@ $page_title = "User Management";
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="topbar">
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search..." form="filter-form" name="search" value="<?php echo htmlspecialchars($search); ?>">
-                </div>
-                
-                <div class="topbar-right">
-                    <div class="notifications">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge">3</span>
-                    </div>
-                    <div class="messages">
-                        <i class="fas fa-envelope"></i>
-                        <span class="badge">5</span>
-                    </div>
-                </div>
-            </header>
-
             <div class="page-header">
                 <h1>User Management</h1>
                 <a href="add-user.php" class="btn btn-primary">
@@ -222,164 +204,213 @@ $page_title = "User Management";
                 </a>
             </div>
 
+            <?php if (isset($_SESSION['success'])): ?>
+                <div class="alert alert-success">
+                    <?php 
+                        echo $_SESSION['success']; 
+                        unset($_SESSION['success']);
+                    ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if (isset($_SESSION['error'])): ?>
+                <div class="alert alert-danger">
+                    <?php 
+                        echo $_SESSION['error']; 
+                        unset($_SESSION['error']);
+                    ?>
+                </div>
+            <?php endif; ?>
+
             <!-- Stats Cards -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon users">
-                        <i class="fas fa-user-tie"></i>
-                    </div>
-                    <div class="stat-details">
-                        <h3>Admin Users</h3>
-                        <div class="stat-number"><?php echo isset($role_counts['admin']) ? $role_counts['admin'] : 0; ?></div>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon properties">
-                        <i class="fas fa-user-cog"></i>
-                    </div>
-                    <div class="stat-details">
-                        <h3>Managers</h3>
-                        <div class="stat-number"><?php echo isset($role_counts['manager']) ? $role_counts['manager'] : 0; ?></div>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon tickets">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="stat-details">
-                        <h3>Residents</h3>
-                        <div class="stat-number"><?php echo isset($role_counts['resident']) ? $role_counts['resident'] : 0; ?></div>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon payments">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-details">
-                        <h3>Total Users</h3>
-                        <div class="stat-number"><?php echo $total; ?></div>
-                        <div class="stat-breakdown">
-                            <span><i class="fas fa-circle" style="color: #28a745;"></i> Active: <?php echo isset($status_counts['active']) ? $status_counts['active'] : 0; ?></span>
-                            <span><i class="fas fa-circle" style="color: #dc3545;"></i> Inactive: <?php echo isset($status_counts['inactive']) ? $status_counts['inactive'] : 0; ?></span>
+            <div class="content-wrapper">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon users">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3>Admin Users</h3>
+                            <div class="stat-number"><?php echo isset($role_counts['admin']) ? $role_counts['admin'] : 0; ?></div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Filters -->
-            <div class="card">
-                <div class="card-header user-filter-header">
-                    <h3>Users List</h3>
-                    <form id="filter-form" action="users.php" method="GET" class="filter-form">
-                        <div class="filter-group">
-                            <label for="role">Role:</label>
-                            <select name="role" id="role" onchange="this.form.submit()">
-                                <option value="">All Roles</option>
-                                <option value="admin" <?php echo $role_filter === 'admin' ? 'selected' : ''; ?>>Admin</option>
-                                <option value="manager" <?php echo $role_filter === 'manager' ? 'selected' : ''; ?>>Manager</option>
-                                <option value="resident" <?php echo $role_filter === 'resident' ? 'selected' : ''; ?>>Resident</option>
-                            </select>
+                    <div class="stat-card">
+                        <div class="stat-icon properties">
+                            <i class="fas fa-user-cog"></i>
                         </div>
-                        <div class="filter-group">
-                            <label for="status">Status:</label>
-                            <select name="status" id="status" onchange="this.form.submit()">
-                                <option value="">All Statuses</option>
-                                <option value="active" <?php echo $status_filter === 'active' ? 'selected' : ''; ?>>Active</option>
-                                <option value="inactive" <?php echo $status_filter === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
-                            </select>
+                        <div class="stat-details">
+                            <h3>Managers</h3>
+                            <div class="stat-number"><?php echo isset($role_counts['manager']) ? $role_counts['manager'] : 0; ?></div>
                         </div>
-                        <a href="users.php" class="reset-link">Reset</a>
-                    </form>
-                </div>
-                <div class="card-body">
-                    <?php if (empty($users)): ?>
-                        <div class="empty-state">
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon tickets">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3>Residents</h3>
+                            <div class="stat-number"><?php echo isset($role_counts['resident']) ? $role_counts['resident'] : 0; ?></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon payments">
                             <i class="fas fa-users"></i>
-                            <p>No users found. Try adjusting your filters or add a new user.</p>
-                            <a href="add-user.php" class="btn btn-primary">Add New User</a>
                         </div>
-                    <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Role</th>
-                                        <th>Status</th>
-                                        <th>Created</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($users as $user): ?>
-                                        <tr>
-                                            <td><?php echo $user['id']; ?></td>
-                                            <td>
-                                                <div class="user-cell">
-                                                    <div class="user-avatar-sm">
-                                                        <?php if (!empty($user['profile_image'])): ?>
-                                                            <img src="../assets/img/avatars/<?php echo htmlspecialchars($user['profile_image']); ?>" alt="<?php echo htmlspecialchars($user['name']); ?>">
-                                                        <?php else: ?>
-                                                            <i class="fas fa-user-circle"></i>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                    <?php echo htmlspecialchars($user['name']); ?>
-                                                </div>
-                                            </td>
-                                            <td><?php echo htmlspecialchars($user['email']); ?></td>
-                                            <td>
-                                                <?php echo ucfirst(htmlspecialchars($user['role'])); ?>
-                                            </td>
-                                            <td>
-                                                <?php echo ucfirst(htmlspecialchars($user['status'])); ?>
-                                            </td>
-                                            <td><?php echo date('M d, Y', strtotime($user['created_at'])); ?></td>
-                                            <td class="actions">
-                                                <a href="view-user.php?id=<?php echo $user['id']; ?>" class="btn-icon" title="View User">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a href="edit-user.php?id=<?php echo $user['id']; ?>" class="btn-icon" title="Edit User">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <a href="javascript:void(0);" class="btn-icon delete-user" data-id="<?php echo $user['id']; ?>" title="Delete User">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Pagination -->
-                        <?php if ($total_pages > 1): ?>
-                            <div class="pagination">
-                                <?php if ($page > 1): ?>
-                                    <a href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&role=<?php echo urlencode($role_filter); ?>&status=<?php echo urlencode($status_filter); ?>" class="pagination-link">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </a>
-                                <?php endif; ?>
-                                
-                                <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
-                                    <a href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&role=<?php echo urlencode($role_filter); ?>&status=<?php echo urlencode($status_filter); ?>" 
-                                       class="pagination-link <?php echo $i === $page ? 'active' : ''; ?>">
-                                        <?php echo $i; ?>
-                                    </a>
-                                <?php endfor; ?>
-                                
-                                <?php if ($page < $total_pages): ?>
-                                    <a href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&role=<?php echo urlencode($role_filter); ?>&status=<?php echo urlencode($status_filter); ?>" class="pagination-link">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </a>
-                                <?php endif; ?>
+                        <div class="stat-details">
+                            <h3>Total Users</h3>
+                            <div class="stat-number"><?php echo $total; ?></div>
+                            <div class="stat-breakdown">
+                                <span><i class="fas fa-circle" style="color: #28a745;"></i> Active: <?php echo isset($status_counts['active']) ? $status_counts['active'] : 0; ?></span>
+                                <span><i class="fas fa-circle" style="color: #dc3545;"></i> Inactive: <?php echo isset($status_counts['inactive']) ? $status_counts['inactive'] : 0; ?></span>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="card user-filter-card">
+                    <div class="card-header user-filter-header">
+                        <h3><i class="fas fa-filter"></i> Users List</h3>
+                        <form id="filter-form" action="users.php" method="GET" class="filter-form">
+                            <div class="filter-wrapper">
+                                <div class="search-filter">
+                                    <div class="search-bar">
+                                        <i class="fas fa-search"></i>
+                                        <input type="text" placeholder="Search..." name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
+                                    </div>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="role">Role:</label>
+                                    <select name="role" id="role" onchange="this.form.submit()">
+                                        <option value="">All Roles</option>
+                                        <option value="admin" <?php echo $role_filter === 'admin' ? 'selected' : ''; ?>>Admin</option>
+                                        <option value="manager" <?php echo $role_filter === 'manager' ? 'selected' : ''; ?>>Manager</option>
+                                        <option value="resident" <?php echo $role_filter === 'resident' ? 'selected' : ''; ?>>Resident</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="status">Status:</label>
+                                    <select name="status" id="status" onchange="this.form.submit()">
+                                        <option value="">All Statuses</option>
+                                        <option value="active" <?php echo $status_filter === 'active' ? 'selected' : ''; ?>>Active</option>
+                                        <option value="inactive" <?php echo $status_filter === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
+                                    </select>
+                                </div>
+                                <a href="users.php" class="reset-link">Reset</a>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-body">
+                        <?php if (empty($users)): ?>
+                            <div class="no-data">
+                                <i class="fas fa-users"></i>
+                                <p>No users found. Try adjusting your filters or add a new user.</p>
+                                <a href="add-user.php" class="btn btn-primary">Add New User</a>
+                            </div>
+                        <?php else: ?>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Status</th>
+                                            <th>Created</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($users as $user): ?>
+                                            <tr>
+                                                <td><?php echo $user['id']; ?></td>
+                                                <td>
+                                                    <div class="user-cell">
+                                                        <div class="user-avatar-sm">
+                                                            <?php if (!empty($user['profile_image'])): ?>
+                                                                <img src="../assets/img/avatars/<?php echo htmlspecialchars($user['profile_image']); ?>" alt="<?php echo htmlspecialchars($user['name']); ?>">
+                                                            <?php else: ?>
+                                                                <div class="avatar-placeholder-sm">
+                                                                    <span class="avatar-initial-sm"><?php echo substr(htmlspecialchars($user['name']), 0, 1); ?></span>
+                                                                </div>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                        <span class="user-name"><?php echo htmlspecialchars($user['name']); ?></span>
+                                                    </div>
+                                                </td>
+                                                <td><?php echo htmlspecialchars($user['email']); ?></td>
+                                                <td>
+                                                    <span class="user-role-badge">
+                                                        <?php
+                                                        $roleIcon = '';
+                                                        switch($user['role']) {
+                                                            case 'admin':
+                                                                $roleIcon = '<i class="fas fa-user-shield"></i>';
+                                                                break;
+                                                            case 'manager':
+                                                                $roleIcon = '<i class="fas fa-user-cog"></i>';
+                                                                break;
+                                                            case 'resident':
+                                                                $roleIcon = '<i class="fas fa-user"></i>';
+                                                                break;
+                                                        }
+                                                        echo $roleIcon . ' ' . ucfirst(htmlspecialchars($user['role']));
+                                                        ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span class="status-badge <?php echo $user['status']; ?>">
+                                                        <i class="fas fa-circle"></i>
+                                                        <?php echo ucfirst(htmlspecialchars($user['status'])); ?>
+                                                    </span>
+                                                </td>
+                                                <td><?php echo date('M d, Y', strtotime($user['created_at'])); ?></td>
+                                                <td class="actions">
+                                                    <a href="view-user.php?id=<?php echo $user['id']; ?>" class="btn-icon" title="View User">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="edit-user.php?id=<?php echo $user['id']; ?>" class="btn-icon" title="Edit User">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="javascript:void(0);" class="btn-icon delete-user" data-id="<?php echo $user['id']; ?>" title="Delete User">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination -->
+                            <?php if ($total_pages > 1): ?>
+                                <div class="pagination">
+                                    <?php if ($page > 1): ?>
+                                        <a href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&role=<?php echo urlencode($role_filter); ?>&status=<?php echo urlencode($status_filter); ?>" class="pagination-link">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                    
+                                    <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
+                                        <a href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&role=<?php echo urlencode($role_filter); ?>&status=<?php echo urlencode($status_filter); ?>" 
+                                        class="pagination-link <?php echo $i === $page ? 'active' : ''; ?>">
+                                            <?php echo $i; ?>
+                                        </a>
+                                    <?php endfor; ?>
+                                    
+                                    <?php if ($page < $total_pages): ?>
+                                        <a href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&role=<?php echo urlencode($role_filter); ?>&status=<?php echo urlencode($status_filter); ?>" class="pagination-link">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
                         <?php endif; ?>
-                    <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </main>
@@ -405,27 +436,8 @@ $page_title = "User Management";
         </div>
     </div>
 
+    <script src="js/dark-mode.js"></script>
     <script>
-        // Dark mode toggle
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        
-        // Check for saved dark mode preference
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            document.body.classList.add('dark-mode');
-            darkModeToggle.checked = true;
-        }
-        
-        // Dark mode toggle event listener
-        darkModeToggle.addEventListener('change', function() {
-            if (this.checked) {
-                document.body.classList.add('dark-mode');
-                localStorage.setItem('darkMode', 'enabled');
-            } else {
-                document.body.classList.remove('dark-mode');
-                localStorage.setItem('darkMode', null);
-            }
-        });
-        
         // Delete user modal functionality
         const modal = document.getElementById('deleteModal');
         const deleteButtons = document.querySelectorAll('.delete-user');
@@ -450,6 +462,92 @@ $page_title = "User Management";
         window.addEventListener('click', function(event) {
             if (event.target == modal) {
                 modal.style.display = 'none';
+            }
+        });
+
+        // Real-time search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('.search-filter input[name="search"]');
+            const userRows = document.querySelectorAll('.table tbody tr');
+            
+            function performSearch(searchTerm) {
+                searchTerm = searchTerm.toLowerCase().trim();
+                
+                let visibleCount = 0;
+                userRows.forEach(row => {
+                    const name = row.querySelector('.user-name')?.textContent.toLowerCase() || '';
+                    const email = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
+                    const role = row.querySelector('.user-role-badge')?.textContent.toLowerCase() || '';
+                    const status = row.querySelector('.status-badge')?.textContent.toLowerCase() || '';
+                    
+                    if (name.includes(searchTerm) || email.includes(searchTerm) || 
+                        role.includes(searchTerm) || status.includes(searchTerm)) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+                
+                // Show/hide "no results" message if needed
+                const existingNoResults = document.querySelector('.search-no-results');
+                const tableContainer = document.querySelector('.table-responsive');
+                
+                if (visibleCount === 0 && !existingNoResults && tableContainer) {
+                    const noResults = document.createElement('div');
+                    noResults.className = 'no-data search-no-results';
+                    noResults.innerHTML = '<i class="fas fa-search"></i><p>No users match your search criteria.</p>';
+                    
+                    tableContainer.style.display = 'none';
+                    tableContainer.parentNode.insertBefore(noResults, tableContainer.nextSibling);
+                } else if (visibleCount > 0 && existingNoResults) {
+                    existingNoResults.remove();
+                    if (tableContainer) tableContainer.style.display = '';
+                }
+            }
+            
+            if (searchInput) {
+                // Set focus on search input if it's empty
+                if (!searchInput.value) {
+                    setTimeout(() => {
+                        searchInput.focus();
+                    }, 100);
+                }
+                
+                searchInput.addEventListener('input', function() {
+                    performSearch(this.value);
+                });
+                
+                // Add a clear button to the search input
+                const searchContainer = searchInput.parentElement;
+                const clearButton = document.createElement('i');
+                clearButton.className = 'fas fa-times search-clear';
+                clearButton.style.display = searchInput.value ? 'block' : 'none';
+                clearButton.style.cursor = 'pointer';
+                clearButton.style.position = 'absolute';
+                clearButton.style.right = '10px';
+                clearButton.style.top = '50%';
+                clearButton.style.transform = 'translateY(-50%)';
+                searchContainer.style.position = 'relative';
+                searchContainer.appendChild(clearButton);
+                
+                // Show/hide clear button based on input value
+                searchInput.addEventListener('input', function() {
+                    clearButton.style.display = this.value ? 'block' : 'none';
+                });
+                
+                // Clear search when button is clicked
+                clearButton.addEventListener('click', function() {
+                    searchInput.value = '';
+                    performSearch('');
+                    this.style.display = 'none';
+                    searchInput.focus();
+                });
+                
+                // If there's an initial search value, perform the search
+                if (searchInput.value) {
+                    performSearch(searchInput.value);
+                }
             }
         });
     </script>

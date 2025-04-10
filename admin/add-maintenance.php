@@ -144,39 +144,190 @@ $page_title = "Add Maintenance Update";
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
     <style>
-        .form-row {
-            margin-bottom: 1.5rem;
+        /* Enhanced Form Styling */
+        .card {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
         
-        .form-group {
-            margin-bottom: 1rem;
+        .card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+        
+        .card-header {
+            padding: 18px 24px;
+            border-bottom: none;
+        }
+        
+        .card-header h3 {
+            font-weight: 600;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-header h3 i {
+            font-size: 1.1rem;
+        }
+        
+        .card-body {
+            padding: 30px;
         }
         
         .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            letter-spacing: 0.2px;
+            display: inline-block;
         }
         
-        .form-control {
-            width: 100%;
-            padding: 0.75rem;
+        .text-danger {
+            color: #ff5c75;
+            font-weight: 700;
+        }
+        
+        input, select, textarea {
+            padding: 12px 16px;
+            border-radius: 8px;
             border: 1px solid var(--border-color);
-            border-radius: 0.5rem;
             background-color: var(--light-color);
             color: var(--text-primary);
-            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            width: 100%;
         }
         
-        textarea.form-control {
-            min-height: 150px;
+        input:hover, select:hover, textarea:hover {
+            border-color: var(--primary-color-light);
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.15);
+            outline: none;
+        }
+        
+        .form-row {
+            margin-bottom: 24px;
+        }
+        
+        .form-section-title {
+            margin: 30px 0 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
         }
         
         .form-actions {
             display: flex;
-            gap: 1rem;
             justify-content: flex-end;
-            margin-top: 2rem;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-color-dark);
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary-bg);
+            color: var(--text-primary);
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+            transform: translateY(-1px);
+        }
+        
+        small {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: block;
+        }
+        
+        /* Dark mode specific styles */
+        [data-theme="dark"] .card-header {
+            background: linear-gradient(to right, var(--primary-color), var(--primary-color-dark));
+        }
+        
+        [data-theme="dark"] .card-header h3 {
+            color: #fff;
+        }
+        
+        [data-theme="dark"] .form-group label {
+            color: #ffffff;
+            font-weight: 600;
+        }
+        
+        [data-theme="dark"] .card {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            background-color: var(--card-bg);
+        }
+        
+        [data-theme="dark"] input, 
+        [data-theme="dark"] select,
+        [data-theme="dark"] textarea {
+            background-color: #2a2e35 !important;
+            color: #ffffff !important;
+            border-color: #3f4756;
+        }
+        
+        [data-theme="dark"] input:hover, 
+        [data-theme="dark"] select:hover,
+        [data-theme="dark"] textarea:hover {
+            border-color: var(--primary-color-light);
+        }
+        
+        [data-theme="dark"] input:focus, 
+        [data-theme="dark"] select:focus,
+        [data-theme="dark"] textarea:focus {
+            border-color: var(--primary-color);
+            background-color: #2d3239 !important;
+        }
+        
+        [data-theme="dark"] input::placeholder {
+            color: #8e99ad;
+        }
+        
+        [data-theme="dark"] .form-section-title {
+            color: #ffffff;
+            border-color: #3f4756;
+        }
+        
+        [data-theme="dark"] .text-danger {
+            color: #ff7a8e;
+        }
+        
+        [data-theme="dark"] small {
+            color: #b0b0b0;
         }
         
         .alert {
@@ -195,6 +346,20 @@ $page_title = "Add Maintenance Update";
             background-color: rgba(40, 167, 69, 0.1);
             color: #28a745;
             border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+        
+        [data-theme="dark"] .alert-danger {
+            background-color: rgba(220, 53, 69, 0.15);
+            color: #ff6b6b;
+        }
+        
+        [data-theme="dark"] .alert-success {
+            background-color: rgba(40, 167, 69, 0.15);
+            color: #2ecc71;
+        }
+        
+        textarea.form-control {
+            min-height: 150px;
         }
     </style>
 </head>
@@ -281,29 +446,11 @@ $page_title = "Add Maintenance Update";
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="topbar">
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search..." disabled>
+            <div class="page-header">
+                <div class="breadcrumb">
+                    <a href="maintenance-new.php">Maintenance</a>
+                    <span>Add Maintenance Update</span>
                 </div>
-                
-                <div class="topbar-right">
-                    <div class="notifications">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge">3</span>
-                    </div>
-                    <div class="messages">
-                        <i class="fas fa-envelope"></i>
-                        <span class="badge">5</span>
-                    </div>
-                </div>
-            </header>
-
-            <div class="content-header">
-                <a href="maintenance-new.php" class="back-button">
-                    <i class="fas fa-arrow-left"></i> Back to Maintenance Updates
-                </a>
-                <h1><?php echo $page_title; ?></h1>
             </div>
 
             <?php if (!empty($success_message)): ?>
@@ -318,105 +465,90 @@ $page_title = "Add Maintenance Update";
                 </div>
             <?php endif; ?>
 
-            <div class="card">
-                <div class="card-header">
-                    <h3>Maintenance Details</h3>
-                </div>
-                <div class="card-body">
-                    <form action="add-maintenance.php" method="POST">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="title">Title <span class="text-danger">*</span></label>
-                                <input type="text" name="title" id="title" class="form-control" value="<?php echo htmlspecialchars($maintenance['title']); ?>" required>
+            <div class="content-wrapper">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-tools"></i> Add Maintenance Update</h3>
+                    </div>
+                    <div class="card-body">
+                        <form action="add-maintenance.php" method="POST">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="title">Title <span class="text-danger">*</span></label>
+                                    <input type="text" name="title" id="title" value="<?php echo htmlspecialchars($maintenance['title']); ?>" required>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="location">Location <span class="text-danger">*</span></label>
-                                <input type="text" name="location" id="location" class="form-control" value="<?php echo htmlspecialchars($maintenance['location']); ?>" required>
-                                <small class="form-text text-muted">Specify where in the residential complex the maintenance will occur.</small>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="location">Location <span class="text-danger">*</span></label>
+                                    <input type="text" name="location" id="location" value="<?php echo htmlspecialchars($maintenance['location']); ?>" required>
+                                    <small class="form-text text-muted">Specify where in the residential complex the maintenance will occur.</small>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="description">Description <span class="text-danger">*</span></label>
-                                <textarea name="description" id="description" class="form-control" required><?php echo htmlspecialchars($maintenance['description']); ?></textarea>
-                                <small class="form-text text-muted">Provide detailed information about the maintenance work being performed.</small>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="description">Description <span class="text-danger">*</span></label>
+                                    <textarea name="description" id="description" required><?php echo htmlspecialchars($maintenance['description']); ?></textarea>
+                                    <small class="form-text text-muted">Provide detailed information about the maintenance work being performed.</small>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="start_date">Start Date <span class="text-danger">*</span></label>
-                                <input type="date" name="start_date" id="start_date" class="form-control" value="<?php echo htmlspecialchars($maintenance['start_date']); ?>" required>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="start_date">Start Date <span class="text-danger">*</span></label>
+                                    <input type="date" name="start_date" id="start_date" value="<?php echo htmlspecialchars($maintenance['start_date']); ?>" required>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="end_date">End Date <span class="text-danger">*</span></label>
-                                <input type="date" name="end_date" id="end_date" class="form-control" value="<?php echo htmlspecialchars($maintenance['end_date']); ?>" required>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="end_date">End Date <span class="text-danger">*</span></label>
+                                    <input type="date" name="end_date" id="end_date" value="<?php echo htmlspecialchars($maintenance['end_date']); ?>" required>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="status">Status <span class="text-danger">*</span></label>
-                                <select name="status" id="status" class="form-control" required>
-                                    <option value="scheduled" <?php echo $maintenance['status'] === 'scheduled' ? 'selected' : ''; ?>>Scheduled</option>
-                                    <option value="in_progress" <?php echo $maintenance['status'] === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
-                                    <option value="completed" <?php echo $maintenance['status'] === 'completed' ? 'selected' : ''; ?>>Completed</option>
-                                    <option value="delayed" <?php echo $maintenance['status'] === 'delayed' ? 'selected' : ''; ?>>Delayed</option>
-                                    <option value="cancelled" <?php echo $maintenance['status'] === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
-                                </select>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="status">Status <span class="text-danger">*</span></label>
+                                    <select name="status" id="status" required>
+                                        <option value="scheduled" <?php echo $maintenance['status'] === 'scheduled' ? 'selected' : ''; ?>>Scheduled</option>
+                                        <option value="in_progress" <?php echo $maintenance['status'] === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
+                                        <option value="completed" <?php echo $maintenance['status'] === 'completed' ? 'selected' : ''; ?>>Completed</option>
+                                        <option value="delayed" <?php echo $maintenance['status'] === 'delayed' ? 'selected' : ''; ?>>Delayed</option>
+                                        <option value="cancelled" <?php echo $maintenance['status'] === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
+                                    </select>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="priority">Priority <span class="text-danger">*</span></label>
-                                <select name="priority" id="priority" class="form-control" required>
-                                    <option value="low" <?php echo $maintenance['priority'] === 'low' ? 'selected' : ''; ?>>Low</option>
-                                    <option value="medium" <?php echo $maintenance['priority'] === 'medium' ? 'selected' : ''; ?>>Medium</option>
-                                    <option value="high" <?php echo $maintenance['priority'] === 'high' ? 'selected' : ''; ?>>High</option>
-                                    <option value="emergency" <?php echo $maintenance['priority'] === 'emergency' ? 'selected' : ''; ?>>Emergency</option>
-                                </select>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="priority">Priority <span class="text-danger">*</span></label>
+                                    <select name="priority" id="priority" required>
+                                        <option value="low" <?php echo $maintenance['priority'] === 'low' ? 'selected' : ''; ?>>Low</option>
+                                        <option value="medium" <?php echo $maintenance['priority'] === 'medium' ? 'selected' : ''; ?>>Medium</option>
+                                        <option value="high" <?php echo $maintenance['priority'] === 'high' ? 'selected' : ''; ?>>High</option>
+                                        <option value="emergency" <?php echo $maintenance['priority'] === 'emergency' ? 'selected' : ''; ?>>Emergency</option>
+                                    </select>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="form-actions">
-                            <a href="maintenance-new.php" class="btn btn-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-primary">Add Maintenance Update</button>
-                        </div>
-                    </form>
+                            
+                            <div class="form-actions">
+                                <a href="maintenance-new.php" class="btn btn-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus-circle"></i> Add Maintenance Update
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
+    <script src="js/dark-mode.js"></script>
     <script>
-        // Dark mode toggle
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        
-        // Check for saved dark mode preference
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            document.body.classList.add('dark-mode');
-            darkModeToggle.checked = true;
-        }
-        
-        // Dark mode toggle event listener
-        darkModeToggle.addEventListener('change', function() {
-            if (this.checked) {
-                document.body.classList.add('dark-mode');
-                localStorage.setItem('darkMode', 'enabled');
-            } else {
-                document.body.classList.remove('dark-mode');
-                localStorage.setItem('darkMode', null);
-            }
-        });
-        
         // Date validation
         const startDateInput = document.getElementById('start_date');
         const endDateInput = document.getElementById('end_date');

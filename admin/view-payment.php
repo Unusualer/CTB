@@ -23,12 +23,11 @@ try {
     $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    $sql = "SELECT p.*, u.name as user_name, u.email as user_email, u.phone_number as user_phone, 
-            pr.identifier as property_identifier, pr.title as property_title, pr.type as property_type, 
-            pr.location as property_location, pr.price as property_price, pr.image as property_image
+    $sql = "SELECT p.*, p.type as payment_method, pr.identifier as property_identifier, pr.type as property_type, 
+            u.name as user_name, u.email as user_email, u.phone as user_phone
             FROM payments p 
-            LEFT JOIN users u ON p.user_id = u.id
             LEFT JOIN properties pr ON p.property_id = pr.id
+            LEFT JOIN users u ON pr.user_id = u.id
             WHERE p.id = :id";
 
     $stmt = $db->prepare($sql);
@@ -84,6 +83,9 @@ function getStatusClass($status) {
 
 // Format payment method for display
 function formatPaymentMethod($method) {
+    if (empty($method)) {
+        return 'Unknown';
+    }
     return ucfirst(str_replace('_', ' ', $method));
 }
 
@@ -183,23 +185,12 @@ $page_title = "Payment Details";
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="topbar">
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search..." disabled>
-                </div>
-                
-                <div class="topbar-right">
-                    <div class="notifications">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge">3</span>
-                    </div>
-                    <div class="messages">
-                        <i class="fas fa-envelope"></i>
-                        <span class="badge">5</span>
-                    </div>
-                </div>
-            </header>
+            <div class="content-header">
+                <a href="payments.php" class="back-button">
+                    <i class="fas fa-arrow-left"></i> Back to Payments
+                </a>
+                <h1>Payment Details</h1>
+            </div>
 
             <!-- Page Content -->
             <div class="page-content">
@@ -210,14 +201,6 @@ $page_title = "Payment Details";
                     <button class="close-btn">&times;</button>
                 </div>
                 <?php endif; ?>
-
-                <!-- Header with back button -->
-                <div class="content-header">
-                    <a href="payments.php" class="back-button">
-                        <i class="fas fa-arrow-left"></i> Back to Payments
-                    </a>
-                    <h1>Payment Details</h1>
-                </div>
 
                 <div class="ticket-details-container">
                     <div class="ticket-details-grid">
@@ -248,20 +231,18 @@ $page_title = "Payment Details";
                                     <span class="detail-value">
                                         <?php 
                                             $methodIcon = '';
-                                            switch ($payment['payment_method']) {
-                                                case 'credit_card': 
-                                                    $methodIcon = '<i class="fas fa-credit-card"></i> ';
-                                                    break;
-                                                case 'bank_transfer': 
+                                            $paymentMethod = isset($payment['payment_method']) ? $payment['payment_method'] : 'transfer';
+                                            switch ($paymentMethod) {
+                                                case 'transfer': 
                                                     $methodIcon = '<i class="fas fa-university"></i> ';
                                                     break;
-                                                case 'cash': 
-                                                    $methodIcon = '<i class="fas fa-money-bill"></i> ';
+                                                case 'cheque': 
+                                                    $methodIcon = '<i class="fas fa-money-check"></i> ';
                                                     break;
                                                 default: 
                                                     $methodIcon = '<i class="fas fa-money-check"></i> ';
                                             }
-                                            echo $methodIcon . formatPaymentMethod($payment['payment_method']);
+                                            echo $methodIcon . formatPaymentMethod($paymentMethod);
                                         ?>
                                     </span>
                                 </div>
@@ -274,8 +255,8 @@ $page_title = "Payment Details";
                                     <span class="detail-value description-text"><?php echo nl2br(htmlspecialchars($payment['description'] ?? 'No description available')); ?></span>
                                 </div>
                                 <div class="detail-row">
-                                    <span class="detail-label">Payment Date:</span>
-                                    <span class="detail-value"><?php echo date('M d, Y H:i', strtotime($payment['payment_date'])); ?></span>
+                                    <span class="detail-label">Payment Month:</span>
+                                    <span class="detail-value"><?php echo date('M d, Y', strtotime($payment['month'])); ?></span>
                                 </div>
                                 <div class="detail-row">
                                     <span class="detail-label">Created:</span>
@@ -287,6 +268,10 @@ $page_title = "Payment Details";
                                     <span class="detail-value"><?php echo date('M d, Y H:i', strtotime($payment['updated_at'])); ?></span>
                                 </div>
                                 <?php endif; ?>
+                                <div class="detail-row">
+                                    <span class="detail-label">Payment Type:</span>
+                                    <span class="detail-value">Monthly Subscription</span>
+                                </div>
                             </div>
                         </div>
 
@@ -337,30 +322,13 @@ $page_title = "Payment Details";
                             </div>
                             <div class="card-body">
                                 <?php if (isset($payment['property_id']) && $payment['property_id']): ?>
-                                    <?php if (isset($payment['property_image']) && $payment['property_image']): ?>
-                                    <div class="property-image">
-                                        <img src="../uploads/properties/<?php echo htmlspecialchars($payment['property_image']); ?>" alt="Property Image">
-                                    </div>
-                                    <?php endif; ?>
-                                    <div class="detail-row">
-                                        <span class="detail-label">Title:</span>
-                                        <span class="detail-value"><?php echo htmlspecialchars($payment['property_title']); ?></span>
-                                    </div>
                                     <div class="detail-row">
                                         <span class="detail-label">Identifier:</span>
-                                        <span class="detail-value"><?php echo htmlspecialchars($payment['property_identifier']); ?></span>
-                                    </div>
-                                    <div class="detail-row">
-                                        <span class="detail-label">Location:</span>
-                                        <span class="detail-value"><?php echo htmlspecialchars($payment['property_location'] ?? 'N/A'); ?></span>
+                                        <span class="detail-value"><?php echo htmlspecialchars($payment['property_identifier'] ?? 'N/A'); ?></span>
                                     </div>
                                     <div class="detail-row">
                                         <span class="detail-label">Type:</span>
                                         <span class="detail-value"><?php echo ucfirst(htmlspecialchars($payment['property_type'] ?? 'N/A')); ?></span>
-                                    </div>
-                                    <div class="detail-row">
-                                        <span class="detail-label">Price:</span>
-                                        <span class="detail-value">$<?php echo number_format($payment['property_price'] ?? 0); ?></span>
                                     </div>
                                     <div class="detail-row">
                                         <span class="detail-label">Actions:</span>
@@ -390,9 +358,9 @@ $page_title = "Payment Details";
                                         <label for="status">Update Status:</label>
                                         <select name="status" id="status" class="form-control">
                                             <option value="pending" <?php echo $payment['status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                                            <option value="completed" <?php echo $payment['status'] === 'completed' ? 'selected' : ''; ?>>Completed</option>
+                                            <option value="paid" <?php echo $payment['status'] === 'paid' ? 'selected' : ''; ?>>Paid</option>
+                                            <option value="cancelled" <?php echo $payment['status'] === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
                                             <option value="failed" <?php echo $payment['status'] === 'failed' ? 'selected' : ''; ?>>Failed</option>
-                                            <option value="refunded" <?php echo $payment['status'] === 'refunded' ? 'selected' : ''; ?>>Refunded</option>
                                         </select>
                                     </div>
                                     <div class="form-group">

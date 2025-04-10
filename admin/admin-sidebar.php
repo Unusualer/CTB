@@ -69,8 +69,6 @@ $pending_tickets = $unresolved_tickets ?? 0;
 $new_messages = 0;  // This would be populated from a database query
 ?>
 
-<link rel="stylesheet" href="admin-sidebar.css">
-
 <div class="admin-sidebar">
     <div class="sidebar-brand">
         <h2>CTB Admin</h2>

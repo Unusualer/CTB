@@ -278,24 +278,6 @@ $page_title = "View Maintenance Update";
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="topbar">
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search..." disabled>
-                </div>
-                
-                <div class="topbar-right">
-                    <div class="notifications">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge">3</span>
-                    </div>
-                    <div class="messages">
-                        <i class="fas fa-envelope"></i>
-                        <span class="badge">5</span>
-                    </div>
-                </div>
-            </header>
-
             <div class="content-header">
                 <a href="maintenance-new.php" class="back-button">
                     <i class="fas fa-arrow-left"></i> Back to Maintenance Updates

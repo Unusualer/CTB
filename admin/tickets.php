@@ -25,12 +25,8 @@ try {
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     // Build the query - select tickets with user and property info
-    $query = "SELECT t.*, 
-              u.name as user_name, 
-              p.identifier as property_identifier 
+    $query = "SELECT t.* 
               FROM maintenance_logs t 
-              LEFT JOIN users u ON t.reported_by = u.id 
-              LEFT JOIN properties p ON t.property_id = p.id 
               WHERE 1=1";
     $count_query = "SELECT COUNT(*) as total FROM maintenance_logs t WHERE 1=1";
     $params = [];
@@ -46,12 +42,6 @@ try {
         $query .= " AND t.status = :status";
         $count_query .= " AND t.status = :status";
         $params[':status'] = $status_filter;
-    }
-    
-    if (!empty($priority_filter)) {
-        $query .= " AND t.priority = :priority";
-        $count_query .= " AND t.priority = :priority";
-        $params[':priority'] = $priority_filter;
     }
     
     // Add ordering
@@ -86,23 +76,12 @@ try {
         $status_counts[$status_data['status']] = $status_data['count'];
     }
     
-    // Get counts by priority for stats
-    $priority_counts = [];
-    $priority_stmt = $db->prepare("SELECT priority, COUNT(*) as count FROM maintenance_logs GROUP BY priority");
-    $priority_stmt->execute();
-    $priority_results = $priority_stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    foreach ($priority_results as $priority_data) {
-        $priority_counts[$priority_data['priority']] = $priority_data['count'];
-    }
-    
 } catch (PDOException $e) {
     $_SESSION['error'] = "Database error: " . $e->getMessage();
     $tickets = [];
     $total = 0;
     $total_pages = 0;
     $status_counts = ['reported' => 0, 'in_progress' => 0, 'completed' => 0, 'cancelled' => 0];
-    $priority_counts = ['low' => 0, 'medium' => 0, 'high' => 0, 'urgent' => 0];
 }
 
 // Page title
@@ -202,31 +181,31 @@ $page_title = "Ticket Management";
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="topbar">
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search tickets..." form="filter-form" name="search" value="<?php echo htmlspecialchars($search); ?>">
-                </div>
-                
-                <div class="topbar-right">
-                    <div class="notifications">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge">3</span>
-                    </div>
-                    <div class="messages">
-                        <i class="fas fa-envelope"></i>
-                        <span class="badge">5</span>
-                    </div>
-                </div>
-            </header>
-
             <div class="page-header">
                 <h1>Ticket Management</h1>
                 <a href="add-ticket.php" class="btn btn-primary">
                     <i class="fas fa-plus"></i>
-                    Add New Ticket
+                    Create New Ticket
                 </a>
             </div>
+
+            <?php if (isset($_SESSION['success'])): ?>
+                <div class="alert alert-success">
+                    <?php 
+                        echo $_SESSION['success']; 
+                        unset($_SESSION['success']);
+                    ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if (isset($_SESSION['error'])): ?>
+                <div class="alert alert-danger">
+                    <?php 
+                        echo $_SESSION['error']; 
+                        unset($_SESSION['error']);
+                    ?>
+                </div>
+            <?php endif; ?>
 
             <!-- Stats Cards -->
             <div class="stats-grid">
@@ -277,31 +256,39 @@ $page_title = "Ticket Management";
             </div>
 
             <!-- Filters -->
-            <div class="card">
+            <div class="card user-filter-card">
                 <div class="card-header user-filter-header">
-                    <h3>Tickets List</h3>
+                    <h3><i class="fas fa-filter"></i> Tickets List</h3>
                     <form id="filter-form" action="tickets.php" method="GET" class="filter-form">
-                        <div class="filter-group">
-                            <label for="status">Status:</label>
-                            <select name="status" id="status" onchange="this.form.submit()">
-                                <option value="">All Statuses</option>
-                                <option value="reported" <?php echo $status_filter === 'reported' ? 'selected' : ''; ?>>Reported</option>
-                                <option value="in_progress" <?php echo $status_filter === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
-                                <option value="completed" <?php echo $status_filter === 'completed' ? 'selected' : ''; ?>>Completed</option>
-                                <option value="cancelled" <?php echo $status_filter === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
-                            </select>
+                        <div class="filter-wrapper">
+                            <div class="search-filter">
+                                <div class="search-bar">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" placeholder="Search..." name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
+                                </div>
+                            </div>
+                            <div class="filter-group">
+                                <label for="status">Status:</label>
+                                <select name="status" id="status" onchange="this.form.submit()">
+                                    <option value="">All Statuses</option>
+                                    <option value="reported" <?php echo $status_filter === 'reported' ? 'selected' : ''; ?>>Reported</option>
+                                    <option value="in_progress" <?php echo $status_filter === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
+                                    <option value="completed" <?php echo $status_filter === 'completed' ? 'selected' : ''; ?>>Completed</option>
+                                    <option value="cancelled" <?php echo $status_filter === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="priority">Priority:</label>
+                                <select name="priority" id="priority" onchange="this.form.submit()">
+                                    <option value="">All Priorities</option>
+                                    <option value="low" <?php echo $priority_filter === 'low' ? 'selected' : ''; ?>>Low</option>
+                                    <option value="medium" <?php echo $priority_filter === 'medium' ? 'selected' : ''; ?>>Medium</option>
+                                    <option value="high" <?php echo $priority_filter === 'high' ? 'selected' : ''; ?>>High</option>
+                                    <option value="urgent" <?php echo $priority_filter === 'urgent' ? 'selected' : ''; ?>>Urgent</option>
+                                </select>
+                            </div>
+                            <a href="tickets.php" class="reset-link">Reset</a>
                         </div>
-                        <div class="filter-group">
-                            <label for="priority">Priority:</label>
-                            <select name="priority" id="priority" onchange="this.form.submit()">
-                                <option value="">All Priorities</option>
-                                <option value="low" <?php echo $priority_filter === 'low' ? 'selected' : ''; ?>>Low</option>
-                                <option value="medium" <?php echo $priority_filter === 'medium' ? 'selected' : ''; ?>>Medium</option>
-                                <option value="high" <?php echo $priority_filter === 'high' ? 'selected' : ''; ?>>High</option>
-                                <option value="urgent" <?php echo $priority_filter === 'urgent' ? 'selected' : ''; ?>>Urgent</option>
-                            </select>
-                        </div>
-                        <a href="tickets.php" class="reset-link">Reset</a>
                     </form>
                 </div>
                 <div class="card-body">
@@ -332,22 +319,14 @@ $page_title = "Ticket Management";
                                             <td><?php echo $ticket['id']; ?></td>
                                             <td>
                                                 <div class="ticket-cell">
-                                                    <?php echo htmlspecialchars($ticket['title']); ?>
+                                                    <?php echo htmlspecialchars($ticket['title'] ?? $ticket['description']); ?>
                                                 </div>
                                             </td>
                                             <td>
-                                                <?php if ($ticket['property_id']): ?>
-                                                    <a href="view-property.php?id=<?php echo $ticket['property_id']; ?>" class="property-link">
-                                                        <?php echo htmlspecialchars($ticket['property_identifier']); ?>
-                                                    </a>
-                                                <?php else: ?>
-                                                    <span class="text-muted">N/A</span>
-                                                <?php endif; ?>
+                                                <span class="text-muted">N/A</span>
                                             </td>
                                             <td>
-                                                <a href="view-user.php?id=<?php echo $ticket['reported_by']; ?>" class="user-link">
-                                                    <?php echo htmlspecialchars($ticket['user_name']); ?>
-                                                </a>
+                                                <span class="text-muted">N/A</span>
                                             </td>
                                             <td>
                                                 <?php 
@@ -364,18 +343,7 @@ $page_title = "Ticket Management";
                                                 </span>
                                             </td>
                                             <td>
-                                                <?php 
-                                                    $priorityClass = '';
-                                                    switch ($ticket['priority']) {
-                                                        case 'low': $priorityClass = 'success'; break;
-                                                        case 'medium': $priorityClass = 'warning'; break;
-                                                        case 'high': $priorityClass = 'primary'; break;
-                                                        case 'urgent': $priorityClass = 'danger'; break;
-                                                    }
-                                                ?>
-                                                <span class="priority-indicator priority-<?php echo $priorityClass; ?>">
-                                                    <?php echo ucfirst(htmlspecialchars($ticket['priority'])); ?>
-                                                </span>
+                                                <span class="text-muted">N/A</span>
                                             </td>
                                             <td><?php echo date('M d, Y', strtotime($ticket['created_at'])); ?></td>
                                             <td class="actions">
@@ -444,27 +412,8 @@ $page_title = "Ticket Management";
         </div>
     </div>
 
+    <script src="js/dark-mode.js"></script>
     <script>
-        // Dark mode toggle
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        
-        // Check for saved dark mode preference
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            document.body.classList.add('dark-mode');
-            darkModeToggle.checked = true;
-        }
-        
-        // Dark mode toggle event listener
-        darkModeToggle.addEventListener('change', function() {
-            if (this.checked) {
-                document.body.classList.add('dark-mode');
-                localStorage.setItem('darkMode', 'enabled');
-            } else {
-                document.body.classList.remove('dark-mode');
-                localStorage.setItem('darkMode', null);
-            }
-        });
-        
         // Delete ticket modal functionality
         const modal = document.getElementById('deleteModal');
         const deleteButtons = document.querySelectorAll('.delete-ticket');

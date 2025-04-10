@@ -1,5 +1,5 @@
 -- CTB Residential Management System Database Schema
--- Combined SQL file
+-- Simplified version
 
 -- Drop database if it exists
 DROP DATABASE IF EXISTS ctb_db;
@@ -19,145 +19,82 @@ CREATE TABLE users (
     phone VARCHAR(50),
     role ENUM('admin', 'manager', 'resident') NOT NULL,
     status ENUM('active', 'inactive') DEFAULT 'active',
+    profile_image VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Create property_types table
-CREATE TABLE property_types (
-    id INT(11) PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- Create properties table
+-- Create properties table with simplified structure
 CREATE TABLE properties (
     id INT AUTO_INCREMENT PRIMARY KEY,
     type ENUM('apartment', 'parking') NOT NULL,
     identifier VARCHAR(50) NOT NULL UNIQUE,
-    description TEXT,
-    area DECIMAL(10,2) DEFAULT NULL,
-    floor INT DEFAULT NULL,
-    user_id INT DEFAULT NULL,
-    status ENUM('occupied', 'vacant', 'maintenance') DEFAULT 'vacant',
+    user_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
--- Add property_type_id column to properties table
-ALTER TABLE properties ADD COLUMN property_type_id INT(11) NULL AFTER type;
-ALTER TABLE properties ADD CONSTRAINT fk_property_type FOREIGN KEY (property_type_id) REFERENCES property_types(id) ON DELETE SET NULL;
-
--- Create resident_properties junction table
-CREATE TABLE resident_properties (
-    id INT(11) PRIMARY KEY AUTO_INCREMENT,
-    user_id INT(11) NOT NULL,
-    property_id INT(11) NOT NULL,
-    unit_number VARCHAR(20) NOT NULL,
-    move_in_date DATE NOT NULL,
-    lease_end_date DATE,
-    monthly_rent DECIMAL(10,2) NOT NULL,
-    status ENUM('active', 'past', 'pending') NOT NULL DEFAULT 'active',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
-    UNIQUE KEY unique_resident_unit (user_id, property_id, unit_number)
-);
-
--- Create payments table
+-- Create payments table with simplified structure
 CREATE TABLE payments (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
     property_id INT NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
-    payment_date DATE NOT NULL,
-    payment_month DATE NOT NULL,
-    payment_type ENUM('rent', 'maintenance', 'other') DEFAULT 'rent',
-    payment_method ENUM('cash', 'check', 'bank_transfer', 'online', 'credit_card', 'other') DEFAULT 'cash',
-    reference_number VARCHAR(255),
-    receipt_number VARCHAR(50),
-    description VARCHAR(255),
-    status ENUM('paid', 'pending', 'cancelled', 'completed', 'failed', 'refunded') DEFAULT 'paid',
-    notes TEXT,
-    created_by INT, -- ID of the user (admin/manager) who recorded the payment
+    month DATE NOT NULL,
+    status ENUM('paid', 'pending', 'cancelled', 'failed') DEFAULT 'pending',
+    type ENUM('rent', 'maintenance', 'other') DEFAULT 'rent',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
-    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE
 );
 
--- Create maintenance_logs table
+-- Create maintenance_logs table with simplified structure
 CREATE TABLE maintenance_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    property_id INT,
-    title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
-    reported_by INT NOT NULL,
-    assigned_to INT,
-    start_date DATE,
-    expected_completion_date DATE,
-    actual_completion_date DATE,
     status ENUM('reported', 'in_progress', 'completed', 'cancelled') DEFAULT 'reported',
-    priority ENUM('low', 'medium', 'high', 'urgent') DEFAULT 'medium',
-    cost DECIMAL(10,2) DEFAULT 0,
+    date DATE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE SET NULL,
-    FOREIGN KEY (reported_by) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Create maintenance_updates table
 CREATE TABLE maintenance_updates (
-    id INT(11) NOT NULL AUTO_INCREMENT,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     location VARCHAR(255) NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
-    status ENUM('scheduled', 'in_progress', 'completed', 'delayed', 'cancelled') NOT NULL DEFAULT 'scheduled',
-    priority ENUM('low', 'medium', 'high', 'emergency') NOT NULL DEFAULT 'medium',
-    created_by INT(11) NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id),
-    KEY created_by (created_by),
-    CONSTRAINT maintenance_created_by_fk FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- Create tickets table
-CREATE TABLE tickets (
-    id INT(11) PRIMARY KEY AUTO_INCREMENT,
-    user_id INT(11) NOT NULL,
-    property_id INT(11) NULL,
-    subject VARCHAR(255) NOT NULL,
-    description TEXT NOT NULL,
-    category ENUM('maintenance', 'billing', 'noise_complaint', 'other') NOT NULL,
-    priority ENUM('low', 'medium', 'high', 'urgent') NOT NULL DEFAULT 'medium',
-    status ENUM('open', 'in_progress', 'closed', 'reopened') NOT NULL DEFAULT 'open',
-    assigned_to INT(11) NULL,
-    attachment VARCHAR(255) NULL,
+    status ENUM('scheduled', 'in_progress', 'completed', 'delayed', 'cancelled') DEFAULT 'scheduled',
+    priority ENUM('low', 'medium', 'high', 'emergency') DEFAULT 'medium',
+    created_by INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE SET NULL,
-    FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Create activity_log table
+-- Create tickets table with simplified structure
+CREATE TABLE tickets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    status ENUM('open', 'in_progress', 'closed', 'reopened') DEFAULT 'open',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Create activity_log table with simplified structure
 CREATE TABLE activity_log (
-    id INT(11) PRIMARY KEY AUTO_INCREMENT,
-    user_id INT(11) NOT NULL,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
     action VARCHAR(50) NOT NULL,
-    entity_type VARCHAR(50) NOT NULL,
-    entity_id INT(11) NOT NULL,
+    entity_type VARCHAR(50) DEFAULT NULL,
+    entity_id INT DEFAULT NULL,
     details TEXT,
-    ip_address VARCHAR(45),
+    description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -166,54 +103,55 @@ CREATE TABLE activity_log (
 
 -- Insert sample admin user (password: "password")
 INSERT INTO users (email, password, name, role, status) VALUES 
-('admin@ctb.com', '$2y$10$HcvUc.6RkX9Q1uIz1Zcj/uvPYN1D7EGd0YKntr9yKJjlOHgJ2s3ue', 'System Administrator', 'admin', 'active');
+('admin@ctb.com', '$2y$10$Km.56tx92n1R9o4MZuwJleiCDikkBjyDRwNzpmE44hCpfBzQtu2k2', 'System Administrator', 'admin', 'active');
 
 -- Insert sample manager user (password: "password")
 INSERT INTO users (email, password, name, role, status) VALUES 
-('manager@ctb.com', '$2y$10$HcvUc.6RkX9Q1uIz1Zcj/uvPYN1D7EGd0YKntr9yKJjlOHgJ2s3ue', 'Building Manager', 'manager', 'active');
+('manager@ctb.com', '$2y$10$Km.56tx92n1R9o4MZuwJleiCDikkBjyDRwNzpmE44hCpfBzQtu2k2', 'Building Manager', 'manager', 'active');
 
 -- Insert sample resident user (password: "password")
 INSERT INTO users (email, password, name, phone, role, status) VALUES 
-('resident@ctb.com', '$2y$10$HcvUc.6RkX9Q1uIz1Zcj/uvPYN1D7EGd0YKntr9yKJjlOHgJ2s3ue', 'John Doe', '555-123-4567', 'resident', 'active');
-
--- Insert sample property types
-INSERT INTO property_types (name, description) VALUES
-('Apartment', 'Multi-unit residential building where units are stacked vertically'),
-('Single Family House', 'Standalone residential building designed for one family'),
-('Townhouse', 'Multi-floor home that shares one or two walls with adjacent properties'),
-('Condominium', 'Privately owned unit within a building of other units'),
-('Duplex', 'Building with two separate dwelling units, either side by side or one above the other'),
-('Studio', 'Single room unit that combines living room, bedroom, and kitchen'),
-('Penthouse', 'Luxury apartment on the top floor of a high-rise building'),
-('Loft', 'Large, open space with minimal interior walls, often in converted industrial buildings');
+('resident@ctb.com', '$2y$10$Km.56tx92n1R9o4MZuwJleiCDikkBjyDRwNzpmE44hCpfBzQtu2k2', 'John Doe', '555-123-4567', 'resident', 'active');
 
 -- Insert sample properties
-INSERT INTO properties (type, identifier, description, area, floor, status) VALUES 
-('apartment', 'A101', 'One bedroom apartment with balcony', 75.50, 1, 'vacant'),
-('apartment', 'A102', 'Two bedroom apartment with sea view', 95.75, 1, 'vacant'),
-('apartment', 'A201', 'Luxury apartment with three bedrooms', 120.00, 2, 'vacant'),
-('parking', 'P001', 'Covered parking spot', NULL, -1, 'vacant'),
-('parking', 'P002', 'Covered parking spot', NULL, -1, 'vacant');
-
--- Assign property to resident
-UPDATE properties SET user_id = 3, status = 'occupied' WHERE identifier = 'A101';
-UPDATE properties SET user_id = 3, status = 'occupied' WHERE identifier = 'P001';
+INSERT INTO properties (type, identifier, user_id) VALUES 
+('apartment', 'A101', 3),
+('apartment', 'A102', NULL),
+('parking', 'P456', 3);
 
 -- Insert sample payments
-INSERT INTO payments (user_id, property_id, amount, payment_date, payment_month, payment_type, payment_method, receipt_number, status, created_by) VALUES 
-(3, 1, 5000.00, '2023-01-05', '2023-01-01', 'rent', 'bank_transfer', 'RCP-001', 'paid', 2),
-(3, 1, 5000.00, '2023-02-03', '2023-02-01', 'rent', 'cash', 'RCP-002', 'paid', 2),
-(3, 1, 5000.00, '2023-03-10', '2023-03-01', 'rent', 'cash', 'RCP-003', 'paid', 2);
+INSERT INTO payments (property_id, amount, month, status, type) VALUES 
+(1, 1000.00, '2023-01-01', 'paid', 'rent'),
+(1, 1000.00, '2023-02-01', 'paid', 'rent'),
+(3, 250.00, '2023-01-01', 'paid', 'rent');
 
 -- Insert sample maintenance logs
-INSERT INTO maintenance_logs (property_id, title, description, reported_by, assigned_to, start_date, expected_completion_date, status, priority) VALUES 
-(1, 'Leaking faucet', 'The bathroom sink faucet is leaking and needs repair', 3, 2, '2023-03-15', '2023-03-17', 'in_progress', 'medium'),
-(1, 'Broken AC', 'The air conditioning unit is not cooling properly', 3, 2, '2023-02-20', '2023-02-22', 'completed', 'high');
+INSERT INTO maintenance_logs (description, status, date) VALUES 
+('Leaking faucet in apartment A101', 'in_progress', '2023-03-15'),
+('Broken light fixture in parking area P456', 'completed', '2023-02-20');
+
+-- Insert sample tickets
+INSERT INTO tickets (user_id, subject, description, status) VALUES 
+(3, 'Noisy neighbors', 'The neighbors in A102 are making too much noise at night', 'open'),
+(3, 'Parking issues', 'Someone keeps parking in my spot P456', 'closed');
+
+-- Insert sample activity logs
+INSERT INTO activity_log (user_id, action, entity_type, entity_id, details, description) VALUES 
+(1, 'login', 'user', 1, 'Admin login', 'Admin logged into the system'),
+(3, 'payment', 'property', 1, 'Rent payment for January', 'Resident made a rent payment for January 2023');
+
+-- Insert sample maintenance updates
+INSERT INTO maintenance_updates (title, description, location, start_date, end_date, status, priority, created_by) VALUES
+('Elevator Maintenance', 'Annual inspection and maintenance of elevators in Building A', 'Building A', DATE_ADD(CURDATE(), INTERVAL 5 DAY), DATE_ADD(CURDATE(), INTERVAL 6 DAY), 'scheduled', 'medium', 1),
+('Roof Repair', 'Fixing leak in roof above apartment A101', 'Building A - A101', DATE_ADD(CURDATE(), INTERVAL -2 DAY), DATE_ADD(CURDATE(), INTERVAL 3 DAY), 'in_progress', 'high', 1),
+('HVAC System Service', 'Regular maintenance of HVAC systems in all apartments', 'All Buildings', DATE_ADD(CURDATE(), INTERVAL 10 DAY), DATE_ADD(CURDATE(), INTERVAL 15 DAY), 'scheduled', 'low', 2),
+('Parking Lot Repainting', 'Repainting parking lot lines and signs', 'Parking Area', DATE_ADD(CURDATE(), INTERVAL -10 DAY), DATE_ADD(CURDATE(), INTERVAL -8 DAY), 'completed', 'medium', 1);
 
 -- Create indexes for better performance
 CREATE INDEX idx_properties_user ON properties(user_id);
-CREATE INDEX idx_payments_user ON payments(user_id);
 CREATE INDEX idx_payments_property ON payments(property_id);
-CREATE INDEX idx_maintenance_property ON maintenance_logs(property_id);
-CREATE INDEX idx_maintenance_reported ON maintenance_logs(reported_by);
-CREATE INDEX idx_maintenance_assigned ON maintenance_logs(assigned_to); 
+CREATE INDEX idx_tickets_user ON tickets(user_id);
+CREATE INDEX idx_activity_user ON activity_log(user_id);
+CREATE INDEX idx_maintenance_updates_created_by ON maintenance_updates(created_by);
+CREATE INDEX idx_maintenance_updates_status ON maintenance_updates(status);
+CREATE INDEX idx_maintenance_updates_dates ON maintenance_updates(start_date, end_date); 
