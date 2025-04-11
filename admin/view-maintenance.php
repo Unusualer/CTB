@@ -14,7 +14,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 // Check if maintenance ID is provided
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     $_SESSION['error'] = "Invalid maintenance update ID.";
-    header("Location: maintenance-new.php");
+    header("Location: maintenance.php");
     exit();
 }
 
@@ -29,7 +29,7 @@ try {
     
     // Fetch maintenance update details
     $query = "SELECT m.*, u.name as created_by_name 
-              FROM maintenance_updates m 
+              FROM maintenance m 
               LEFT JOIN users u ON m.created_by = u.id 
               WHERE m.id = :id";
     $stmt = $db->prepare($query);
@@ -40,14 +40,14 @@ try {
     
     if (!$maintenance) {
         $_SESSION['error'] = "Maintenance update not found.";
-        header("Location: maintenance-new.php");
+        header("Location: maintenance.php");
         exit();
     }
     
     // Fetch comments for this maintenance update (if we have a comments table)
     // This is a placeholder - you may need to adjust this based on your actual database schema
     $comment_query = "SELECT c.*, u.name as user_name 
-                     FROM maintenance_comments c 
+                     FROM maintenance_comment c 
                      LEFT JOIN users u ON c.user_id = u.id 
                      WHERE c.maintenance_id = :maintenance_id 
                      ORDER BY c.created_at DESC";
@@ -197,89 +197,12 @@ $page_title = "View Maintenance Update";
 </head>
 <body>
     <div class="admin-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <img src="../assets/images/logo.png" alt="CTB Logo" class="logo">
-                <h2>CTB Admin</h2>
-            </div>
-            
-            <div class="user-info">
-                <div class="user-avatar">
-                    <i class="fas fa-user-circle"></i>
-                </div>
-                <div class="user-details">
-                    <h4><?php echo htmlspecialchars($_SESSION['name']); ?></h4>
-                    <p>Administrator</p>
-                </div>
-            </div>
-            
-            <nav class="sidebar-nav">
-                <ul>
-                    <li>
-                        <a href="dashboard.php">
-                            <i class="fas fa-chart-line"></i>
-                            <span>Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="users.php">
-                            <i class="fas fa-users"></i>
-                            <span>Users</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="properties.php">
-                            <i class="fas fa-building"></i>
-                            <span>Properties</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="tickets.php">
-                            <i class="fas fa-ticket-alt"></i>
-                            <span>Tickets</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="payments.php">
-                            <i class="fas fa-credit-card"></i>
-                            <span>Payments</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="activity-log.php">
-                            <i class="fas fa-history"></i>
-                            <span>Activity Log</span>
-                        </a>
-                    </li>
-                    <li class="active">
-                        <a href="maintenance-new.php">
-                            <i class="fas fa-tools"></i>
-                            <span>Maintenance</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            
-            <div class="sidebar-footer">
-                <div class="theme-toggle">
-                    <i class="fas fa-moon"></i>
-                    <label class="switch">
-                        <input type="checkbox" id="darkModeToggle">
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-                <a href="../logout.php" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </a>
-            </div>
-        </aside>
+        <?php include 'includes/admin-sidebar.php'; ?>
 
         <!-- Main Content -->
         <main class="main-content">
             <div class="content-header">
-                <a href="maintenance-new.php" class="back-button">
+                <a href="maintenance.php" class="back-button">
                     <i class="fas fa-arrow-left"></i> Back to Maintenance Updates
                 </a>
                 <h1><?php echo $page_title; ?></h1>

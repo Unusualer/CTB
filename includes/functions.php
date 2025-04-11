@@ -17,28 +17,45 @@ function time_elapsed_string($datetime, $full = false) {
     $ago = new DateTime($datetime);
     $diff = $now->diff($ago);
 
-    $diff->w = floor($diff->d / 7);
-    $diff->d -= $diff->w * 7;
-
-    $string = array(
-        'y' => 'year',
-        'm' => 'month',
-        'w' => 'week',
-        'd' => 'day',
-        'h' => 'hour',
-        'i' => 'minute',
-        's' => 'second',
-    );
+    // Create an array without using dynamic properties
+    $string = array();
     
-    foreach ($string as $k => &$v) {
-        if ($diff->$k) {
-            $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
-        } else {
-            unset($string[$k]);
-        }
+    // Calculate weeks separately
+    $weeks = floor($diff->d / 7);
+    $days_remaining = $diff->d % 7;
+    
+    if ($diff->y > 0) {
+        $string['y'] = $diff->y . ' year' . ($diff->y > 1 ? 's' : '');
+    }
+    
+    if ($diff->m > 0) {
+        $string['m'] = $diff->m . ' month' . ($diff->m > 1 ? 's' : '');
+    }
+    
+    if ($weeks > 0) {
+        $string['w'] = $weeks . ' week' . ($weeks > 1 ? 's' : '');
+    }
+    
+    if ($days_remaining > 0) {
+        $string['d'] = $days_remaining . ' day' . ($days_remaining > 1 ? 's' : '');
+    }
+    
+    if ($diff->h > 0) {
+        $string['h'] = $diff->h . ' hour' . ($diff->h > 1 ? 's' : '');
+    }
+    
+    if ($diff->i > 0) {
+        $string['i'] = $diff->i . ' minute' . ($diff->i > 1 ? 's' : '');
+    }
+    
+    if ($diff->s > 0) {
+        $string['s'] = $diff->s . ' second' . ($diff->s > 1 ? 's' : '');
     }
 
-    if (!$full) $string = array_slice($string, 0, 1);
+    if (!$full) {
+        $string = array_slice($string, 0, 1);
+    }
+    
     return $string ? implode(', ', $string) . ' ago' : 'just now';
 }
 

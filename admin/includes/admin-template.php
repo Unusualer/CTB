@@ -218,7 +218,7 @@ try {
             <div class="sidebar-menu-category">Support</div>
             
             <div class="sidebar-menu-item">
-                <a href="tickets.php" class="sidebar-menu-link <?php echo in_array($currentPage, ['tickets.php', 'ticket-details.php']) ? 'active' : ''; ?>">
+                <a href="tickets.php" class="sidebar-menu-link <?php echo in_array($currentPage, ['tickets.php', 'view-ticket.php']) ? 'active' : ''; ?>">
                     <i class="fas fa-ticket-alt"></i>
                     <span class="sidebar-menu-text">Support Tickets</span>
                     <?php if (isset($openTickets) && $openTickets > 0): ?>

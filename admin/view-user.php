@@ -76,84 +76,7 @@ $page_title = "View User";
 </head>
 <body>
     <div class="admin-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <img src="../assets/images/logo.png" alt="CTB Logo" class="logo">
-                <h2>CTB Admin</h2>
-            </div>
-            
-            <div class="user-info">
-                <div class="user-avatar">
-                    <i class="fas fa-user-circle"></i>
-                </div>
-                <div class="user-details">
-                    <h4><?php echo htmlspecialchars($_SESSION['name']); ?></h4>
-                    <p>Administrator</p>
-                </div>
-            </div>
-            
-            <nav class="sidebar-nav">
-                <ul>
-                    <li>
-                        <a href="dashboard.php">
-                            <i class="fas fa-chart-line"></i>
-                            <span>Dashboard</span>
-                        </a>
-                    </li>
-                    <li class="active">
-                        <a href="users.php">
-                            <i class="fas fa-users"></i>
-                            <span>Users</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="properties.php">
-                            <i class="fas fa-building"></i>
-                            <span>Properties</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="tickets.php">
-                            <i class="fas fa-ticket-alt"></i>
-                            <span>Tickets</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="payments.php">
-                            <i class="fas fa-credit-card"></i>
-                            <span>Payments</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="activity-log.php">
-                            <i class="fas fa-history"></i>
-                            <span>Activity Log</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="maintenance-new.php">
-                            <i class="fas fa-tools"></i>
-                            <span>Maintenance</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            
-            <div class="sidebar-footer">
-                <div class="theme-toggle">
-                    <i class="fas fa-moon"></i>
-                    <label class="switch">
-                        <input type="checkbox" id="darkModeToggle">
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-                <a href="../logout.php" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </a>
-            </div>
-        </aside>
+        <?php include 'includes/admin-sidebar.php'; ?>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -275,7 +198,7 @@ $page_title = "View User";
                                                     <i class="<?php echo ($property['type'] === 'apartment') ? 'fas fa-home' : 'fas fa-car'; ?>"></i>
                                                 </div>
                                                 <div class="property-details">
-                                                    <h4><?php echo htmlspecialchars($property['type'] . ' ' . $property['identifier']); ?></h4>
+                                                    <h4><?php echo ucfirst(htmlspecialchars($property['type'])) . ' ' . htmlspecialchars($property['identifier']); ?></h4>
                                                     <div class="property-meta">
                                                         <span class="property-id">ID: <?php echo $property['id']; ?></span>
                                                         <a href="view-property.php?id=<?php echo $property['id']; ?>" class="view-link">
@@ -373,5 +296,136 @@ $page_title = "View User";
             }
         });
     </script>
+
+    <style>
+        /* Enhanced Property List Styling */
+        .property-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .property-item {
+            display: flex;
+            align-items: center;
+            background-color: var(--light-color);
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .property-item:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+        
+        .property-icon {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-color-light);
+            border-radius: 50%;
+            margin-right: 16px;
+            color: var(--primary-color);
+        }
+        
+        .property-icon i {
+            font-size: 1.25rem;
+        }
+        
+        .property-details {
+            flex: 1;
+        }
+        
+        .property-details h4 {
+            margin: 0 0 8px 0;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+        
+        .property-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .property-id {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            background-color: var(--secondary-bg);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+        
+        .view-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            background-color: rgba(var(--primary-rgb), 0.1);
+        }
+        
+        .view-link i {
+            font-size: 0.8rem;
+            transition: transform 0.2s ease;
+        }
+        
+        .view-link:hover {
+            background-color: rgba(var(--primary-rgb), 0.15);
+            color: var(--primary-color-dark);
+        }
+        
+        .view-link:hover i {
+            transform: translateX(3px);
+        }
+        
+        /* Dark mode specific styles */
+        [data-theme="dark"] .property-item {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+        }
+        
+        [data-theme="dark"] .property-details h4 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .property-id {
+            color: #b0b0b0;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        [data-theme="dark"] .view-link {
+            color: var(--primary-color-light);
+            background-color: rgba(var(--primary-rgb), 0.2);
+        }
+        
+        [data-theme="dark"] .view-link:hover {
+            background-color: rgba(var(--primary-rgb), 0.3);
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .property-icon {
+            background-color: rgba(var(--primary-rgb), 0.3);
+            color: var(--primary-color-light);
+        }
+        
+        /* Breadcrumb styling from edit-user.php */
+        [data-theme="dark"] .breadcrumb {
+            color: #b0b0b0;
+        }
+        
+        [data-theme="dark"] .breadcrumb a {
+            color: #ffffff;
+        }
+    </style>
 </body>
 </html> 

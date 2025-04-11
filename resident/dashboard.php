@@ -56,7 +56,7 @@ $recentPayments = $recentStmt->fetchAll();
 // Fetch ongoing maintenance
 $maintenanceStmt = $conn->prepare("
     SELECT m.*, pr.identifier as property_identifier
-    FROM maintenance_logs m
+    FROM maintenance m
     JOIN properties pr ON m.property_id = pr.id
     WHERE m.property_id IN ($propertyIdStr) 
     AND m.status IN ('reported', 'in_progress')

@@ -189,6 +189,8 @@ $new_messages = 0;  // This would be populated from a database query
     </div>
 </div>
 
+<?php include 'includes/sidebar-footer.php'; ?>
+
 <div class="sidebar-overlay"></div>
 
 <script>

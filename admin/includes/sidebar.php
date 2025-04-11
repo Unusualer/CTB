@@ -54,7 +54,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 </a>
             </li>
             <li class="sidebar-menu-item">
-                <a href="tickets.php" class="sidebar-menu-link <?php echo $current_page == 'tickets.php' || $current_page == 'ticket-details.php' ? 'active' : ''; ?>">
+                <a href="tickets.php" class="sidebar-menu-link <?php echo $current_page == 'tickets.php' || $current_page == 'view-ticket.php' ? 'active' : ''; ?>">
                     <i class="fas fa-ticket-alt sidebar-menu-icon"></i>
                     <span class="sidebar-menu-text">Tickets</span>
                 </a>

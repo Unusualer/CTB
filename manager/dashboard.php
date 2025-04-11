@@ -43,7 +43,7 @@ try {
 
     // Count ongoing maintenance requests
     $requestsStmt = $conn->prepare("
-        SELECT COUNT(*) as count FROM maintenance_logs 
+        SELECT COUNT(*) as count FROM maintenance 
         WHERE status IN ('reported', 'in_progress')
     ");
     $requestsStmt->execute();
@@ -80,7 +80,7 @@ try {
     // Get urgent maintenance requests
     $urgentStmt = $conn->prepare("
         SELECT m.*, u.name as reported_by_name, pr.identifier as property_identifier 
-        FROM maintenance_logs m
+        FROM maintenance m
         JOIN users u ON m.reported_by = u.id
         JOIN properties pr ON m.property_id = pr.id
         WHERE m.status IN ('reported', 'in_progress')

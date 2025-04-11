@@ -21,7 +21,7 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 $property_id = (int)$_GET['id'];
 $property = null;
 $assigned_resident = null;
-$maintenance_logs = [];
+$maintenance_items = [];
 
 // Get property data
 try {
@@ -53,27 +53,27 @@ try {
         ];
     }
     
-    // Get maintenance logs for this property
+    // Get maintenance items for this property
     try {
-        // First check if maintenance_logs table has property_id column
-        $check_stmt = $db->prepare("SHOW COLUMNS FROM maintenance_logs LIKE 'property_id'");
+        // First check if maintenance table has property_id column
+        $check_stmt = $db->prepare("SHOW COLUMNS FROM maintenance LIKE 'property_id'");
         $check_stmt->execute();
         $hasPropertyIdColumn = $check_stmt->rowCount() > 0;
         
         if ($hasPropertyIdColumn) {
-            $maint_stmt = $db->prepare("SELECT * FROM maintenance_logs 
+            $maint_stmt = $db->prepare("SELECT * FROM maintenance
                                     WHERE property_id = :property_id 
                                     ORDER BY created_at DESC LIMIT 10");
             $maint_stmt->bindParam(':property_id', $property_id, PDO::PARAM_INT);
             $maint_stmt->execute();
-            $maintenance_logs = $maint_stmt->fetchAll(PDO::FETCH_ASSOC);
+            $maintenance_items = $maint_stmt->fetchAll(PDO::FETCH_ASSOC);
         } else {
-            // In the simplified schema, maintenance_logs might not have property_id
-            $maintenance_logs = [];
+            // In the simplified schema, maintenance might not have property_id
+            $maintenance_items = [];
         }
     } catch (PDOException $e) {
-        // If there's an error, just set maintenance logs to empty array
-        $maintenance_logs = [];
+        // If there's an error, just set maintenance items to empty array
+        $maintenance_items = [];
     }
     
 } catch (PDOException $e) {
@@ -98,84 +98,7 @@ $page_title = "View Property";
 </head>
 <body>
     <div class="admin-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <img src="../assets/images/logo.png" alt="CTB Logo" class="logo">
-                <h2>CTB Admin</h2>
-            </div>
-            
-            <div class="user-info">
-                <div class="user-avatar">
-                    <i class="fas fa-user-circle"></i>
-                </div>
-                <div class="user-details">
-                    <h4><?php echo htmlspecialchars($_SESSION['name']); ?></h4>
-                    <p>Administrator</p>
-                </div>
-            </div>
-            
-            <nav class="sidebar-nav">
-                <ul>
-                    <li>
-                        <a href="dashboard.php">
-                            <i class="fas fa-chart-line"></i>
-                            <span>Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="users.php">
-                            <i class="fas fa-users"></i>
-                            <span>Users</span>
-                        </a>
-                    </li>
-                    <li class="active">
-                        <a href="properties.php">
-                            <i class="fas fa-building"></i>
-                            <span>Properties</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="tickets.php">
-                            <i class="fas fa-ticket-alt"></i>
-                            <span>Tickets</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="payments.php">
-                            <i class="fas fa-credit-card"></i>
-                            <span>Payments</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="activity-log.php">
-                            <i class="fas fa-history"></i>
-                            <span>Activity Log</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="maintenance-new.php">
-                            <i class="fas fa-tools"></i>
-                            <span>Maintenance</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            
-            <div class="sidebar-footer">
-                <div class="theme-toggle">
-                    <i class="fas fa-moon"></i>
-                    <label class="switch">
-                        <input type="checkbox" id="darkModeToggle">
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-                <a href="../logout.php" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </a>
-            </div>
-        </aside>
+        <?php include 'includes/admin-sidebar.php'; ?>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -187,9 +110,6 @@ $page_title = "View Property";
                 <div class="actions">
                     <a href="edit-property.php?id=<?php echo $property['id']; ?>" class="btn btn-primary">
                         <i class="fas fa-edit"></i> Edit Property
-                    </a>
-                    <a href="javascript:void(0);" class="btn btn-danger delete-property" data-id="<?php echo $property['id']; ?>">
-                        <i class="fas fa-trash-alt"></i> Delete Property
                     </a>
                 </div>
             </div>
@@ -300,15 +220,15 @@ $page_title = "View Property";
                         </div>
                     </div>
 
-                    <!-- Maintenance Logs Card -->
-                    <?php if (!empty($maintenance_logs)): ?>
+                    <!-- Maintenance Items Card -->
+                    <?php if (!empty($maintenance_items)): ?>
                     <div class="card maintenance-card">
                         <div class="card-header">
                             <h3><i class="fas fa-tools"></i> Recent Maintenance</h3>
                         </div>
                         <div class="card-body">
                             <div class="maintenance-list">
-                                <?php foreach ($maintenance_logs as $log): ?>
+                                <?php foreach ($maintenance_items as $log): ?>
                                     <div class="maintenance-item">
                                         <div class="maintenance-status <?php echo $log['status']; ?>">
                                             <i class="fas fa-circle"></i>
@@ -331,54 +251,17 @@ $page_title = "View Property";
         </main>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Confirm Deletion</h3>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete this property? This action cannot be undone.</p>
-            </div>
-            <div class="modal-footer">
-                <form id="deleteForm" action="delete-property.php" method="POST">
-                    <input type="hidden" name="property_id" id="deletePropertyId">
-                    <button type="button" class="btn btn-secondary close-modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <script src="js/dark-mode.js"></script>
-    <script>
-        // Delete property modal functionality
-        const modal = document.getElementById('deleteModal');
-        const deleteButtons = document.querySelectorAll('.delete-property');
-        const closeButtons = document.querySelectorAll('.close, .close-modal');
-        const deleteForm = document.getElementById('deleteForm');
-        const deletePropertyIdInput = document.getElementById('deletePropertyId');
+    
+    <style>
+        /* Breadcrumb styling for dark mode */
+        [data-theme="dark"] .breadcrumb {
+            color: #b0b0b0;
+        }
         
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const propertyId = this.getAttribute('data-id');
-                deletePropertyIdInput.value = propertyId;
-                modal.style.display = 'block';
-            });
-        });
-        
-        closeButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                modal.style.display = 'none';
-            });
-        });
-        
-        window.addEventListener('click', function(event) {
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
-        });
-    </script>
+        [data-theme="dark"] .breadcrumb a {
+            color: #ffffff;
+        }
+    </style>
 </body>
 </html> 

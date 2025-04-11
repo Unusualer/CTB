@@ -379,84 +379,7 @@ $page_title = "Add New Payment";
 </head>
 <body>
     <div class="admin-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <img src="../assets/images/logo.png" alt="CTB Logo" class="logo">
-                <h2>CTB Admin</h2>
-            </div>
-            
-            <div class="user-info">
-                <div class="user-avatar">
-                    <i class="fas fa-user-circle"></i>
-                </div>
-                <div class="user-details">
-                    <h4><?php echo htmlspecialchars($_SESSION['name']); ?></h4>
-                    <p>Administrator</p>
-                </div>
-            </div>
-            
-            <nav class="sidebar-nav">
-                <ul>
-                    <li>
-                        <a href="dashboard.php">
-                            <i class="fas fa-chart-line"></i>
-                            <span>Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="users.php">
-                            <i class="fas fa-users"></i>
-                            <span>Users</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="properties.php">
-                            <i class="fas fa-building"></i>
-                            <span>Properties</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="tickets.php">
-                            <i class="fas fa-ticket-alt"></i>
-                            <span>Tickets</span>
-                        </a>
-                    </li>
-                    <li class="active">
-                        <a href="payments.php">
-                            <i class="fas fa-credit-card"></i>
-                            <span>Payments</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="activity-log.php">
-                            <i class="fas fa-history"></i>
-                            <span>Activity Log</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="settings.php">
-                            <i class="fas fa-cog"></i>
-                            <span>Settings</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            
-            <div class="sidebar-footer">
-                <div class="theme-toggle">
-                    <i class="fas fa-moon"></i>
-                    <label class="switch">
-                        <input type="checkbox" id="darkModeToggle">
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-                <a href="../logout.php" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </a>
-            </div>
-        </aside>
+        <?php include 'includes/admin-sidebar.php'; ?>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -578,5 +501,16 @@ $page_title = "Add New Payment";
     </div>
 
     <script src="js/dark-mode.js"></script>
+    
+    <style>
+        /* Breadcrumb styling for dark mode */
+        [data-theme="dark"] .breadcrumb {
+            color: #b0b0b0;
+        }
+        
+        [data-theme="dark"] .breadcrumb a {
+            color: #ffffff;
+        }
+    </style>
 </body>
 </html> 

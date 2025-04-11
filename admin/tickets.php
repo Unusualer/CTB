@@ -26,9 +26,9 @@ try {
     
     // Build the query - select tickets with user and property info
     $query = "SELECT t.* 
-              FROM maintenance_logs t 
+              FROM maintenance t 
               WHERE 1=1";
-    $count_query = "SELECT COUNT(*) as total FROM maintenance_logs t WHERE 1=1";
+    $count_query = "SELECT COUNT(*) as total FROM maintenance t WHERE 1=1";
     $params = [];
     
     // Apply filters
@@ -68,7 +68,7 @@ try {
     
     // Get counts by status for stats
     $status_counts = [];
-    $status_stmt = $db->prepare("SELECT status, COUNT(*) as count FROM maintenance_logs GROUP BY status");
+    $status_stmt = $db->prepare("SELECT status, COUNT(*) as count FROM maintenance GROUP BY status");
     $status_stmt->execute();
     $status_results = $status_stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -100,84 +100,7 @@ $page_title = "Ticket Management";
 </head>
 <body>
     <div class="admin-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <img src="../assets/images/logo.png" alt="CTB Logo" class="logo">
-                <h2>CTB Admin</h2>
-            </div>
-            
-            <div class="user-info">
-                <div class="user-avatar">
-                    <i class="fas fa-user-circle"></i>
-                </div>
-                <div class="user-details">
-                    <h4><?php echo htmlspecialchars($_SESSION['name']); ?></h4>
-                    <p>Administrator</p>
-                </div>
-            </div>
-            
-            <nav class="sidebar-nav">
-                <ul>
-                    <li>
-                        <a href="dashboard.php">
-                            <i class="fas fa-chart-line"></i>
-                            <span>Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="users.php">
-                            <i class="fas fa-users"></i>
-                            <span>Users</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="properties.php">
-                            <i class="fas fa-building"></i>
-                            <span>Properties</span>
-                        </a>
-                    </li>
-                    <li class="active">
-                        <a href="tickets.php">
-                            <i class="fas fa-ticket-alt"></i>
-                            <span>Tickets</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="payments.php">
-                            <i class="fas fa-credit-card"></i>
-                            <span>Payments</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="activity-log.php">
-                            <i class="fas fa-history"></i>
-                            <span>Activity Log</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="maintenance-new.php">
-                            <i class="fas fa-tools"></i>
-                            <span>Maintenance</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            
-            <div class="sidebar-footer">
-                <div class="theme-toggle">
-                    <i class="fas fa-moon"></i>
-                    <label class="switch">
-                        <input type="checkbox" id="darkModeToggle">
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-                <a href="../logout.php" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </a>
-            </div>
-        </aside>
+        <?php include 'includes/admin-sidebar.php'; ?>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -403,7 +326,8 @@ $page_title = "Ticket Management";
                 <p>Are you sure you want to delete this ticket? This action cannot be undone.</p>
             </div>
             <div class="modal-footer">
-                <form id="deleteForm" action="delete-ticket.php" method="POST">
+                <form id="deleteForm" action="view-ticket.php" method="POST">
+                    <input type="hidden" name="delete_ticket" value="1">
                     <input type="hidden" name="ticket_id" id="deleteTicketId">
                     <button type="button" class="btn btn-secondary close-modal">Cancel</button>
                     <button type="submit" class="btn btn-danger">Delete</button>

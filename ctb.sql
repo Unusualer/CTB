@@ -42,24 +42,14 @@ CREATE TABLE payments (
     amount DECIMAL(10,2) NOT NULL,
     month DATE NOT NULL,
     status ENUM('paid', 'pending', 'cancelled', 'failed') DEFAULT 'pending',
-    type ENUM('rent', 'maintenance', 'other') DEFAULT 'rent',
+    type ENUM('transfer', 'cheque') DEFAULT 'transfer',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE
 );
 
--- Create maintenance_logs table with simplified structure
-CREATE TABLE maintenance_logs (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    description TEXT NOT NULL,
-    status ENUM('reported', 'in_progress', 'completed', 'cancelled') DEFAULT 'reported',
-    date DATE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- Create maintenance_updates table
-CREATE TABLE maintenance_updates (
+-- Create maintenance table
+CREATE TABLE maintenance (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
@@ -74,12 +64,13 @@ CREATE TABLE maintenance_updates (
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Create tickets table with simplified structure
+-- Create tickets table with simplified structure and response column
 CREATE TABLE tickets (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     subject VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
+    response TEXT,
     status ENUM('open', 'in_progress', 'closed', 'reopened') DEFAULT 'open',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -121,14 +112,9 @@ INSERT INTO properties (type, identifier, user_id) VALUES
 
 -- Insert sample payments
 INSERT INTO payments (property_id, amount, month, status, type) VALUES 
-(1, 1000.00, '2023-01-01', 'paid', 'rent'),
-(1, 1000.00, '2023-02-01', 'paid', 'rent'),
-(3, 250.00, '2023-01-01', 'paid', 'rent');
-
--- Insert sample maintenance logs
-INSERT INTO maintenance_logs (description, status, date) VALUES 
-('Leaking faucet in apartment A101', 'in_progress', '2023-03-15'),
-('Broken light fixture in parking area P456', 'completed', '2023-02-20');
+(1, 1000.00, '2023-01-01', 'paid', 'transfer'),
+(1, 1000.00, '2023-02-01', 'paid', 'transfer'),
+(3, 250.00, '2023-01-01', 'paid', 'cheque');
 
 -- Insert sample tickets
 INSERT INTO tickets (user_id, subject, description, status) VALUES 
@@ -141,7 +127,7 @@ INSERT INTO activity_log (user_id, action, entity_type, entity_id, details, desc
 (3, 'payment', 'property', 1, 'Rent payment for January', 'Resident made a rent payment for January 2023');
 
 -- Insert sample maintenance updates
-INSERT INTO maintenance_updates (title, description, location, start_date, end_date, status, priority, created_by) VALUES
+INSERT INTO maintenance (title, description, location, start_date, end_date, status, priority, created_by) VALUES
 ('Elevator Maintenance', 'Annual inspection and maintenance of elevators in Building A', 'Building A', DATE_ADD(CURDATE(), INTERVAL 5 DAY), DATE_ADD(CURDATE(), INTERVAL 6 DAY), 'scheduled', 'medium', 1),
 ('Roof Repair', 'Fixing leak in roof above apartment A101', 'Building A - A101', DATE_ADD(CURDATE(), INTERVAL -2 DAY), DATE_ADD(CURDATE(), INTERVAL 3 DAY), 'in_progress', 'high', 1),
 ('HVAC System Service', 'Regular maintenance of HVAC systems in all apartments', 'All Buildings', DATE_ADD(CURDATE(), INTERVAL 10 DAY), DATE_ADD(CURDATE(), INTERVAL 15 DAY), 'scheduled', 'low', 2),
@@ -152,6 +138,6 @@ CREATE INDEX idx_properties_user ON properties(user_id);
 CREATE INDEX idx_payments_property ON payments(property_id);
 CREATE INDEX idx_tickets_user ON tickets(user_id);
 CREATE INDEX idx_activity_user ON activity_log(user_id);
-CREATE INDEX idx_maintenance_updates_created_by ON maintenance_updates(created_by);
-CREATE INDEX idx_maintenance_updates_status ON maintenance_updates(status);
-CREATE INDEX idx_maintenance_updates_dates ON maintenance_updates(start_date, end_date); 
+CREATE INDEX idx_maintenance_created_by ON maintenance(created_by);
+CREATE INDEX idx_maintenance_status ON maintenance(status);
+CREATE INDEX idx_maintenance_dates ON maintenance(start_date, end_date); 
