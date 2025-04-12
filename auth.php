@@ -26,10 +26,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Collect form data and sanitize
     $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
     $password = $_POST['password'];
+    $remember_me = isset($_POST['remember_me']) ? (int)$_POST['remember_me'] : 0;
     
     if ($debug) {
         debugOutput("Email: " . $email);
         debugOutput("Password: " . str_repeat('*', strlen($password)));
+        debugOutput("Remember Me: " . $remember_me);
     }
     
     // Basic validation
@@ -142,6 +144,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Add phone if available
                 if (!empty($user['phone'])) {
                     $_SESSION['phone'] = $user['phone'];
+                }
+                
+                // Handle remember me functionality
+                if ($remember_me == 1) {
+                    // Set a cookie with the email that expires in 30 days
+                    setcookie('ctb_email', $email, time() + (30 * 24 * 60 * 60), '/', '', false, true);
+                } else {
+                    // Clear the cookie if remember me is not checked
+                    if (isset($_COOKIE['ctb_email'])) {
+                        setcookie('ctb_email', '', time() - 3600, '/');
+                    }
                 }
                 
                 // Log the successful login

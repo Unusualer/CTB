@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Functionality Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .container {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #4e73df;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button:hover {
+            background-color: #3a5cc8;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+            min-height: 100px;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Remember Me Functionality Test</h1>
+
+    <div class="container">
+        <h2>Test Controls</h2>
+        <div class="controls">
+            <div>
+                <label for="email">Email:</label>
+                <input type="email" id="email" value="test@example.com">
+            </div>
+            <div>
+                <label for="days">Days to expire:</label>
+                <input type="number" id="days" value="30" min="1" max="365">
+            </div>
+        </div>
+
+        <button id="setCookie">Set Cookie</button>
+        <button id="getCookie">Get Cookie</button>
+        <button id="eraseCookie">Erase Cookie</button>
+        <button id="runTest">Run Full Test</button>
+
+        <div id="result">
+            <p>Test results will appear here.</p>
+        </div>
+    </div>
+
+    <script>
+        // Cookie helper functions (same as in login.php)
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Strict";
+            return `Cookie set: ${name}=${value}, expires in ${days} days`;
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        function eraseCookie(name) {
+            document.cookie = name + '=; Max-Age=-99999999; path=/';
+            return `Cookie erased: ${name}`;
+        }
+
+        // Test functions
+        function testRememberMeFunctionality() {
+            let results = [];
+
+            results.push("Testing Remember Me Functionality");
+
+            // Current cookies
+            results.push("Current cookies: " + document.cookie);
+
+            // Test cookie setting
+            const email = document.getElementById('email').value;
+            const days = parseInt(document.getElementById('days').value);
+            results.push(setCookie("ctb_email", email, days));
+
+            // Verify cookie was set
+            const savedEmail = getCookie("ctb_email");
+            results.push("Retrieved email cookie: " + savedEmail);
+
+            // Test cookie erasure
+            results.push(eraseCookie("ctb_email"));
+
+            // Verify cookie was erased
+            const afterErase = getCookie("ctb_email");
+            results.push("After erasure, email cookie: " + (afterErase || "null"));
+
+            return results.join('<br>');
+        }
+
+        // Event listeners
+        document.getElementById('setCookie').addEventListener('click', function () {
+            const email = document.getElementById('email').value;
+            const days = parseInt(document.getElementById('days').value);
+            const result = setCookie("ctb_email", email, days);
+            document.getElementById('result').innerHTML = `<p>${result}</p>`;
+        });
+
+        document.getElementById('getCookie').addEventListener('click', function () {
+            const savedEmail = getCookie("ctb_email");
+            document.getElementById('result').innerHTML = `<p>Retrieved email cookie: ${savedEmail || "not found"}</p>`;
+        });
+
+        document.getElementById('eraseCookie').addEventListener('click', function () {
+            const result = eraseCookie("ctb_email");
+            document.getElementById('result').innerHTML = `<p>${result}</p>`;
+        });
+
+        document.getElementById('runTest').addEventListener('click', function () {
+            const results = testRememberMeFunctionality();
+            document.getElementById('result').innerHTML = results;
+        });
+    </script>
+</body>
+
+</html>
