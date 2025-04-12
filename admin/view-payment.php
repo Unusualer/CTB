@@ -436,11 +436,12 @@ $page_title = "Détails du Paiement";
                                             <input type="hidden" name="update_status" value="1">
                                             <div class="form-group">
                                                 <label for="status">Statut:</label>
-                                                <select name="status" id="status" class="form-control">
+                                                <select id="status" name="status" class="form-control">
                                                     <option value="pending" <?php echo $payment['status'] === 'pending' ? 'selected' : ''; ?>>En Attente</option>
                                                     <option value="paid" <?php echo $payment['status'] === 'paid' ? 'selected' : ''; ?>>Payé</option>
                                                     <option value="cancelled" <?php echo $payment['status'] === 'cancelled' ? 'selected' : ''; ?>>Annulé</option>
                                                     <option value="failed" <?php echo $payment['status'] === 'failed' ? 'selected' : ''; ?>>Échoué</option>
+                                                    <option value="refunded" <?php echo $payment['status'] === 'refunded' ? 'selected' : ''; ?>>Remboursé</option>
                                                 </select>
                                             </div>
                                             <div class="form-group">

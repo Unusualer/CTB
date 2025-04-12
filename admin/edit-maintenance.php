@@ -171,7 +171,7 @@ function getPriorityLabel($priority) {
         case 'high':
             return 'Haute';
         case 'emergency':
-            return 'Urgence';
+            return 'Urgente';
         default:
             return ucfirst($priority);
     }
@@ -181,7 +181,7 @@ function getPriorityLabel($priority) {
 function getStatusLabel($status) {
     switch($status) {
         case 'scheduled':
-            return 'Planifié';
+            return 'Programmé';
         case 'in_progress':
             return 'En Cours';
         case 'completed':

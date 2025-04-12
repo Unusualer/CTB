@@ -284,11 +284,11 @@ $page_title = "Mises à Jour de Maintenance";
                                 <label for="status">Statut:</label>
                                 <select name="status" id="status" onchange="this.form.submit()">
                                     <option value="">Tous les Statuts</option>
-                                    <option value="scheduled" <?php echo $status_filter === 'scheduled' ? 'selected' : ''; ?>>Planifiée</option>
+                                    <option value="scheduled" <?php echo $status_filter === 'scheduled' ? 'selected' : ''; ?>>Programmé</option>
                                     <option value="in_progress" <?php echo $status_filter === 'in_progress' ? 'selected' : ''; ?>>En Cours</option>
-                                    <option value="completed" <?php echo $status_filter === 'completed' ? 'selected' : ''; ?>>Terminée</option>
-                                    <option value="delayed" <?php echo $status_filter === 'delayed' ? 'selected' : ''; ?>>Retardée</option>
-                                    <option value="cancelled" <?php echo $status_filter === 'cancelled' ? 'selected' : ''; ?>>Annulée</option>
+                                    <option value="completed" <?php echo $status_filter === 'completed' ? 'selected' : ''; ?>>Terminé</option>
+                                    <option value="delayed" <?php echo $status_filter === 'delayed' ? 'selected' : ''; ?>>Retardé</option>
+                                    <option value="cancelled" <?php echo $status_filter === 'cancelled' ? 'selected' : ''; ?>>Annulé</option>
                                 </select>
                             </div>
                             <div class="filter-group">
@@ -303,13 +303,12 @@ $page_title = "Mises à Jour de Maintenance";
                             </div>
                             <div class="filter-group">
                                 <label for="date_from">De:</label>
-                                <input type="date" id="date_from" name="date_from" value="<?php echo $date_from; ?>">
+                                <input type="date" id="date_from" name="date_from" value="<?php echo $date_from; ?>" onchange="this.form.submit()">
                             </div>
                             <div class="filter-group">
                                 <label for="date_to">À:</label>
-                                <input type="date" id="date_to" name="date_to" value="<?php echo $date_to; ?>">
+                                <input type="date" id="date_to" name="date_to" value="<?php echo $date_to; ?>" onchange="this.form.submit()">
                             </div>
-                            <button type="submit" class="btn btn-primary btn-sm">Appliquer</button>
                             <a href="maintenance.php" class="reset-link">Réinitialiser</a>
                         </div>
                     </form>
@@ -434,12 +433,14 @@ $page_title = "Mises à Jour de Maintenance";
             if (dateTo.value && new Date(this.value) > new Date(dateTo.value)) {
                 dateTo.value = this.value;
             }
+            this.form.submit();
         });
         
         dateTo.addEventListener('change', function() {
             if (dateFrom.value && new Date(this.value) < new Date(dateFrom.value)) {
                 dateFrom.value = this.value;
             }
+            this.form.submit();
         });
         
         // Delete maintenance modal functionality

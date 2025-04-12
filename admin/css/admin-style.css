@@ -377,31 +377,48 @@ input:checked+.slider:before {
     margin-bottom: 20px;
 }
 
+/* Breadcrumb styles */
 .breadcrumb {
     display: flex;
     align-items: center;
-    font-size: 14px;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
 }
 
 .breadcrumb a {
-    color: #4a5568;
+    color: var(--text-primary);
     text-decoration: none;
-    transition: color 0.2s;
+    position: relative;
+    padding-right: 1rem;
+    margin-right: 0.5rem;
+}
+
+.breadcrumb a:after {
+    content: '/';
+    position: absolute;
+    right: 0;
+    color: var(--text-secondary);
 }
 
 .breadcrumb a:hover {
-    color: #3182ce;
+    text-decoration: underline;
 }
 
 .breadcrumb span {
-    color: #718096;
+    color: var(--text-primary);
 }
 
-.breadcrumb a:after,
-.breadcrumb span:not(:last-child):after {
-    content: "/";
-    margin: 0 8px;
-    color: #cbd5e0;
+/* Dark mode breadcrumb */
+[data-theme="dark"] .breadcrumb {
+    color: #b0b0b0;
+}
+
+[data-theme="dark"] .breadcrumb a {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .breadcrumb a:after {
+    color: #b0b0b0;
 }
 
 .page-header .actions {

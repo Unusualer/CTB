@@ -198,19 +198,25 @@ $page_title = "Voir la Propriété";
                             <?php if (!empty($assigned_resident)): ?>
                                 <div class="resident-info">
                                     <div class="resident-avatar">
-                                        <i class="fas fa-user-circle"></i>
+                                        <div class="avatar-circle">
+                                            <i class="fas fa-user"></i>
+                                        </div>
                                     </div>
                                     <div class="resident-details">
                                         <h4><?php echo htmlspecialchars($assigned_resident['name']); ?></h4>
-                                        <p><?php echo htmlspecialchars($assigned_resident['email']); ?></p>
-                                        <a href="view-user.php?id=<?php echo $assigned_resident['id']; ?>" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-eye"></i> Voir le Résident
-                                        </a>
+                                        <p class="resident-email"><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($assigned_resident['email']); ?></p>
+                                        <div class="resident-actions">
+                                            <a href="view-user.php?id=<?php echo $assigned_resident['id']; ?>" class="btn btn-primary">
+                                                <i class="fas fa-eye"></i> Voir le Profil
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             <?php else: ?>
                                 <div class="empty-state">
-                                    <i class="fas fa-user-slash"></i>
+                                    <div class="empty-icon">
+                                        <i class="fas fa-user-slash"></i>
+                                    </div>
                                     <p>Aucun résident assigné à cette propriété.</p>
                                     <a href="edit-property.php?id=<?php echo $property['id']; ?>" class="btn btn-primary">
                                         <i class="fas fa-user-plus"></i> Assigner un Résident
@@ -261,6 +267,180 @@ $page_title = "Voir la Propriété";
         
         [data-theme="dark"] .breadcrumb a {
             color: #ffffff;
+        }
+        
+        /* Profile Header Icons */
+        .profile-avatar {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #4a80f0, #2c57b5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1.5rem;
+            color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .profile-avatar i {
+            font-size: 36px; /* Icône plus grande */
+        }
+        
+        /* Resident Card Styling */
+        .resident-info {
+            display: flex;
+            align-items: center;
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            background-color: var(--light-color);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        
+        .resident-info:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+        }
+        
+        .resident-avatar {
+            margin-right: 1.5rem;
+        }
+        
+        .avatar-circle {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #4a80f0, #2c57b5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 2rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .resident-details {
+            flex: 1;
+        }
+        
+        .resident-details h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .resident-email {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        .resident-email i {
+            margin-right: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--primary-color);
+        }
+        
+        .resident-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--secondary-bg);
+            color: var(--primary-color);
+            border-color: var(--primary-color-light);
+        }
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            background-color: var(--light-color);
+            border-radius: 0.5rem;
+            border: 1px dashed var(--border-color);
+        }
+        
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--secondary-bg);
+            border-radius: 50%;
+            margin-bottom: 1.25rem;
+        }
+        
+        .empty-icon i {
+            font-size: 2rem;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state p {
+            margin-bottom: 1.25rem;
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+        
+        /* Dark mode styles */
+        [data-theme="dark"] .resident-info {
+            background-color: var(--card-bg);
+            border-color: #3f4756;
+        }
+        
+        [data-theme="dark"] .resident-details h4 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .resident-email {
+            color: #b0b0b0;
+        }
+        
+        [data-theme="dark"] .btn-outline {
+            border-color: #3f4756;
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .btn-outline:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--primary-color-light);
+        }
+        
+        [data-theme="dark"] .empty-state {
+            background-color: var(--card-bg);
+            border-color: #3f4756;
+        }
+        
+        [data-theme="dark"] .empty-icon {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        [data-theme="dark"] .empty-state p {
+            color: #b0b0b0;
         }
     </style>
 </body>

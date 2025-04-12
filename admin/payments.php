@@ -237,8 +237,9 @@ $page_title = "Gestion des Paiements";
                                 <label for="status">Statut:</label>
                                 <select name="status" id="status" onchange="this.form.submit()">
                                     <option value="">Tous les Statuts</option>
-                                    <option value="completed" <?php echo $status_filter === 'completed' ? 'selected' : ''; ?>>Terminé</option>
+                                    <option value="paid" <?php echo $status_filter === 'paid' ? 'selected' : ''; ?>>Payé</option>
                                     <option value="pending" <?php echo $status_filter === 'pending' ? 'selected' : ''; ?>>En Attente</option>
+                                    <option value="cancelled" <?php echo $status_filter === 'cancelled' ? 'selected' : ''; ?>>Annulé</option>
                                     <option value="failed" <?php echo $status_filter === 'failed' ? 'selected' : ''; ?>>Échoué</option>
                                     <option value="refunded" <?php echo $status_filter === 'refunded' ? 'selected' : ''; ?>>Remboursé</option>
                                 </select>
@@ -247,20 +248,18 @@ $page_title = "Gestion des Paiements";
                                 <label for="payment_method">Méthode:</label>
                                 <select name="payment_method" id="payment_method" onchange="this.form.submit()">
                                     <option value="">Toutes les Méthodes</option>
-                                    <option value="credit_card" <?php echo $payment_method_filter === 'credit_card' ? 'selected' : ''; ?>>Carte Bancaire</option>
-                                    <option value="bank_transfer" <?php echo $payment_method_filter === 'bank_transfer' ? 'selected' : ''; ?>>Virement</option>
-                                    <option value="other" <?php echo $payment_method_filter === 'other' ? 'selected' : ''; ?>>Autre</option>
+                                    <option value="transfer" <?php echo $payment_method_filter === 'transfer' ? 'selected' : ''; ?>>Virement</option>
+                                    <option value="cheque" <?php echo $payment_method_filter === 'cheque' ? 'selected' : ''; ?>>Chèque</option>
                                 </select>
                             </div>
                             <div class="filter-group">
                                 <label for="date_from">De:</label>
-                                <input type="date" id="date_from" name="date_from" value="<?php echo $date_from; ?>">
+                                <input type="date" id="date_from" name="date_from" value="<?php echo $date_from; ?>" onchange="this.form.submit()">
                             </div>
                             <div class="filter-group">
                                 <label for="date_to">À:</label>
-                                <input type="date" id="date_to" name="date_to" value="<?php echo $date_to; ?>">
+                                <input type="date" id="date_to" name="date_to" value="<?php echo $date_to; ?>" onchange="this.form.submit()">
                             </div>
-                            <button type="submit" class="btn btn-primary btn-sm">Appliquer</button>
                             <a href="payments.php" class="reset-link">Réinitialiser</a>
                         </div>
                     </form>
@@ -345,18 +344,28 @@ $page_title = "Gestion des Paiements";
                                                     }
                                                 ?>
                                                 <span class="status-indicator status-<?php echo $statusClass; ?>">
-                                                    <?php echo ucfirst($payment['status']); ?>
+                                                    <?php 
+                                                    $statusLabel = '';
+                                                    switch ($payment['status']) {
+                                                        case 'completed': $statusLabel = 'Terminé'; break;
+                                                        case 'pending': $statusLabel = 'En attente'; break;
+                                                        case 'failed': $statusLabel = 'Échoué'; break;
+                                                        case 'refunded': $statusLabel = 'Remboursé'; break;
+                                                        default: $statusLabel = ucfirst($payment['status']); break;
+                                                    }
+                                                    echo $statusLabel; 
+                                                    ?>
                                                 </span>
                                             </td>
-                                            <td><?php echo date('M d, Y', strtotime($payment['month'])); ?></td>
+                                            <td><?php echo date('d M Y', strtotime($payment['month'])); ?></td>
                                             <td class="actions">
-                                                <a href="view-payment.php?id=<?php echo $payment['id']; ?>" class="btn-icon" title="View Payment">
+                                                <a href="view-payment.php?id=<?php echo $payment['id']; ?>" class="btn-icon" title="Voir le Paiement">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="edit-payment.php?id=<?php echo $payment['id']; ?>" class="btn-icon" title="Edit Payment">
+                                                <a href="edit-payment.php?id=<?php echo $payment['id']; ?>" class="btn-icon" title="Modifier le Paiement">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <a href="javascript:void(0);" class="btn-icon delete-payment" data-id="<?php echo $payment['id']; ?>" title="Delete Payment">
+                                                <a href="javascript:void(0);" class="btn-icon delete-payment" data-id="<?php echo $payment['id']; ?>" title="Supprimer le Paiement">
                                                     <i class="fas fa-trash-alt"></i>
                                                 </a>
                                             </td>
@@ -399,17 +408,17 @@ $page_title = "Gestion des Paiements";
     <div id="deleteModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Confirm Deletion</h3>
+                <h3>Confirmer la Suppression</h3>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete this payment? This action cannot be undone.</p>
+                <p>Êtes-vous sûr de vouloir supprimer ce paiement ? Cette action est irréversible.</p>
             </div>
             <div class="modal-footer">
                 <form id="deleteForm" action="delete-payment.php" method="POST">
                     <input type="hidden" name="payment_id" id="deletePaymentId">
-                    <button type="button" class="btn btn-secondary close-modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="button" class="btn btn-secondary close-modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger">Supprimer</button>
                 </form>
             </div>
         </div>
@@ -425,12 +434,14 @@ $page_title = "Gestion des Paiements";
             if (dateTo.value && new Date(this.value) > new Date(dateTo.value)) {
                 dateTo.value = this.value;
             }
+            this.form.submit();
         });
         
         dateTo.addEventListener('change', function() {
             if (dateFrom.value && new Date(this.value) < new Date(dateFrom.value)) {
                 dateFrom.value = this.value;
             }
+            this.form.submit();
         });
         
         // Delete payment modal functionality

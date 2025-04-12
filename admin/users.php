@@ -343,17 +343,17 @@ $page_title = "Gestion des Utilisateurs";
     <div id="deleteModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Confirm Deletion</h3>
+                <h3>Confirmer la Suppression</h3>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete this user? This action cannot be undone.</p>
+                <p>Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.</p>
             </div>
             <div class="modal-footer">
                 <form id="deleteForm" action="delete-user.php" method="POST">
                     <input type="hidden" name="user_id" id="deleteUserId">
-                    <button type="button" class="btn btn-secondary close-modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="button" class="btn btn-secondary close-modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger">Supprimer</button>
                 </form>
             </div>
         </div>

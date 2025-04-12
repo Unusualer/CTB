@@ -11,9 +11,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-// Check if ID is provided
-if (!isset($_GET['id']) || empty($_GET['id'])) {
-    $_SESSION['error'] = "L'ID du ticket est requis.";
+// Check if ticket ID is provided
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    $_SESSION['error'] = "ID de ticket invalide.";
     header("Location: tickets.php");
     exit();
 }
@@ -28,28 +28,15 @@ try {
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     // Fetch ticket details with user information
-    $stmt = $db->prepare("SELECT t.*, u.name, u.email, u.phone
-                          FROM tickets t 
-                          JOIN users u ON t.user_id = u.id
-                          WHERE t.id = :id");
-    $stmt->bindParam(':id', $ticket_id, PDO::PARAM_INT);
-    $stmt->execute();
+    $stmt = $db->prepare("SELECT t.*, u.name AS username, u.email, u.id AS user_id FROM tickets t LEFT JOIN users u ON t.user_id = u.id WHERE t.id = ?");
+    $stmt->execute([$ticket_id]);
+    $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    if ($stmt->rowCount() === 0) {
-        $_SESSION['error'] = "Ticket non trouvé.";
+    if (!$ticket) {
+        $_SESSION['error'] = "Ticket introuvable.";
         header("Location: tickets.php");
         exit();
     }
-    
-    $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    // Get activity log for this ticket
-    $log_stmt = $db->prepare("SELECT * FROM activity_log 
-                             WHERE entity_type = 'ticket' AND entity_id = :ticket_id 
-                             ORDER BY created_at DESC LIMIT 10");
-    $log_stmt->bindParam(':ticket_id', $ticket_id, PDO::PARAM_INT);
-    $log_stmt->execute();
-    $activity_logs = $log_stmt->fetchAll(PDO::FETCH_ASSOC);
     
 } catch (PDOException $e) {
     $error_message = "Database error: " . $e->getMessage();
@@ -88,9 +75,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_ticket'])) {
         if ($delete_stmt->execute()) {
             // Log the activity
             $admin_id = $_SESSION['user_id'];
-            log_activity($db, $admin_id, 'delete', 'ticket', $delete_ticket_id, "Deleted ticket #$delete_ticket_id");
+            log_activity($db, $admin_id, 'delete', 'ticket', $delete_ticket_id, "Ticket #$delete_ticket_id supprimé");
             
-            $_SESSION['success'] = "Ticket has been deleted successfully.";
+            $_SESSION['success'] = "Le ticket a été supprimé avec succès.";
             header("Location: tickets.php");
             exit();
         }
@@ -103,26 +90,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_ticket'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $new_status = $_POST['status'];
     $response = $_POST['response'];
-    $admin_notes = isset($_POST['admin_notes']) ? $_POST['admin_notes'] : '';
+    $priority = isset($_POST['priority']) ? $_POST['priority'] : null;
     
     try {
         $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
-        // Update ticket status, response and admin notes
+        // Update ticket status, priority and response
         $update_stmt = $db->prepare("UPDATE tickets SET status = :status, response = :response, 
-                                    admin_notes = :admin_notes, updated_at = NOW() WHERE id = :id");
+                                    priority = :priority, updated_at = NOW() WHERE id = :id");
         $update_stmt->bindParam(':status', $new_status);
         $update_stmt->bindParam(':response', $response);
-        $update_stmt->bindParam(':admin_notes', $admin_notes);
+        $update_stmt->bindParam(':priority', $priority);
         $update_stmt->bindParam(':id', $ticket_id, PDO::PARAM_INT);
         $update_stmt->execute();
         
         // Log the activity
         $admin_id = $_SESSION['user_id'];
-        log_activity($db, $admin_id, 'update', 'ticket', $ticket_id, "Updated ticket #$ticket_id status to: " . ucfirst($new_status));
+        log_activity($db, $admin_id, 'update', 'ticket', $ticket_id, "Ticket #$ticket_id mis à jour : Statut (" . ucfirst($new_status) . "), Priorité (" . ucfirst($priority) . ")");
         
-        $_SESSION['success'] = "Ticket status updated successfully.";
+        $_SESSION['success'] = "Le ticket a été mis à jour avec succès.";
         header("Location: view-ticket.php?id=$ticket_id");
         exit();
         
@@ -148,7 +135,7 @@ function getPriorityClass($priority) {
 }
 
 // Page title
-$page_title = "Voir le Ticket";
+$page_title = "Détails du Ticket #$ticket_id | Système de Gestion Immobilière";
 ?>
 
 <!DOCTYPE html>
@@ -279,6 +266,11 @@ $page_title = "Voir le Ticket";
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .form-group label {
+            color: #e0e0e0;
         }
         
         .form-control {
@@ -287,11 +279,35 @@ $page_title = "Voir le Ticket";
             border: 1px solid var(--border-color);
             border-radius: 0.375rem;
             background-color: var(--light-color);
+            color: var(--text-primary);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: 0;
+            box-shadow: 0 0 0 0.25rem rgba(var(--primary-rgb), 0.25);
         }
         
         textarea.form-control {
             resize: vertical;
             min-height: 100px;
+        }
+        
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+            padding-right: 2.5rem;
+        }
+        
+        small {
+            display: block;
+            margin-top: 0.25rem;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
         }
         
         /* Dark mode specific styles */
@@ -303,8 +319,21 @@ $page_title = "Voir le Ticket";
         
         [data-theme="dark"] .form-control {
             background-color: #2a2e35;
-            color: #ffffff;
             border-color: #3f4756;
+            color: #e0e0e0;
+        }
+        
+        [data-theme="dark"] .form-control:focus {
+            border-color: var(--primary-color-light);
+            box-shadow: 0 0 0 0.25rem rgba(var(--primary-rgb), 0.4);
+        }
+        
+        [data-theme="dark"] select.form-control {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23adb5bd' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+        }
+        
+        [data-theme="dark"] small {
+            color: #a0a0a0;
         }
         
         [data-theme="dark"] .form-control::placeholder {
@@ -358,195 +387,38 @@ $page_title = "Voir le Ticket";
             color: #6c757d;
         }
         
-        .delete-btn {
-            cursor: pointer;
+        /* Dark mode status badges */
+        [data-theme="dark"] .status-primary {
+            background-color: rgba(var(--primary-rgb), 0.3);
+            color: var(--primary-color-light);
         }
         
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+        [data-theme="dark"] .status-success {
+            background-color: rgba(25, 135, 84, 0.3);
+            color: #25c274;
         }
         
-        .modal-content {
-            background-color: var(--bg-color);
-            margin: 15% auto;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            max-width: 500px;
-            width: 90%;
+        [data-theme="dark"] .status-warning {
+            background-color: rgba(255, 193, 7, 0.3);
+            color: #ffda6a;
         }
         
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
-            margin-bottom: 15px;
+        [data-theme="dark"] .status-danger {
+            background-color: rgba(220, 53, 69, 0.3);
+            color: #ff8085;
         }
         
-        .modal-header h3 {
-            margin: 0;
+        [data-theme="dark"] .status-info {
+            background-color: rgba(13, 202, 240, 0.3);
+            color: #6edbf7;
         }
         
-        .close {
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
+        [data-theme="dark"] .status-secondary {
+            background-color: rgba(108, 117, 125, 0.3);
+            color: #a1a8ae;
         }
         
-        .modal-footer {
-            margin-top: 20px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-        
-        [data-theme="dark"] .modal-content {
-            background-color: #2a2e35;
-            border: 1px solid #3f4756;
-        }
-        
-        /* Styles from view-user.php */
-        .content-wrapper {
-            margin-top: 1.5rem;
-        }
-        
-        .profile-header {
-            margin-bottom: 1.5rem;
-        }
-        
-        .profile-header-content {
-            display: flex;
-            align-items: center;
-            padding: 1.5rem;
-        }
-        
-        .profile-avatar {
-            width: 80px;
-            height: 80px;
-            margin-right: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .avatar-placeholder {
-            width: 100%;
-            height: 100%;
-            background-color: var(--primary-color-light);
-            color: var(--primary-color);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-        }
-        
-        .profile-details {
-            flex: 1;
-        }
-        
-        .profile-name-wrapper {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-        
-        .profile-name-wrapper h2 {
-            margin: 0;
-            margin-right: 1rem;
-            font-size: 1.5rem;
-            color: var(--text-primary);
-        }
-        
-        .user-id-badge {
-            background-color: var(--secondary-bg);
-            color: var(--text-secondary);
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        
-        .profile-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-        }
-        
-        .user-role, .user-status, .user-joined {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-        
-        .user-status i {
-            font-size: 0.625rem;
-        }
-        
-        .user-status.active {
-            color: #198754;
-        }
-        
-        .user-status.inactive {
-            color: #dc3545;
-        }
-        
-        .card-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-        }
-        
-        @media (min-width: 992px) {
-            .card-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-        
-        @media (min-width: 576px) {
-            .info-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        
-        .info-group {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .info-group label {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.25rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .info-value {
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-        
+        /* Status badges */
         .status-badge {
             display: inline-flex;
             align-items: center;
@@ -556,6 +428,7 @@ $page_title = "Voir le Ticket";
             border-radius: 1rem;
             font-size: 0.875rem;
             font-weight: 600;
+            transition: all 0.2s ease;
         }
         
         .status-badge.active {
@@ -571,21 +444,67 @@ $page_title = "Voir le Ticket";
         .status-badge.open {
             background-color: rgba(220, 53, 69, 0.15);
             color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
         }
         
         .status-badge.in_progress {
             background-color: rgba(255, 193, 7, 0.15);
             color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
         }
         
         .status-badge.closed {
             background-color: rgba(25, 135, 84, 0.15);
             color: #198754;
+            border: 1px solid rgba(25, 135, 84, 0.3);
         }
         
         .status-badge.reopened {
             background-color: rgba(var(--primary-rgb), 0.15);
             color: var(--primary-color);
+            border: 1px solid rgba(var(--primary-rgb), 0.3);
+        }
+        
+        /* Dark mode status badges */
+        [data-theme="dark"] .status-badge {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+        }
+        
+        [data-theme="dark"] .status-badge.active {
+            background-color: rgba(25, 135, 84, 0.25);
+            color: #25c274;
+            border: 1px solid rgba(25, 135, 84, 0.5);
+        }
+        
+        [data-theme="dark"] .status-badge.inactive {
+            background-color: rgba(220, 53, 69, 0.25);
+            color: #ff8085;
+            border: 1px solid rgba(220, 53, 69, 0.5);
+        }
+        
+        [data-theme="dark"] .status-badge.open {
+            background-color: rgba(220, 53, 69, 0.25);
+            color: #ff8085;
+            border: 1px solid rgba(220, 53, 69, 0.5);
+        }
+        
+        [data-theme="dark"] .status-badge.in_progress {
+            background-color: rgba(255, 193, 7, 0.25);
+            color: #ffda6a;
+            border: 1px solid rgba(255, 193, 7, 0.5);
+        }
+        
+        [data-theme="dark"] .status-badge.closed {
+            background-color: rgba(25, 135, 84, 0.25);
+            color: #25c274;
+            border: 1px solid rgba(25, 135, 84, 0.5);
+        }
+        
+        [data-theme="dark"] .status-badge.reopened {
+            background-color: rgba(var(--primary-rgb), 0.25);
+            color: var(--primary-color-light);
+            border: 1px solid rgba(var(--primary-rgb), 0.5);
         }
         
         /* Property Styling from view-user.php */
@@ -720,6 +639,15 @@ $page_title = "Voir le Ticket";
             color: var(--text-primary);
             text-decoration: none;
             margin-right: 0.5rem;
+            position: relative;
+            padding-right: 1rem;
+        }
+        
+        .breadcrumb a:after {
+            content: '/';
+            position: absolute;
+            right: 0;
+            color: var(--text-secondary);
         }
         
         .breadcrumb a:hover {
@@ -727,13 +655,11 @@ $page_title = "Voir le Ticket";
         }
         
         .breadcrumb span {
-            margin-left: 0.5rem;
+            color: var(--text-primary);
         }
         
         .breadcrumb span::before {
-            content: '/';
-            margin-right: 0.5rem;
-            color: var(--text-secondary);
+            content: '';
         }
         
         .page-header {
@@ -755,6 +681,342 @@ $page_title = "Voir le Ticket";
         
         [data-theme="dark"] .breadcrumb a {
             color: #ffffff;
+        }
+        
+        /* Styles pour l'affichage des informations utilisateur */
+        .user-info-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .user-avatar i {
+            font-size: 1.2rem;
+        }
+        
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .user-name {
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-decoration: none;
+        }
+        
+        .user-name:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+        
+        .user-email {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Dark mode specific styles */
+        [data-theme="dark"] .user-name {
+            color: #f0f0f0;
+        }
+        
+        [data-theme="dark"] .user-name:hover {
+            color: var(--primary-color-light);
+        }
+        
+        [data-theme="dark"] .user-email {
+            color: #a0a0a0;
+        }
+        
+        /* Fix for the small text in the update form */
+        .form-group small {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .form-group small {
+            color: #a0a0a0;
+        }
+        
+        .delete-btn {
+            cursor: pointer;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: var(--bg-color);
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+        }
+        
+        .close {
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .modal-footer {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        [data-theme="dark"] .modal-content {
+            background-color: #2a2e35;
+            border: 1px solid #3f4756;
+        }
+        
+        /* Styles from view-user.php */
+        .content-wrapper {
+            margin-top: 1.5rem;
+        }
+        
+        .profile-header {
+            margin-bottom: 1.5rem;
+        }
+        
+        .profile-header-content {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+        }
+        
+        .profile-avatar {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #4a80f0, #2c57b5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1.5rem;
+            color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: inherit;
+        }
+        
+        .profile-avatar i {
+            font-size: 36px; /* Icône plus grande */
+        }
+        
+        .profile-details {
+            flex: 1;
+        }
+        
+        .profile-name-wrapper {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .profile-name-wrapper h2 {
+            margin: 0;
+            margin-right: 1rem;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+        }
+        
+        .user-id-badge {
+            background-color: var(--secondary-bg);
+            color: var(--text-secondary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .profile-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .user-role, .user-status, .user-joined {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .user-status i {
+            font-size: 0.625rem;
+        }
+        
+        .user-status.active {
+            color: #198754;
+        }
+        
+        .user-status.inactive {
+            color: #dc3545;
+        }
+        
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        @media (min-width: 992px) {
+            .card-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        @media (min-width: 576px) {
+            .info-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .info-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .info-group label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .info-value {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        /* New styles for compact user information */
+        .card-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .mt-3 {
+            margin-top: 1.5rem;
+        }
+        
+        .compact-user-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .user-info-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .user-info-header h4 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+        
+        .user-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .user-meta span {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        
+        .user-meta i {
+            width: 16px;
+            color: var(--primary-color);
+        }
+        
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            border-radius: 0.25rem;
+        }
+        
+        [data-theme="dark"] .user-info-header h4 {
+            color: #f0f0f0;
+        }
+        
+        [data-theme="dark"] .user-meta {
+            color: #a0a0a0;
+        }
+        
+        [data-theme="dark"] .user-meta i {
+            color: var(--primary-color-light);
         }
     </style>
 </head>
@@ -817,11 +1079,49 @@ $page_title = "Voir le Ticket";
                                 </div>
                                 <div class="profile-meta">
                                     <span class="user-status <?php echo $ticket['status']; ?>">
-                                        <i class="fas fa-circle"></i> <?php echo ucfirst(str_replace('_', ' ', $ticket['status'])); ?>
+                                        <i class="fas fa-circle"></i> <?php 
+                                        $status_text = '';
+                                        switch($ticket['status']) {
+                                            case 'open':
+                                                $status_text = 'Ouvert';
+                                                break;
+                                            case 'in_progress':
+                                                $status_text = 'En cours';
+                                                break;
+                                            case 'closed':
+                                                $status_text = 'Fermé';
+                                                break;
+                                            case 'reopened':
+                                                $status_text = 'Réouvert';
+                                                break;
+                                            default:
+                                                $status_text = ucfirst(str_replace('_', ' ', $ticket['status']));
+                                        }
+                                        echo $status_text;
+                                        ?>
                                     </span>
                                     <?php if (isset($ticket['priority']) && !empty($ticket['priority'])): ?>
                                     <span class="status-badge <?php echo getPriorityClass($ticket['priority']); ?>">
-                                        <?php echo ucfirst($ticket['priority']); ?>
+                                        <?php 
+                                        $priority_text = '';
+                                        switch($ticket['priority']) {
+                                            case 'low':
+                                                $priority_text = 'Basse';
+                                                break;
+                                            case 'medium':
+                                                $priority_text = 'Moyenne';
+                                                break;
+                                            case 'high':
+                                                $priority_text = 'Haute';
+                                                break;
+                                            case 'urgent':
+                                                $priority_text = 'Urgente';
+                                                break;
+                                            default:
+                                                $priority_text = ucfirst($ticket['priority']);
+                                        }
+                                        echo $priority_text;
+                                        ?>
                                     </span>
                                     <?php endif; ?>
                                     <?php if (isset($ticket['category']) && !empty($ticket['category'])): ?>
@@ -829,7 +1129,7 @@ $page_title = "Voir le Ticket";
                                         <?php echo ucfirst($ticket['category']); ?>
                                     </span>
                                     <?php endif; ?>
-                                    <span class="user-joined"><i class="far fa-calendar-alt"></i> Créé <?php echo date('M d, Y', strtotime($ticket['created_at'])); ?></span>
+                                    <span class="user-joined"><i class="far fa-calendar-alt"></i> Créé <?php echo date('d M Y', strtotime($ticket['created_at'])); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -861,23 +1161,67 @@ $page_title = "Voir le Ticket";
                                 <div class="info-grid">
                                     <div class="info-group">
                                         <label><i class="fas fa-user"></i> Soumis par:</label>
-                                        <span class="info-value">
-                                            <a href="view-user.php?id=<?php echo $ticket['user_id']; ?>">
-                                                <?php echo htmlspecialchars($ticket['name']); ?>
-                                            </a>
-                                        </span>
+                                        <div class="user-info-display">
+                                            <div class="user-avatar">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div class="user-details">
+                                                <a href="view-user.php?id=<?php echo $ticket['user_id']; ?>" class="user-name">
+                                                    <?php echo htmlspecialchars($ticket['username'] ?? 'Utilisateur inconnu'); ?>
+                                                </a>
+                                                <span class="user-email"><?php echo htmlspecialchars($ticket['email'] ?? 'Email inconnu'); ?></span>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="info-group">
                                         <label><i class="fas fa-check-circle"></i> Statut:</label>
                                         <span class="status-badge <?php echo $ticket['status']; ?>">
-                                            <?php echo ucfirst(str_replace('_', ' ', $ticket['status'])); ?>
+                                            <?php 
+                                            $status_text = '';
+                                            switch($ticket['status']) {
+                                                case 'open':
+                                                    $status_text = 'Ouvert';
+                                                    break;
+                                                case 'in_progress':
+                                                    $status_text = 'En cours';
+                                                    break;
+                                                case 'closed':
+                                                    $status_text = 'Fermé';
+                                                    break;
+                                                case 'reopened':
+                                                    $status_text = 'Réouvert';
+                                                    break;
+                                                default:
+                                                    $status_text = ucfirst(str_replace('_', ' ', $ticket['status']));
+                                            }
+                                            echo $status_text;
+                                            ?>
                                         </span>
                                     </div>
                                     <?php if (isset($ticket['priority']) && !empty($ticket['priority'])): ?>
                                     <div class="info-group">
                                         <label><i class="fas fa-exclamation-triangle"></i> Priorité:</label>
                                         <span class="status-badge <?php echo getPriorityClass($ticket['priority']); ?>">
-                                            <?php echo ucfirst($ticket['priority']); ?>
+                                            <?php 
+                                            $priority_text = '';
+                                            switch($ticket['priority']) {
+                                                case 'low':
+                                                    $priority_text = 'Basse';
+                                                    break;
+                                                case 'medium':
+                                                    $priority_text = 'Moyenne';
+                                                    break;
+                                                case 'high':
+                                                    $priority_text = 'Haute';
+                                                    break;
+                                                case 'urgent':
+                                                    $priority_text = 'Urgente';
+                                                    break;
+                                                default:
+                                                    $priority_text = ucfirst($ticket['priority']);
+                                            }
+                                            echo $priority_text;
+                                            ?>
                                         </span>
                                     </div>
                                     <?php endif; ?>
@@ -899,121 +1243,75 @@ $page_title = "Voir le Ticket";
                             </div>
                         </div>
 
-                        <!-- User Information Card -->
-                        <div class="card property-assignments-card">
-                            <div class="card-header">
-                                <h3><i class="fas fa-user"></i> Informations Utilisateur</h3>
-                            </div>
-                            <div class="card-body">
-                                <div class="property-list">
-                                    <div class="property-item">
-                                        <div class="property-icon">
-                                            <i class="fas fa-user"></i>
-                                        </div>
-                                        <div class="property-details">
-                                            <h4><?php echo htmlspecialchars($ticket['name']); ?></h4>
-                                            <div class="property-meta">
-                                                <span class="property-id">ID: <?php echo $ticket['user_id']; ?></span>
-                                                <a href="view-user.php?id=<?php echo $ticket['user_id']; ?>" class="view-link">
-                                                    Voir l'Utilisateur <i class="fas fa-arrow-right"></i>
-                                                </a>
+                        <div class="card-column">
+                            <!-- User Information Card - Compact version -->
+                            <div class="card compact-user-card">
+                                <div class="card-header">
+                                    <h3><i class="fas fa-user"></i> Informations Utilisateur</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="compact-user-info">
+                                        <div class="user-info-header">
+                                            <div class="user-avatar">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div>
+                                                <h4><?php echo htmlspecialchars($ticket['username'] ?? 'Utilisateur inconnu'); ?></h4>
+                                                <div class="user-meta">
+                                                    <span><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($ticket['email'] ?? 'Email inconnu'); ?></span>
+                                                    <?php if (!empty($ticket['phone'])): ?>
+                                                    <span><i class="fas fa-phone"></i> <?php echo htmlspecialchars($ticket['phone']); ?></span>
+                                                    <?php endif; ?>
+                                                </div>
                                             </div>
                                         </div>
+                                        <a href="view-user.php?id=<?php echo $ticket['user_id']; ?>" class="btn btn-sm btn-primary mt-2">
+                                            <i class="fas fa-eye"></i> Voir l'Utilisateur
+                                        </a>
                                     </div>
-                                    
-                                    <div class="property-item">
-                                        <div class="property-icon">
-                                            <i class="fas fa-envelope"></i>
-                                        </div>
-                                        <div class="property-details">
-                                            <h4><?php echo htmlspecialchars($ticket['email']); ?></h4>
-                                            <div class="property-meta">
-                                                <span class="property-id">Email</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <?php if (!empty($ticket['phone'])): ?>
-                                    <div class="property-item">
-                                        <div class="property-icon">
-                                            <i class="fas fa-phone"></i>
-                                        </div>
-                                        <div class="property-details">
-                                            <h4><?php echo htmlspecialchars($ticket['phone']); ?></h4>
-                                            <div class="property-meta">
-                                                <span class="property-id">Téléphone</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <?php endif; ?>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Activity Log Card -->
-                        <div class="card activity-card">
-                            <div class="card-header">
-                                <h3><i class="fas fa-history"></i> Activité Récente</h3>
-                            </div>
-                            <div class="card-body">
-                                <?php if (empty($activity_logs)): ?>
-                                    <div class="no-data">
-                                        <i class="far fa-clock"></i>
-                                        <p>Aucune activité récente trouvée.</p>
-                                    </div>
-                                <?php else: ?>
-                                    <div class="activity-timeline">
-                                        <?php foreach ($activity_logs as $log): ?>
-                                            <div class="activity-item">
-                                                <div class="activity-icon">
-                                                    <i class="fas fa-circle"></i>
-                                                </div>
-                                                <div class="activity-content">
-                                                    <p class="activity-text"><?php echo isset($log['description']) ? htmlspecialchars($log['description']) : 'Aucune description disponible'; ?></p>
-                                                    <p class="activity-time"><?php echo isset($log['created_at']) ? date('d M Y H:i', strtotime($log['created_at'])) : 'Date inconnue'; ?></p>
-                                                </div>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                        
-                        <!-- Update Status Card -->
-                        <div class="card">
-                            <div class="card-header">
-                                <h3><i class="fas fa-edit"></i> Mettre à Jour le Statut</h3>
-                            </div>
-                            <div class="card-body">
-                                <form action="view-ticket.php?id=<?php echo $ticket_id; ?>" method="POST" class="form">
-                                    <input type="hidden" name="update_status" value="1">
-                                    
-                                    <div class="form-group">
-                                        <label for="status">Statut:</label>
-                                        <select id="status" name="status" class="form-control">
-                                            <option value="open" <?php echo $ticket['status'] === 'open' ? 'selected' : ''; ?>>Ouvert</option>
-                                            <option value="in_progress" <?php echo $ticket['status'] === 'in_progress' ? 'selected' : ''; ?>>En Cours</option>
-                                            <option value="closed" <?php echo $ticket['status'] === 'closed' ? 'selected' : ''; ?>>Fermé</option>
-                                            <option value="reopened" <?php echo $ticket['status'] === 'reopened' ? 'selected' : ''; ?>>Réouvert</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label for="response">Réponse:</label>
-                                        <textarea id="response" name="response" class="form-control" rows="4"><?php echo isset($ticket['response']) ? htmlspecialchars($ticket['response']) : ''; ?></textarea>
-                                        <small>Réponse au ticket (visible par l'utilisateur)</small>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label for="admin_notes">Notes Administrateur:</label>
-                                        <textarea id="admin_notes" name="admin_notes" class="form-control" rows="3"><?php echo isset($ticket['admin_notes']) ? htmlspecialchars($ticket['admin_notes']) : ''; ?></textarea>
-                                        <small>Notes internes (non visibles par l'utilisateur)</small>
-                                    </div>
-                                    
-                                    <div class="form-actions">
-                                        <button type="submit" class="btn btn-primary">Mettre à Jour le Statut</button>
-                                    </div>
-                                </form>
+                            <!-- Update Status Card - Now placed below User Info -->
+                            <div class="card mt-3">
+                                <div class="card-header">
+                                    <h3><i class="fas fa-edit"></i> Mettre à Jour le Statut</h3>
+                                </div>
+                                <div class="card-body">
+                                    <form action="view-ticket.php?id=<?php echo $ticket_id; ?>" method="POST" class="form">
+                                        <input type="hidden" name="update_status" value="1">
+                                        
+                                        <div class="form-group">
+                                            <label for="status">Statut:</label>
+                                            <select id="status" name="status" class="form-control">
+                                                <option value="open" <?php echo $ticket['status'] === 'open' ? 'selected' : ''; ?>>Ouvert</option>
+                                                <option value="in_progress" <?php echo $ticket['status'] === 'in_progress' ? 'selected' : ''; ?>>En Cours</option>
+                                                <option value="closed" <?php echo $ticket['status'] === 'closed' ? 'selected' : ''; ?>>Fermé</option>
+                                                <option value="reopened" <?php echo $ticket['status'] === 'reopened' ? 'selected' : ''; ?>>Réouvert</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="priority">Priorité:</label>
+                                            <select id="priority" name="priority" class="form-control">
+                                                <option value="low" <?php echo isset($ticket['priority']) && $ticket['priority'] === 'low' ? 'selected' : ''; ?>>Basse</option>
+                                                <option value="medium" <?php echo isset($ticket['priority']) && $ticket['priority'] === 'medium' ? 'selected' : ''; ?>>Moyenne</option>
+                                                <option value="high" <?php echo isset($ticket['priority']) && $ticket['priority'] === 'high' ? 'selected' : ''; ?>>Haute</option>
+                                                <option value="urgent" <?php echo isset($ticket['priority']) && $ticket['priority'] === 'urgent' ? 'selected' : ''; ?>>Urgente</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="response">Réponse:</label>
+                                            <textarea id="response" name="response" class="form-control" rows="4"><?php echo isset($ticket['response']) ? htmlspecialchars($ticket['response']) : ''; ?></textarea>
+                                            <small>Réponse au ticket (visible par l'utilisateur)</small>
+                                        </div>
+                                        
+                                        <div class="form-actions">
+                                            <button type="submit" class="btn btn-primary">Mettre à Jour le Statut</button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>

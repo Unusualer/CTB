@@ -44,7 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $description = trim($_POST['description'] ?? '');
     $status = trim($_POST['status'] ?? '');
     $response = trim($_POST['response'] ?? '');
-    $admin_notes = trim($_POST['admin_notes'] ?? '');
     
     $errors = [];
     
@@ -74,18 +73,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
             $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
-            // Check if admin_notes column exists (from update-ticket-status.php)
-            $check_column_sql = "SHOW COLUMNS FROM tickets LIKE 'admin_notes'";
-            $check_stmt = $db->prepare($check_column_sql);
-            $check_stmt->execute();
-            
-            if ($check_stmt->rowCount() === 0) {
-                // Add admin_notes column if it doesn't exist
-                $alter_sql = "ALTER TABLE tickets ADD COLUMN admin_notes TEXT DEFAULT NULL";
-                $alter_stmt = $db->prepare($alter_sql);
-                $alter_stmt->execute();
-            }
-
             // Get current status for activity log
             $current_status_stmt = $db->prepare("SELECT status FROM tickets WHERE id = :id");
             $current_status_stmt->bindParam(':id', $ticket_id, PDO::PARAM_INT);
@@ -94,16 +81,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Update ticket using only columns that exist in the database schema
             $stmt = $db->prepare("UPDATE tickets SET user_id = :user_id, subject = :subject, 
-                                 description = :description, status = :status, 
-                                 response = :response, admin_notes = :admin_notes, updated_at = NOW() 
+                                 description = :description, status = :status, priority = :priority,
+                                 response = :response, updated_at = NOW() 
                                  WHERE id = :id");
             
             $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
             $stmt->bindParam(':subject', $subject);
             $stmt->bindParam(':description', $description);
             $stmt->bindParam(':status', $status);
+            $stmt->bindParam(':priority', $_POST['priority']);
             $stmt->bindParam(':response', $response);
-            $stmt->bindParam(':admin_notes', $admin_notes);
             $stmt->bindParam(':id', $ticket_id, PDO::PARAM_INT);
             
             $stmt->execute();
@@ -164,6 +151,18 @@ function getStatusLabel($status) {
     ];
     
     return $labels[$status] ?? ucfirst(str_replace('_', ' ', $status));
+}
+
+// Helper function to get priority label
+function getPriorityLabel($priority) {
+    $labels = [
+        'low' => 'Basse',
+        'medium' => 'Moyenne',
+        'high' => 'Haute',
+        'urgent' => 'Urgente'
+    ];
+    
+    return $labels[$priority] ?? ucfirst($priority);
 }
 
 // Page title
@@ -465,10 +464,20 @@ $page_title = "Modifier le Ticket";
                                 
                                 <div class="form-group">
                                     <label for="status">Statut <span class="required">*</span></label>
-                                    <select id="status" name="status" required>
-                                        <?php foreach ($statuses as $status): ?>
-                                            <option value="<?php echo $status; ?>" <?php echo $ticket['status'] === $status ? 'selected' : ''; ?>>
-                                                <?php echo getStatusLabel($status); ?>
+                                    <select class="form-control" id="status" name="status">
+                                        <option value="open" <?php echo $ticket['status'] == 'open' ? 'selected' : ''; ?>>Ouvert</option>
+                                        <option value="in_progress" <?php echo $ticket['status'] == 'in_progress' ? 'selected' : ''; ?>>En cours</option>
+                                        <option value="closed" <?php echo $ticket['status'] == 'closed' ? 'selected' : ''; ?>>Fermé</option>
+                                        <option value="reopened" <?php echo $ticket['status'] == 'reopened' ? 'selected' : ''; ?>>Réouvert</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="priority">Priorité <span class="required">*</span></label>
+                                    <select id="priority" name="priority" required>
+                                        <?php foreach ($priorities as $priority): ?>
+                                            <option value="<?php echo $priority; ?>" <?php echo $ticket['priority'] === $priority ? 'selected' : ''; ?>>
+                                                <?php echo getPriorityLabel($priority); ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
@@ -489,12 +498,6 @@ $page_title = "Modifier le Ticket";
                                 <label for="response">Réponse</label>
                                 <textarea id="response" name="response" rows="4"><?php echo isset($ticket['response']) ? htmlspecialchars($ticket['response']) : ''; ?></textarea>
                                 <small>Réponse au ticket (visible par l'utilisateur)</small>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="admin_notes">Notes Administrateur</label>
-                                <textarea id="admin_notes" name="admin_notes" rows="3"><?php echo isset($ticket['admin_notes']) ? htmlspecialchars($ticket['admin_notes']) : ''; ?></textarea>
-                                <small>Notes internes (non visibles par l'utilisateur)</small>
                             </div>
                             
                             <div class="form-actions">

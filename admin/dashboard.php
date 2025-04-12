@@ -189,6 +189,7 @@ $page_title = "Tableau de Bord Admin";
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
+    <link rel="stylesheet" href="css/dashboard-style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -234,7 +235,7 @@ $page_title = "Tableau de Bord Admin";
                             <p class="stat-number"><?php echo number_format($total_properties); ?></p>
                             <div class="stat-breakdown">
                                 <span><i class="fas fa-home"></i> Appartements: <?php echo number_format($total_apartments); ?></span>
-                                <span><i class="fas fa-car"></i> Places de Parking: <?php echo number_format($total_parking); ?></span>
+                                <span><i class="fas fa-car"></i> Parking: <?php echo number_format($total_parking); ?></span>
                                 <span><i class="fas fa-check-circle"></i> Occupées: <?php echo number_format($occupied_properties); ?></span>
                             </div>
                         </div>
@@ -260,11 +261,11 @@ $page_title = "Tableau de Bord Admin";
                             <i class="fas fa-dollar-sign"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Total Payments</h3>
+                            <h3>Paiements Totaux</h3>
                             <p class="stat-number"><?php echo format_currency($total_payments); ?></p>
                             <div class="stat-breakdown">
-                                <span><i class="fas fa-check-circle"></i> Paid: <?php echo format_currency($paid_amount); ?></span>
-                                <span><i class="fas fa-clock"></i> Pending: <?php echo format_currency($pending_amount); ?></span>
+                                <span><i class="fas fa-check-circle"></i> Payés: <?php echo format_currency($paid_amount); ?></span>
+                                <span><i class="fas fa-clock"></i> En Attente: <?php echo format_currency($pending_amount); ?></span>
                             </div>
                         </div>
                     </div>
@@ -274,7 +275,7 @@ $page_title = "Tableau de Bord Admin";
                 <div class="charts-grid">
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3>Monthly Payments Overview</h3>
+                            <h3><i class="fas fa-chart-line"></i> Aperçu des Paiements Mensuels</h3>
                             <div class="chart-actions">
                                 <button class="btn-icon"><i class="fas fa-ellipsis-v"></i></button>
                             </div>
@@ -286,7 +287,7 @@ $page_title = "Tableau de Bord Admin";
 
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3>Ticket Status Distribution</h3>
+                            <h3><i class="fas fa-chart-pie"></i> Distribution des Statuts de Tickets</h3>
                             <div class="chart-actions">
                                 <button class="btn-icon"><i class="fas fa-ellipsis-v"></i></button>
                             </div>
@@ -301,8 +302,8 @@ $page_title = "Tableau de Bord Admin";
                 <div class="content-grid">
                     <div class="content-card">
                         <div class="card-header">
-                            <h3><i class="fas fa-history"></i> Recent Activity</h3>
-                            <a href="activity-log.php" class="view-all">View All</a>
+                            <h3><i class="fas fa-history"></i> Activité Récente</h3>
+                            <a href="activity-log.php" class="view-all">Voir Tout</a>
                         </div>
                         <div class="activity-list dashboard-activity">
                             <?php if (!empty($recent_activity)): ?>
@@ -341,19 +342,19 @@ $page_title = "Tableau de Bord Admin";
                                                     $action_verb = $activity['action'];
                                                     switch ($action_verb) {
                                                         case 'payment':
-                                                            echo "made a payment for";
+                                                            echo "a effectué un paiement pour";
                                                             break;
                                                         case 'login':
-                                                            echo "logged into";
+                                                            echo "s'est connecté à";
                                                             break;
                                                         case 'create':
-                                                            echo "created";
+                                                            echo "a créé";
                                                             break;
                                                         case 'update':
-                                                            echo "updated";
+                                                            echo "a mis à jour";
                                                             break;
                                                         case 'delete':
-                                                            echo "deleted";
+                                                            echo "a supprimé";
                                                             break;
                                                         default:
                                                             // Add 'e' to actions that end with 'e' already
@@ -382,7 +383,7 @@ $page_title = "Tableau de Bord Admin";
                             <?php else: ?>
                                 <div class="empty-state">
                                     <i class="fas fa-history"></i>
-                                    <p>No recent activity</p>
+                                    <p>Aucune activité récente</p>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -390,15 +391,33 @@ $page_title = "Tableau de Bord Admin";
 
                     <div class="content-card">
                         <div class="card-header">
-                            <h3><i class="fas fa-ticket-alt"></i> Recent Tickets</h3>
-                            <a href="tickets.php" class="view-all">View All</a>
+                            <h3><i class="fas fa-ticket-alt"></i> Tickets Récents</h3>
+                            <a href="tickets.php" class="view-all">Voir Tout</a>
                         </div>
                         <div class="tickets-list dashboard-tickets">
                             <?php if (!empty($recent_tickets)): ?>
                                 <?php foreach ($recent_tickets as $ticket): ?>
                                     <div class="ticket-item">
                                         <div class="ticket-status <?php echo $ticket['status']; ?>">
-                                            <?php echo ucfirst($ticket['status']); ?>
+                                            <?php 
+                                                $status_text = $ticket['status'];
+                                                switch ($status_text) {
+                                                    case 'open':
+                                                        echo 'Ouvert';
+                                                        break;
+                                                    case 'in_progress':
+                                                        echo 'En Cours';
+                                                        break;
+                                                    case 'closed':
+                                                        echo 'Fermé';
+                                                        break;
+                                                    case 'reopened':
+                                                        echo 'Réouvert';
+                                                        break;
+                                                    default:
+                                                        echo ucfirst($status_text);
+                                                }
+                                            ?>
                                         </div>
                                         <div class="ticket-details">
                                             <h4><?php echo htmlspecialchars($ticket['subject']); ?></h4>
@@ -417,7 +436,7 @@ $page_title = "Tableau de Bord Admin";
                             <?php else: ?>
                                 <div class="empty-state">
                                     <i class="fas fa-ticket-alt"></i>
-                                    <p>No recent tickets</p>
+                                    <p>Aucun ticket récent</p>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -427,8 +446,8 @@ $page_title = "Tableau de Bord Admin";
                 <!-- Maintenance Section -->
                 <div class="content-card maintenance-card">
                     <div class="card-header">
-                        <h3>Maintenance Overview</h3>
-                        <a href="maintenance.php" class="view-all">View All</a>
+                        <h3><i class="fas fa-tools"></i> Aperçu des Maintenances</h3>
+                        <a href="maintenance.php" class="view-all">Voir Tout</a>
                     </div>
                     <div class="maintenance-stats">
                         <div class="maintenance-stat">
@@ -436,21 +455,21 @@ $page_title = "Tableau de Bord Admin";
                                 <i class="fas fa-calendar"></i>
                                 <span class="count"><?php echo $scheduled_maintenance; ?></span>
                             </div>
-                            <p>Scheduled</p>
+                            <p>Programmées</p>
                         </div>
                         <div class="maintenance-stat">
                             <div class="stat-circle in-progress">
                                 <i class="fas fa-tools"></i>
                                 <span class="count"><?php echo $in_progress_maintenance; ?></span>
                             </div>
-                            <p>In Progress</p>
+                            <p>En Cours</p>
                         </div>
                         <div class="maintenance-stat">
                             <div class="stat-circle completed">
                                 <i class="fas fa-check"></i>
                                 <span class="count"><?php echo $completed_maintenance; ?></span>
                             </div>
-                            <p>Completed</p>
+                            <p>Complétées</p>
                         </div>
                         <div class="maintenance-stat">
                             <div class="stat-circle total">
@@ -501,7 +520,7 @@ $page_title = "Tableau de Bord Admin";
                 data: {
                     labels: paymentLabels,
                     datasets: [{
-                        label: "Payment Amount",
+                        label: "Montant du Paiement",
                         lineTension: 0.3,
                         backgroundColor: "rgba(78, 115, 223, 0.05)",
                         borderColor: "rgba(78, 115, 223, 1)",
@@ -514,6 +533,7 @@ $page_title = "Tableau de Bord Admin";
                         pointHitRadius: 10,
                         pointBorderWidth: 2,
                         data: paymentData,
+                        fill: true
                     }],
                 },
                 options: {
@@ -524,9 +544,18 @@ $page_title = "Tableau de Bord Admin";
                             display: false
                         },
                         tooltip: {
+                            backgroundColor: currentTheme === 'dark' ? '#2d3748' : '#fff',
+                            titleColor: currentTheme === 'dark' ? '#fff' : '#5a5c69',
+                            bodyColor: currentTheme === 'dark' ? '#e0e0e0' : '#858796',
+                            borderColor: currentTheme === 'dark' ? '#4a5568' : '#e3e6f0',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false,
                             callbacks: {
                                 label: function(context) {
-                                    return 'Payment Amount: $' + context.raw.toLocaleString(undefined, {
+                                    return 'Montant: ' + context.raw.toLocaleString(undefined, {
+                                        style: 'currency',
+                                        currency: 'EUR',
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2
                                     });
@@ -548,9 +577,11 @@ $page_title = "Tableau de Bord Admin";
                             ticks: {
                                 color: currentTheme === 'dark' ? '#e0e0e0' : '#858796',
                                 callback: function(value) {
-                                    return '$' + value.toLocaleString(undefined, {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2
+                                    return value.toLocaleString(undefined, {
+                                        style: 'currency',
+                                        currency: 'EUR',
+                                        minimumFractionDigits: 0,
+                                        maximumFractionDigits: 0
                                     });
                                 }
                             },
@@ -565,11 +596,21 @@ $page_title = "Tableau de Bord Admin";
 
         // Ticket Status Chart
         var ticketStatusChart = document.getElementById("ticketStatusChart");
-        var ticketStatuses = ["Open", "In Progress", "Closed"];
+        var ticketStatuses = ["Ouvert", "En Cours", "Fermé"];
         var ticketData = [
             <?php echo $open_tickets; ?>,
             <?php echo $in_progress_tickets; ?>,
             <?php echo $closed_tickets; ?>
+        ];
+        var ticketColors = [
+            'rgba(78, 115, 223, 1)', 
+            'rgba(28, 200, 138, 1)', 
+            'rgba(54, 185, 204, 1)'
+        ];
+        var ticketHoverColors = [
+            'rgba(46, 89, 217, 1)', 
+            'rgba(23, 166, 115, 1)', 
+            'rgba(44, 159, 175, 1)'
         ];
 
         if (ticketStatusChart) {
@@ -579,9 +620,11 @@ $page_title = "Tableau de Bord Admin";
                     labels: ticketStatuses,
                     datasets: [{
                         data: ticketData,
-                        backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
-                        hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf'],
+                        backgroundColor: ticketColors,
+                        hoverBackgroundColor: ticketHoverColors,
                         hoverBorderColor: currentTheme === 'dark' ? '#2c3035' : '#ffffff',
+                        borderWidth: 2,
+                        borderColor: currentTheme === 'dark' ? '#2d3748' : '#ffffff',
                     }],
                 },
                 options: {
@@ -593,10 +636,21 @@ $page_title = "Tableau de Bord Admin";
                             position: 'bottom',
                             labels: {
                                 color: currentTheme === 'dark' ? '#e0e0e0' : '#858796',
-                                padding: 20
+                                padding: 20,
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                }
                             }
                         },
                         tooltip: {
+                            backgroundColor: currentTheme === 'dark' ? '#2d3748' : '#fff',
+                            titleColor: currentTheme === 'dark' ? '#fff' : '#5a5c69',
+                            bodyColor: currentTheme === 'dark' ? '#e0e0e0' : '#858796',
+                            borderColor: currentTheme === 'dark' ? '#4a5568' : '#e3e6f0',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false,
                             callbacks: {
                                 label: function(context) {
                                     var label = context.label || '';
@@ -608,12 +662,19 @@ $page_title = "Tableau de Bord Admin";
                             }
                         }
                     },
-                    cutout: '60%',
+                    cutout: '70%',
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true,
+                        duration: 2000,
+                        easing: 'easeOutCirc'
+                    }
                 },
             });
         }
     });
     </script>
     <script src="js/dark-mode.js"></script>
+    <script src="js/dashboard.js"></script>
 </body>
 </html> 

@@ -423,9 +423,9 @@ $page_title = "Modifier le Paiement";
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="payment_method">Méthode de Paiement <span class="text-danger">*</span></label>
-                                    <select name="payment_method" id="payment_method" required>
-                                        <option value="transfer" <?php echo $payment['payment_method'] === 'transfer' ? 'selected' : ''; ?>>Virement Bancaire</option>
+                                    <label for="payment_method">Méthode de Paiement:</label>
+                                    <select name="payment_method" id="payment_method" class="form-control" required>
+                                        <option value="transfer" <?php echo $payment['payment_method'] === 'transfer' ? 'selected' : ''; ?>>Virement</option>
                                         <option value="cheque" <?php echo $payment['payment_method'] === 'cheque' ? 'selected' : ''; ?>>Chèque</option>
                                     </select>
                                 </div>
@@ -440,12 +440,13 @@ $page_title = "Modifier le Paiement";
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="status">Statut <span class="text-danger">*</span></label>
-                                    <select name="status" id="status" required>
+                                    <label for="status">Statut:</label>
+                                    <select name="status" id="status" class="form-control" required>
                                         <option value="paid" <?php echo $payment['status'] === 'paid' ? 'selected' : ''; ?>>Payé</option>
                                         <option value="pending" <?php echo $payment['status'] === 'pending' ? 'selected' : ''; ?>>En Attente</option>
                                         <option value="cancelled" <?php echo $payment['status'] === 'cancelled' ? 'selected' : ''; ?>>Annulé</option>
                                         <option value="failed" <?php echo $payment['status'] === 'failed' ? 'selected' : ''; ?>>Échoué</option>
+                                        <option value="refunded" <?php echo $payment['status'] === 'refunded' ? 'selected' : ''; ?>>Remboursé</option>
                                     </select>
                                 </div>
                             </div>

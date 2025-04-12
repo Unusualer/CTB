@@ -17,8 +17,8 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
     phone VARCHAR(50),
-    role ENUM('admin', 'manager', 'resident') NOT NULL,
-    status ENUM('active', 'inactive') DEFAULT 'active',
+    role ENUM('admin', 'manager', 'resident') NOT NULL COMMENT 'admin=Administrateur, manager=Gestionnaire, resident=Résident',
+    status ENUM('active', 'inactive') DEFAULT 'active' COMMENT 'active=Actif, inactive=Inactif',
     profile_image VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -27,7 +27,7 @@ CREATE TABLE users (
 -- Create properties table with simplified structure
 CREATE TABLE properties (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    type ENUM('apartment', 'parking') NOT NULL,
+    type ENUM('apartment', 'parking') NOT NULL COMMENT 'apartment=Appartement, parking=Place de Parking',
     identifier VARCHAR(50) NOT NULL UNIQUE,
     user_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -41,8 +41,8 @@ CREATE TABLE payments (
     property_id INT NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
     month DATE NOT NULL,
-    status ENUM('paid', 'pending', 'cancelled', 'failed') DEFAULT 'pending',
-    type ENUM('transfer', 'cheque') DEFAULT 'transfer',
+    status ENUM('paid', 'pending', 'cancelled', 'failed', 'refunded') DEFAULT 'pending' COMMENT 'paid=Payé, pending=En Attente, cancelled=Annulé, failed=Échoué, refunded=Remboursé',
+    type ENUM('transfer', 'cheque') DEFAULT 'transfer' COMMENT 'transfer=Virement, cheque=Chèque',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE
@@ -56,8 +56,8 @@ CREATE TABLE maintenance (
     location VARCHAR(255) NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
-    status ENUM('scheduled', 'in_progress', 'completed', 'delayed', 'cancelled') DEFAULT 'scheduled',
-    priority ENUM('low', 'medium', 'high', 'emergency') DEFAULT 'medium',
+    status ENUM('scheduled', 'in_progress', 'completed', 'delayed', 'cancelled') DEFAULT 'scheduled' COMMENT 'scheduled=Programmé, in_progress=En Cours, completed=Terminé, delayed=Retardé, cancelled=Annulé',
+    priority ENUM('low', 'medium', 'high', 'emergency') DEFAULT 'medium' COMMENT 'low=Basse, medium=Moyenne, high=Haute, emergency=Urgente',
     created_by INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -71,7 +71,8 @@ CREATE TABLE tickets (
     subject VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     response TEXT,
-    status ENUM('open', 'in_progress', 'closed', 'reopened') DEFAULT 'open',
+    status ENUM('open', 'in_progress', 'closed', 'reopened') DEFAULT 'open' COMMENT 'open=Ouvert, in_progress=En Cours, closed=Fermé, reopened=Réouvert',
+    priority ENUM('low', 'medium', 'high', 'urgent') DEFAULT 'medium' COMMENT 'low=Basse, medium=Moyenne, high=Haute, urgent=Urgente',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

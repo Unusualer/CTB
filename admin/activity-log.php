@@ -179,6 +179,24 @@ function getActionBadgeClass($action) {
     }
 }
 
+// Helper function to get appropriate entity type class for badge
+function getEntityTypeBadgeClass($entity_type) {
+    switch(strtolower($entity_type)) {
+        case 'user':
+            return 'info';
+        case 'property':
+            return 'success';
+        case 'ticket':
+            return 'warning';
+        case 'payment':
+            return 'primary';
+        case 'maintenance':
+            return 'secondary';
+        default:
+            return 'secondary';
+    }
+}
+
 // Page title
 $page_title = "Journal d'Activité";
 ?>
@@ -320,13 +338,12 @@ $page_title = "Journal d'Activité";
                             </div>
                             <div class="filter-group">
                                 <label for="date_from">De:</label>
-                                <input type="date" id="date_from" name="date_from" value="<?php echo $date_from; ?>">
+                                <input type="date" id="date_from" name="date_from" value="<?php echo $date_from; ?>" onchange="this.form.submit()">
                             </div>
                             <div class="filter-group">
                                 <label for="date_to">À:</label>
-                                <input type="date" id="date_to" name="date_to" value="<?php echo $date_to; ?>">
+                                <input type="date" id="date_to" name="date_to" value="<?php echo $date_to; ?>" onchange="this.form.submit()">
                             </div>
-                            <button type="submit" class="btn btn-primary btn-sm">Appliquer</button>
                             <a href="activity-log.php" class="reset-link">Réinitialiser</a>
                         </div>
                     </form>
@@ -374,25 +391,41 @@ $page_title = "Journal d'Activité";
                                             <td>
                                                 <?php
                                                     $entity_link = '';
+                                                    $entity_class = getEntityTypeBadgeClass($log['entity_type']);
+                                                    
                                                     switch($log['entity_type']) {
                                                         case 'user':
                                                             $entity_link = "view-user.php?id={$log['entity_id']}";
+                                                            $icon = "fa-user";
                                                             break;
                                                         case 'property':
                                                             $entity_link = "view-property.php?id={$log['entity_id']}";
+                                                            $icon = "fa-home";
                                                             break;
                                                         case 'ticket':
                                                             $entity_link = "view-ticket.php?id={$log['entity_id']}";
+                                                            $icon = "fa-ticket-alt";
                                                             break;
                                                         case 'payment':
                                                             $entity_link = "view-payment.php?id={$log['entity_id']}";
+                                                            $icon = "fa-credit-card";
                                                             break;
+                                                        case 'maintenance':
+                                                            $entity_link = "view-maintenance.php?id={$log['entity_id']}";
+                                                            $icon = "fa-tools";
+                                                            break;
+                                                        default:
+                                                            $icon = "fa-circle";
                                                     }
                                                     
                                                     if (!empty($entity_link)) {
-                                                        echo "<a href=\"$entity_link\">{$log['entity_id']}</a>";
+                                                        echo "<a href=\"$entity_link\" class=\"entity-badge status-{$entity_class}\">";
+                                                        echo "<i class=\"fas {$icon}\"></i> {$log['entity_id']}";
+                                                        echo "</a>";
                                                     } else {
-                                                        echo $log['entity_id'];
+                                                        echo "<span class=\"entity-badge status-secondary\">";
+                                                        echo "<i class=\"fas {$icon}\"></i> {$log['entity_id']}";
+                                                        echo "</span>";
                                                     }
                                                 ?>
                                             </td>
@@ -434,6 +467,110 @@ $page_title = "Journal d'Activité";
     </div>
 
     <script src="js/dark-mode.js"></script>
+    <style>
+        /* Entity badge styles */
+        .entity-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.2rem 0.5rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            color: var(--text-primary);
+            text-decoration: none;
+            gap: 5px;
+            white-space: nowrap;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .entity-badge i {
+            font-size: 0.75rem;
+        }
+        
+        .entity-badge.status-primary {
+            background-color: rgba(var(--primary-rgb), 0.15);
+            color: var(--primary-color);
+            border: 1px solid rgba(var(--primary-rgb), 0.3);
+        }
+        
+        .entity-badge.status-success {
+            background-color: rgba(25, 135, 84, 0.15);
+            color: #198754;
+            border: 1px solid rgba(25, 135, 84, 0.3);
+        }
+        
+        .entity-badge.status-warning {
+            background-color: rgba(255, 193, 7, 0.15);
+            color: #704b02;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+        
+        .entity-badge.status-danger {
+            background-color: rgba(220, 53, 69, 0.15);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+        
+        .entity-badge.status-info {
+            background-color: rgba(13, 202, 240, 0.15);
+            color: #0a6ebd;
+            border: 1px solid rgba(13, 202, 240, 0.3);
+        }
+        
+        .entity-badge.status-secondary {
+            background-color: rgba(108, 117, 125, 0.15);
+            color: #6c757d;
+            border: 1px solid rgba(108, 117, 125, 0.3);
+        }
+        
+        .entity-badge:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+            opacity: 0.9;
+        }
+        
+        /* Dark mode styles for entity badges */
+        [data-theme="dark"] .entity-badge {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .entity-badge.status-primary {
+            background-color: rgba(var(--primary-rgb), 0.25);
+            border-color: rgba(var(--primary-rgb), 0.5);
+            color: var(--primary-color-light);
+        }
+        
+        [data-theme="dark"] .entity-badge.status-success {
+            background-color: rgba(25, 135, 84, 0.25);
+            border-color: rgba(25, 135, 84, 0.5);
+            color: #25c274;
+        }
+        
+        [data-theme="dark"] .entity-badge.status-warning {
+            background-color: rgba(255, 193, 7, 0.25);
+            border-color: rgba(255, 193, 7, 0.5);
+            color: #ffda6a;
+        }
+        
+        [data-theme="dark"] .entity-badge.status-danger {
+            background-color: rgba(220, 53, 69, 0.25);
+            border-color: rgba(220, 53, 69, 0.5);
+            color: #ff8085;
+        }
+        
+        [data-theme="dark"] .entity-badge.status-info {
+            background-color: rgba(13, 202, 240, 0.25);
+            border-color: rgba(13, 202, 240, 0.5);
+            color: #6edbf7;
+        }
+        
+        [data-theme="dark"] .entity-badge.status-secondary {
+            background-color: rgba(108, 117, 125, 0.25);
+            border-color: rgba(108, 117, 125, 0.5);
+            color: #a1a8ae;
+        }
+    </style>
     <script>
         // Date filters functionality
         const dateFrom = document.getElementById('date_from');
@@ -443,12 +580,14 @@ $page_title = "Journal d'Activité";
             if (dateTo.value && new Date(this.value) > new Date(dateTo.value)) {
                 dateTo.value = this.value;
             }
+            this.form.submit();
         });
         
         dateTo.addEventListener('change', function() {
             if (dateFrom.value && new Date(this.value) < new Date(dateFrom.value)) {
                 dateFrom.value = this.value;
             }
+            this.form.submit();
         });
         
         // Export activity log

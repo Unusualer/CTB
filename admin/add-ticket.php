@@ -374,15 +374,30 @@ $page_title = "Ajouter un Ticket";
                                     </select>
                                 </div>
                                 
-                                <div class="form-group">
-                                    <label for="status">Statut <span class="required">*</span></label>
-                                    <select id="status" name="status" required>
-                                        <option value="">Sélectionner un statut</option>
-                                        <option value="open">Ouvert</option>
-                                        <option value="in_progress">En cours</option>
-                                        <option value="closed">Fermé</option>
-                                        <option value="reopened">Rouvert</option>
-                                    </select>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="status">Statut <span class="text-danger">*</span></label>
+                                        <select name="status" id="status" required>
+                                            <option value="">Sélectionner un statut</option>
+                                            <option value="open">Ouvert</option>
+                                            <option value="in_progress">En cours</option>
+                                            <option value="closed">Fermé</option>
+                                            <option value="reopened">Réouvert</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="priority">Priorité <span class="text-danger">*</span></label>
+                                        <select name="priority" id="priority" required>
+                                            <option value="">Sélectionner une priorité</option>
+                                            <option value="low">Basse</option>
+                                            <option value="medium">Moyenne</option>
+                                            <option value="high">Haute</option>
+                                            <option value="urgent">Urgente</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 
                                 <div class="form-group">

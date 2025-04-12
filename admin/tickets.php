@@ -24,17 +24,18 @@ try {
     $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    // Build the query - select tickets with user and property info
-    $query = "SELECT t.* 
-              FROM maintenance t 
+    // Build the query - select tickets with user info
+    $query = "SELECT t.*, u.name as user_name, u.email as user_email 
+              FROM tickets t 
+              LEFT JOIN users u ON t.user_id = u.id
               WHERE 1=1";
-    $count_query = "SELECT COUNT(*) as total FROM maintenance t WHERE 1=1";
+    $count_query = "SELECT COUNT(*) as total FROM tickets t LEFT JOIN users u ON t.user_id = u.id WHERE 1=1";
     $params = [];
     
     // Apply filters
     if (!empty($search)) {
-        $query .= " AND (t.title LIKE :search OR t.description LIKE :search)";
-        $count_query .= " AND (t.title LIKE :search OR t.description LIKE :search)";
+        $query .= " AND (t.subject LIKE :search OR t.description LIKE :search OR u.name LIKE :search)";
+        $count_query .= " AND (t.subject LIKE :search OR t.description LIKE :search OR u.name LIKE :search)";
         $params[':search'] = "%$search%";
     }
     
@@ -42,6 +43,12 @@ try {
         $query .= " AND t.status = :status";
         $count_query .= " AND t.status = :status";
         $params[':status'] = $status_filter;
+    }
+    
+    if (!empty($priority_filter)) {
+        $query .= " AND t.priority = :priority";
+        $count_query .= " AND t.priority = :priority";
+        $params[':priority'] = $priority_filter;
     }
     
     // Add ordering
@@ -68,7 +75,7 @@ try {
     
     // Get counts by status for stats
     $status_counts = [];
-    $status_stmt = $db->prepare("SELECT status, COUNT(*) as count FROM maintenance GROUP BY status");
+    $status_stmt = $db->prepare("SELECT status, COUNT(*) as count FROM tickets GROUP BY status");
     $status_stmt->execute();
     $status_results = $status_stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -81,7 +88,7 @@ try {
     $tickets = [];
     $total = 0;
     $total_pages = 0;
-    $status_counts = ['reported' => 0, 'in_progress' => 0, 'completed' => 0, 'cancelled' => 0];
+    $status_counts = ['open' => 0, 'in_progress' => 0, 'closed' => 0, 'reopened' => 0];
 }
 
 // Page title
@@ -137,8 +144,8 @@ $page_title = "Gestion des Tickets";
                         <i class="fas fa-clipboard-list"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Signalés</h3>
-                        <div class="stat-number"><?php echo isset($status_counts['reported']) ? $status_counts['reported'] : 0; ?></div>
+                        <h3>Ouverts</h3>
+                        <div class="stat-number"><?php echo isset($status_counts['open']) ? $status_counts['open'] : 0; ?></div>
                     </div>
                 </div>
 
@@ -157,22 +164,20 @@ $page_title = "Gestion des Tickets";
                         <i class="fas fa-check-circle"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Terminés</h3>
-                        <div class="stat-number"><?php echo isset($status_counts['completed']) ? $status_counts['completed'] : 0; ?></div>
+                        <h3>Fermés</h3>
+                        <div class="stat-number"><?php echo isset($status_counts['closed']) ? $status_counts['closed'] : 0; ?></div>
                     </div>
                 </div>
 
                 <div class="stat-card">
                     <div class="stat-icon payments">
-                        <i class="fas fa-exclamation-triangle"></i>
+                        <i class="fas fa-sync-alt"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Statut de Priorité</h3>
-                        <div class="stat-number"><?php echo $total; ?> Total</div>
+                        <h3>Réouverts</h3>
+                        <div class="stat-number"><?php echo isset($status_counts['reopened']) ? $status_counts['reopened'] : 0; ?></div>
                         <div class="stat-breakdown">
-                            <span><i class="fas fa-circle" style="color: #28a745;"></i> Basse: <?php echo isset($priority_counts['low']) ? $priority_counts['low'] : 0; ?></span>
-                            <span><i class="fas fa-circle" style="color: #ffc107;"></i> Moyenne: <?php echo isset($priority_counts['medium']) ? $priority_counts['medium'] : 0; ?></span>
-                            <span><i class="fas fa-circle" style="color: #dc3545;"></i> Haute/Urgente: <?php echo isset($priority_counts['high']) + isset($priority_counts['urgent']) ? $priority_counts['high'] + $priority_counts['urgent'] : 0; ?></span>
+                            <span>Tickets Total: <?php echo $total; ?></span>
                         </div>
                     </div>
                 </div>
@@ -194,10 +199,10 @@ $page_title = "Gestion des Tickets";
                                 <label for="status">Statut:</label>
                                 <select name="status" id="status" onchange="this.form.submit()">
                                     <option value="">Tous les Statuts</option>
-                                    <option value="reported" <?php echo $status_filter === 'reported' ? 'selected' : ''; ?>>Signalé</option>
+                                    <option value="open" <?php echo $status_filter === 'open' ? 'selected' : ''; ?>>Ouvert</option>
                                     <option value="in_progress" <?php echo $status_filter === 'in_progress' ? 'selected' : ''; ?>>En Cours</option>
-                                    <option value="completed" <?php echo $status_filter === 'completed' ? 'selected' : ''; ?>>Terminé</option>
-                                    <option value="cancelled" <?php echo $status_filter === 'cancelled' ? 'selected' : ''; ?>>Annulé</option>
+                                    <option value="closed" <?php echo $status_filter === 'closed' ? 'selected' : ''; ?>>Fermé</option>
+                                    <option value="reopened" <?php echo $status_filter === 'reopened' ? 'selected' : ''; ?>>Réouvert</option>
                                 </select>
                             </div>
                             <div class="filter-group">
@@ -242,41 +247,95 @@ $page_title = "Gestion des Tickets";
                                             <td><?php echo $ticket['id']; ?></td>
                                             <td>
                                                 <div class="ticket-cell">
-                                                    <?php echo htmlspecialchars($ticket['title'] ?? $ticket['description']); ?>
+                                                    <?php echo htmlspecialchars($ticket['subject']); ?>
                                                 </div>
                                             </td>
                                             <td>
                                                 <span class="text-muted">N/A</span>
                                             </td>
                                             <td>
-                                                <span class="text-muted">N/A</span>
+                                                <?php if (isset($ticket['user_name']) && !empty($ticket['user_name'])): ?>
+                                                    <div class="user-info-cell">
+                                                        <div class="user-avatar">
+                                                            <i class="fas fa-user"></i>
+                                                        </div>
+                                                        <div class="user-details">
+                                                            <a href="view-user.php?id=<?php echo $ticket['user_id']; ?>" class="user-name">
+                                                                <?php echo htmlspecialchars($ticket['user_name']); ?>
+                                                            </a>
+                                                            <?php if (isset($ticket['user_email'])): ?>
+                                                                <span class="user-email"><?php echo htmlspecialchars($ticket['user_email']); ?></span>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <div class="user-info-cell">
+                                                        <div class="user-avatar unknown">
+                                                            <i class="fas fa-user-slash"></i>
+                                                        </div>
+                                                        <div class="user-details">
+                                                            <span class="user-unknown">Utilisateur inconnu</span>
+                                                        </div>
+                                                    </div>
+                                                <?php endif; ?>
                                             </td>
                                             <td>
                                                 <?php 
                                                     $statusClass = '';
                                                     switch ($ticket['status']) {
-                                                        case 'reported': $statusClass = 'primary'; break;
+                                                        case 'open': $statusClass = 'danger'; break;
                                                         case 'in_progress': $statusClass = 'warning'; break;
-                                                        case 'completed': $statusClass = 'success'; break;
-                                                        case 'cancelled': $statusClass = 'danger'; break;
+                                                        case 'closed': $statusClass = 'success'; break;
+                                                        case 'reopened': $statusClass = 'primary'; break;
                                                     }
                                                 ?>
                                                 <span class="status-indicator status-<?php echo $statusClass; ?>">
-                                                    <?php echo ucfirst(htmlspecialchars($ticket['status'])); ?>
+                                                    <?php 
+                                                        $statusLabels = [
+                                                            'open' => 'Ouvert',
+                                                            'in_progress' => 'En cours',
+                                                            'closed' => 'Fermé',
+                                                            'reopened' => 'Réouvert'
+                                                        ];
+                                                        echo $statusLabels[$ticket['status']] ?? ucfirst($ticket['status']);
+                                                    ?>
                                                 </span>
                                             </td>
                                             <td>
-                                                <span class="text-muted">N/A</span>
+                                                <?php if (!empty($ticket['priority'])): ?>
+                                                    <?php 
+                                                        $priorityClass = '';
+                                                        switch ($ticket['priority']) {
+                                                            case 'low': $priorityClass = 'success'; break;
+                                                            case 'medium': $priorityClass = 'warning'; break;
+                                                            case 'high': $priorityClass = 'danger'; break;
+                                                            case 'urgent': $priorityClass = 'danger'; break;
+                                                            default: $priorityClass = 'secondary';
+                                                        }
+                                                        
+                                                        $priorityLabels = [
+                                                            'low' => 'Basse',
+                                                            'medium' => 'Moyenne',
+                                                            'high' => 'Haute',
+                                                            'urgent' => 'Urgente'
+                                                        ];
+                                                    ?>
+                                                    <span class="status-indicator status-<?php echo $priorityClass; ?>">
+                                                        <?php echo $priorityLabels[$ticket['priority']] ?? ucfirst($ticket['priority']); ?>
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="text-muted">N/A</span>
+                                                <?php endif; ?>
                                             </td>
-                                            <td><?php echo date('M d, Y', strtotime($ticket['created_at'])); ?></td>
+                                            <td><?php echo date('d M Y', strtotime($ticket['created_at'])); ?></td>
                                             <td class="actions">
-                                                <a href="view-ticket.php?id=<?php echo $ticket['id']; ?>" class="btn-icon" title="View Ticket">
+                                                <a href="view-ticket.php?id=<?php echo $ticket['id']; ?>" class="btn-icon" title="Voir le Ticket">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="edit-ticket.php?id=<?php echo $ticket['id']; ?>" class="btn-icon" title="Edit Ticket">
+                                                <a href="edit-ticket.php?id=<?php echo $ticket['id']; ?>" class="btn-icon" title="Modifier le Ticket">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <a href="javascript:void(0);" class="btn-icon delete-ticket" data-id="<?php echo $ticket['id']; ?>" title="Delete Ticket">
+                                                <a href="javascript:void(0);" class="btn-icon delete-ticket" data-id="<?php echo $ticket['id']; ?>" title="Supprimer le Ticket">
                                                     <i class="fas fa-trash-alt"></i>
                                                 </a>
                                             </td>
@@ -319,24 +378,85 @@ $page_title = "Gestion des Tickets";
     <div id="deleteModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Confirm Deletion</h3>
+                <h3>Confirmer la Suppression</h3>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete this ticket? This action cannot be undone.</p>
+                <p>Êtes-vous sûr de vouloir supprimer ce ticket ? Cette action est irréversible.</p>
             </div>
             <div class="modal-footer">
                 <form id="deleteForm" action="view-ticket.php" method="POST">
                     <input type="hidden" name="delete_ticket" value="1">
                     <input type="hidden" name="ticket_id" id="deleteTicketId">
-                    <button type="button" class="btn btn-secondary close-modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="button" class="btn btn-secondary close-modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger">Supprimer</button>
                 </form>
             </div>
         </div>
     </div>
 
     <script src="js/dark-mode.js"></script>
+    <style>
+        /* Styles pour la cellule d'information utilisateur */
+        .user-info-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4a80f0, #2c57b5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            flex-shrink: 0;
+        }
+        
+        .user-avatar.unknown {
+            background: linear-gradient(135deg, #6c757d, #495057);
+        }
+        
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .user-name {
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-decoration: none;
+        }
+        
+        .user-name:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+        
+        .user-email, .user-unknown {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Style pour le mode sombre */
+        [data-theme="dark"] .user-name {
+            color: #f0f0f0;
+        }
+        
+        [data-theme="dark"] .user-name:hover {
+            color: var(--primary-color-light);
+        }
+    </style>
     <script>
         // Delete ticket modal functionality
         const modal = document.getElementById('deleteModal');
@@ -349,6 +469,7 @@ $page_title = "Gestion des Tickets";
             button.addEventListener('click', function() {
                 const ticketId = this.getAttribute('data-id');
                 deleteTicketIdInput.value = ticketId;
+                deleteForm.action = `view-ticket.php?id=${ticketId}`;
                 modal.style.display = 'block';
             });
         });
