@@ -6,14 +6,14 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
 
 // Check if ID is provided
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-    $_SESSION['error'] = "User ID is required.";
+    $_SESSION['error'] = "L'ID de l'utilisateur est requis.";
     header("Location: users.php");
     exit();
 }
@@ -33,7 +33,7 @@ try {
     $stmt->execute();
     
     if ($stmt->rowCount() === 0) {
-        $_SESSION['error'] = "User not found.";
+        $_SESSION['error'] = "Utilisateur non trouvé.";
         header("Location: users.php");
         exit();
     }
@@ -61,11 +61,11 @@ try {
 }
 
 // Page title
-$page_title = "View User";
+$page_title = "Voir l'Utilisateur";
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -82,15 +82,15 @@ $page_title = "View User";
         <main class="main-content">
             <div class="page-header">
                 <div class="breadcrumb">
-                    <a href="users.php">Users</a>
-                    <span>View User</span>
+                    <a href="users.php">Utilisateurs</a>
+                    <span>Voir l'Utilisateur</span>
                 </div>
                 <div class="actions">
                     <a href="edit-user.php?id=<?php echo $user['id']; ?>" class="btn btn-primary">
-                        <i class="fas fa-edit"></i> Edit User
+                        <i class="fas fa-edit"></i> Modifier l'Utilisateur
                     </a>
                     <a href="javascript:void(0);" class="btn btn-danger delete-user" data-id="<?php echo $user['id']; ?>">
-                        <i class="fas fa-trash-alt"></i> Delete User
+                        <i class="fas fa-trash-alt"></i> Supprimer l'Utilisateur
                     </a>
                 </div>
             </div>
@@ -146,7 +146,7 @@ $page_title = "View User";
                     <!-- User Information Card -->
                     <div class="card user-info-card">
                         <div class="card-header">
-                            <h3><i class="fas fa-info-circle"></i> User Information</h3>
+                            <h3><i class="fas fa-info-circle"></i> Informations Utilisateur</h3>
                         </div>
                         <div class="card-body">
                             <div class="info-grid">
@@ -155,24 +155,24 @@ $page_title = "View User";
                                     <span class="info-value"><?php echo htmlspecialchars($user['email']); ?></span>
                                 </div>
                                 <div class="info-group">
-                                    <label><i class="fas fa-phone"></i> Phone:</label>
-                                    <span class="info-value"><?php echo !empty($user['phone']) ? htmlspecialchars($user['phone']) : 'Not provided'; ?></span>
+                                    <label><i class="fas fa-phone"></i> Téléphone:</label>
+                                    <span class="info-value"><?php echo !empty($user['phone']) ? htmlspecialchars($user['phone']) : 'Non renseigné'; ?></span>
                                 </div>
                                 <div class="info-group">
-                                    <label><i class="fas fa-user-shield"></i> Role:</label>
+                                    <label><i class="fas fa-user-shield"></i> Rôle:</label>
                                     <span class="info-value"><?php echo ucfirst(htmlspecialchars($user['role'])); ?></span>
                                 </div>
                                 <div class="info-group">
-                                    <label><i class="fas fa-check-circle"></i> Status:</label>
+                                    <label><i class="fas fa-check-circle"></i> Statut:</label>
                                     <span class="status-badge <?php echo $user['status']; ?>"><?php echo ucfirst(htmlspecialchars($user['status'])); ?></span>
                                 </div>
                                 <div class="info-group">
-                                    <label><i class="fas fa-calendar-plus"></i> Created:</label>
-                                    <span class="info-value"><?php echo date('F d, Y', strtotime($user['created_at'])); ?></span>
+                                    <label><i class="fas fa-calendar-plus"></i> Créé le:</label>
+                                    <span class="info-value"><?php echo date('d F Y', strtotime($user['created_at'])); ?></span>
                                 </div>
                                 <div class="info-group">
-                                    <label><i class="fas fa-edit"></i> Last Updated:</label>
-                                    <span class="info-value"><?php echo date('F d, Y', strtotime($user['updated_at'])); ?></span>
+                                    <label><i class="fas fa-edit"></i> Dernière mise à jour:</label>
+                                    <span class="info-value"><?php echo date('d F Y', strtotime($user['updated_at'])); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -182,13 +182,13 @@ $page_title = "View User";
                     <?php if ($user['role'] === 'resident'): ?>
                         <div class="card property-assignments-card">
                             <div class="card-header">
-                                <h3><i class="fas fa-building"></i> Assigned Properties</h3>
+                                <h3><i class="fas fa-building"></i> Propriétés Assignées</h3>
                             </div>
                             <div class="card-body">
                                 <?php if (empty($assigned_properties)): ?>
                                     <div class="empty-state">
                                         <i class="fas fa-building"></i>
-                                        <p>No properties assigned to this resident.</p>
+                                        <p>Aucune propriété assignée à ce résident.</p>
                                     </div>
                                 <?php else: ?>
                                     <div class="property-list">
@@ -202,7 +202,7 @@ $page_title = "View User";
                                                     <div class="property-meta">
                                                         <span class="property-id">ID: <?php echo $property['id']; ?></span>
                                                         <a href="view-property.php?id=<?php echo $property['id']; ?>" class="view-link">
-                                                            View Property <i class="fas fa-arrow-right"></i>
+                                                            Voir la Propriété <i class="fas fa-arrow-right"></i>
                                                         </a>
                                                     </div>
                                                 </div>
@@ -217,13 +217,13 @@ $page_title = "View User";
                     <!-- Activity Log Card -->
                     <div class="card activity-card">
                         <div class="card-header">
-                            <h3><i class="fas fa-history"></i> Recent Activity</h3>
+                            <h3><i class="fas fa-history"></i> Activité Récente</h3>
                         </div>
                         <div class="card-body">
                             <?php if (empty($activity_logs)): ?>
                                 <div class="no-data">
                                     <i class="far fa-clock"></i>
-                                    <p>No recent activity found.</p>
+                                    <p>Aucune activité récente trouvée.</p>
                                 </div>
                             <?php else: ?>
                                 <div class="activity-timeline">
@@ -233,8 +233,8 @@ $page_title = "View User";
                                                 <i class="fas fa-circle"></i>
                                             </div>
                                             <div class="activity-content">
-                                                <p class="activity-text"><?php echo isset($log['description']) ? htmlspecialchars($log['description']) : 'No description available'; ?></p>
-                                                <p class="activity-time"><?php echo isset($log['created_at']) ? date('M d, Y H:i', strtotime($log['created_at'])) : 'Unknown date'; ?></p>
+                                                <p class="activity-text"><?php echo isset($log['description']) ? htmlspecialchars($log['description']) : 'Aucune description disponible'; ?></p>
+                                                <p class="activity-time"><?php echo isset($log['created_at']) ? date('d M Y H:i', strtotime($log['created_at'])) : 'Date inconnue'; ?></p>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
@@ -251,17 +251,17 @@ $page_title = "View User";
     <div id="deleteModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Confirm Deletion</h3>
+                <h3>Confirmer la Suppression</h3>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete this user? This action cannot be undone.</p>
+                <p>Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.</p>
             </div>
             <div class="modal-footer">
                 <form id="deleteForm" action="delete-user.php" method="POST">
                     <input type="hidden" name="user_id" id="deleteUserId">
-                    <button type="button" class="btn btn-secondary close-modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="button" class="btn btn-secondary close-modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger">Supprimer</button>
                 </form>
             </div>
         </div>

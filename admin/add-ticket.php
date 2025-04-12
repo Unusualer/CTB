@@ -6,7 +6,7 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
@@ -23,7 +23,7 @@ try {
     $users_stmt->execute();
     $users = $users_stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    $_SESSION['error'] = "Database error: " . $e->getMessage();
+    $_SESSION['error'] = "Erreur de base de données : " . $e->getMessage();
 }
 
 // Process form submission
@@ -38,22 +38,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validate user_id
     if (empty($user_id)) {
-        $errors[] = "User is required.";
+        $errors[] = "L'utilisateur est requis.";
     }
     
     // Validate subject
     if (empty($subject)) {
-        $errors[] = "Subject is required.";
+        $errors[] = "Le sujet est requis.";
     }
     
     // Validate description
     if (empty($description)) {
-        $errors[] = "Description is required.";
+        $errors[] = "La description est requise.";
     }
     
     // Validate status
     if (empty($status) || !in_array($status, $statuses)) {
-        $errors[] = "Valid status is required.";
+        $errors[] = "Un statut valide est requis.";
     }
     
     // If no errors, add ticket
@@ -77,14 +77,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Log the activity
             $admin_id = $_SESSION['user_id'];
-            log_activity($db, $admin_id, 'create', 'ticket', $ticket_id, "Created new ticket: $subject");
+            log_activity($db, $admin_id, 'create', 'ticket', $ticket_id, "Création d'un nouveau ticket : $subject");
             
-            $_SESSION['success'] = "Ticket created successfully.";
+            $_SESSION['success'] = "Ticket créé avec succès.";
             header("Location: tickets.php");
             exit();
             
         } catch (PDOException $e) {
-            $_SESSION['error'] = "Database error: " . $e->getMessage();
+            $_SESSION['error'] = "Erreur de base de données : " . $e->getMessage();
         }
     } else {
         $_SESSION['error'] = implode("<br>", $errors);
@@ -92,11 +92,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Page title
-$page_title = "Add New Ticket";
+$page_title = "Ajouter un Ticket";
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -357,50 +357,55 @@ $page_title = "Add New Ticket";
             <div class="content-wrapper">
                 <div class="card user-filter-card">
                     <div class="card-header user-filter-header">
-                        <h3><i class="fas fa-ticket-alt"></i> Add New Ticket</h3>
+                        <h3><i class="fas fa-ticket-alt"></i> Ajouter un Nouveau Ticket</h3>
                     </div>
                     <div class="card-body">
-                        <form action="add-ticket.php" method="POST" class="form">
+                        <form action="add-ticket.php" method="POST" class="ticket-form">
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="user_id">User <span class="required">*</span></label>
+                                    <label for="user_id">Utilisateur <span class="required">*</span></label>
                                     <select id="user_id" name="user_id" required>
-                                        <option value="" disabled <?php echo empty($user_id ?? '') ? 'selected' : ''; ?>>Select User</option>
+                                        <option value="">Sélectionner un utilisateur</option>
                                         <?php foreach ($users as $user): ?>
-                                            <option value="<?php echo $user['id']; ?>" <?php echo isset($user_id) && $user_id === $user['id'] ? 'selected' : ''; ?>>
-                                                <?php echo htmlspecialchars($user['name'] . ' (' . $user['email'] . ')'); ?>
+                                            <option value="<?php echo $user['id']; ?>">
+                                                <?php echo htmlspecialchars($user['name']); ?> (<?php echo htmlspecialchars($user['email']); ?>)
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="status">Status <span class="required">*</span></label>
+                                    <label for="status">Statut <span class="required">*</span></label>
                                     <select id="status" name="status" required>
-                                        <option value="" disabled <?php echo empty($status ?? '') ? 'selected' : ''; ?>>Select Status</option>
-                                        <?php foreach ($statuses as $s): ?>
-                                            <option value="<?php echo $s; ?>" <?php echo isset($status) && $status === $s ? 'selected' : ''; ?>>
-                                                <?php echo ucfirst(str_replace('_', ' ', $s)); ?>
-                                            </option>
-                                        <?php endforeach; ?>
+                                        <option value="">Sélectionner un statut</option>
+                                        <option value="open">Ouvert</option>
+                                        <option value="in_progress">En cours</option>
+                                        <option value="closed">Fermé</option>
+                                        <option value="reopened">Rouvert</option>
                                     </select>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="subject">Subject <span class="required">*</span></label>
-                                    <input type="text" id="subject" name="subject" value="<?php echo htmlspecialchars($subject ?? ''); ?>" required>
+                                    <label for="subject">Sujet <span class="required">*</span></label>
+                                    <input type="text" id="subject" name="subject" required>
                                 </div>
                             </div>
+                            
+                            <div class="form-section-title">Description du Ticket</div>
                             
                             <div class="form-group">
                                 <label for="description">Description <span class="required">*</span></label>
-                                <textarea id="description" name="description" rows="6" required><?php echo htmlspecialchars($description ?? ''); ?></textarea>
+                                <textarea id="description" name="description" rows="6" required></textarea>
                             </div>
                             
                             <div class="form-actions">
-                                <a href="tickets.php" class="btn btn-secondary">Cancel</a>
+                                <a href="tickets.php" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i>
+                                    Annuler
+                                </a>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-plus-circle"></i> Create Ticket
+                                    <i class="fas fa-save"></i>
+                                    Enregistrer
                                 </button>
                             </div>
                         </form>

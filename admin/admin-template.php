@@ -12,11 +12,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo isset($pageTitle) ? $pageTitle : 'Admin Dashboard'; ?> - CTB Property Management</title>
+    <title><?php echo isset($pageTitle) ? $pageTitle : 'Tableau de Bord Admin'; ?> - CTB Gestion Immobilière</title>
     
     <!-- Favicon -->
     <link rel="shortcut icon" href="../assets/images/favicon.ico" type="image/x-icon">
@@ -42,7 +42,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             </div>
             <div class="topbar-search">
                 <i class="fas fa-search"></i>
-                <input type="text" placeholder="Search...">
+                <input type="text" placeholder="Rechercher...">
             </div>
             <div class="topbar-right">
                 <div class="notification-item">
@@ -53,12 +53,12 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
                     <img src="../assets/images/admin-avatar.jpg" alt="Admin">
                     <div class="admin-info">
                         <span class="admin-name"><?php echo $_SESSION['username']; ?></span>
-                        <span class="admin-role">Administrator</span>
+                        <span class="admin-role">Administrateur</span>
                     </div>
                     <div class="profile-dropdown">
-                        <a href="profile.php"><i class="fas fa-user"></i> Profile</a>
-                        <a href="settings.php"><i class="fas fa-cog"></i> Settings</a>
-                        <a href="../logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        <a href="profile.php"><i class="fas fa-user"></i> Profil</a>
+                        <a href="settings.php"><i class="fas fa-cog"></i> Paramètres</a>
+                        <a href="../logout.php"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
                     </div>
                 </div>
             </div>
@@ -76,25 +76,25 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
                         <li class="<?php echo ($currentPage == 'dashboard') ? 'active' : ''; ?>">
                             <a href="index.php">
                                 <i class="fas fa-tachometer-alt"></i>
-                                <span>Dashboard</span>
+                                <span>Tableau de Bord</span>
                             </a>
                         </li>
                         <li class="<?php echo ($currentPage == 'properties') ? 'active' : ''; ?>">
                             <a href="properties.php">
                                 <i class="fas fa-building"></i>
-                                <span>Properties</span>
+                                <span>Propriétés</span>
                             </a>
                         </li>
                         <li class="<?php echo ($currentPage == 'residents') ? 'active' : ''; ?>">
                             <a href="residents.php">
                                 <i class="fas fa-users"></i>
-                                <span>Residents</span>
+                                <span>Résidents</span>
                             </a>
                         </li>
                         <li class="<?php echo ($currentPage == 'payments') ? 'active' : ''; ?>">
                             <a href="payments.php">
                                 <i class="fas fa-credit-card"></i>
-                                <span>Payments</span>
+                                <span>Paiements</span>
                             </a>
                         </li>
                         <li class="<?php echo ($currentPage == 'tickets') ? 'active' : ''; ?>">
@@ -106,13 +106,13 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
                         <li class="<?php echo ($currentPage == 'reports') ? 'active' : ''; ?>">
                             <a href="reports.php">
                                 <i class="fas fa-chart-bar"></i>
-                                <span>Reports</span>
+                                <span>Rapports</span>
                             </a>
                         </li>
                         <li class="<?php echo ($currentPage == 'settings') ? 'active' : ''; ?>">
                             <a href="settings.php">
                                 <i class="fas fa-cog"></i>
-                                <span>Settings</span>
+                                <span>Paramètres</span>
                             </a>
                         </li>
                     </ul>

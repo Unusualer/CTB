@@ -6,14 +6,14 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
 
 // Check if ID is provided
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-    $_SESSION['error'] = "Property ID is required.";
+    $_SESSION['error'] = "L'ID de la propriété est requis.";
     header("Location: properties.php");
     exit();
 }
@@ -34,11 +34,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validate required fields - only validate type and identifier existence, not their values
     if (empty($type) || !in_array($type, $types)) {
-        $errors[] = "Valid property type is required.";
+        $errors[] = "Le type de propriété est invalide.";
     }
     
     if (empty($identifier)) {
-        $errors[] = "Identifier is required.";
+        $errors[] = "L'identifiant est requis.";
     }
     
     // If no errors, update property
@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $existing_property = $check_stmt->fetch(PDO::FETCH_ASSOC);
             
             if (!$existing_property) {
-                $_SESSION['error'] = "Property not found.";
+                $_SESSION['error'] = "Propriété non trouvée.";
             } else {
                 // Update only the user_id, keeping the original type and identifier
                 $update_stmt = $db->prepare("UPDATE properties SET 
@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $log_stmt->bindParam(':description', $description);
                 $log_stmt->execute();
                 
-                $_SESSION['success'] = "Property assignment updated successfully.";
+                $_SESSION['success'] = "Attribution de la propriété mise à jour avec succès.";
                 header("Location: view-property.php?id=$property_id");
                 exit();
             }
@@ -124,11 +124,11 @@ try {
 }
 
 // Page title
-$page_title = "Assign Resident to Property";
+$page_title = "Assigner un Résident à la Propriété";
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -340,9 +340,9 @@ $page_title = "Assign Resident to Property";
         <main class="main-content">
             <div class="page-header">
                 <div class="breadcrumb">
-                    <a href="properties.php">Properties</a>
-                    <a href="view-property.php?id=<?php echo $property_id; ?>">View Property</a>
-                    <span>Assign Resident</span>
+                    <a href="properties.php">Propriétés</a>
+                    <a href="view-property.php?id=<?php echo $property_id; ?>">Voir la Propriété</a>
+                    <span>Assigner un Résident</span>
                 </div>
             </div>
 
@@ -367,44 +367,44 @@ $page_title = "Assign Resident to Property";
             <div class="content-wrapper">
                 <div class="card">
                     <div class="card-header">
-                        <h3><i class="fas fa-user-edit"></i> Assign Resident to Property</h3>
+                        <h3><i class="fas fa-user-edit"></i> Assigner un Résident à la Propriété</h3>
                     </div>
                     <div class="card-body">
                         <form action="edit-property.php?id=<?php echo $property_id; ?>" method="POST" class="form">
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="type">Property Type</label>
+                                    <label for="type">Type de Propriété</label>
                                     <input type="text" id="type" value="<?php echo ucfirst($property['type']); ?>" readonly>
                                     <input type="hidden" name="type" value="<?php echo htmlspecialchars($property['type']); ?>">
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="identifier">Identifier</label>
+                                    <label for="identifier">Identifiant</label>
                                     <input type="text" id="identifier" value="<?php echo htmlspecialchars($property['identifier']); ?>" readonly>
                                     <input type="hidden" name="identifier" value="<?php echo htmlspecialchars($property['identifier']); ?>">
-                                    <div class="help-text">Property identifier is set when property is created and cannot be changed here</div>
+                                    <div class="help-text">L'identifiant de la propriété est défini lors de sa création et ne peut pas être modifié ici</div>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="user_id">Assigned Resident</label>
+                                    <label for="user_id">Résident Assigné</label>
                                     <select id="user_id" name="user_id">
-                                        <option value="">Unassigned</option>
+                                        <option value="">Non assigné</option>
                                         <?php foreach ($residents as $resident): ?>
                                             <option value="<?php echo $resident['id']; ?>" <?php echo (isset($property['user_id']) && $property['user_id'] == $resident['id']) ? 'selected' : ''; ?>>
                                                 <?php echo htmlspecialchars($resident['name']); ?> (<?php echo htmlspecialchars($resident['email']); ?>)
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
-                                    <div class="help-text">Select a resident to assign to this property, or leave unassigned</div>
+                                    <div class="help-text">Sélectionnez un résident à assigner à cette propriété, ou laissez non assigné</div>
                                 </div>
                             </div>
                         
                             <div class="form-actions">
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-user-plus"></i> Assign Resident
+                                    <i class="fas fa-user-plus"></i> Assigner le Résident
                                 </button>
                                 <a href="view-property.php?id=<?php echo $property_id; ?>" class="btn btn-secondary">
-                                    <i class="fas fa-times"></i> Cancel
+                                    <i class="fas fa-times"></i> Annuler
                                 </a>
                             </div>
                         </form>

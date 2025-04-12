@@ -5,7 +5,7 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
-    $_SESSION['error'] = "You don't have permission to access this page.";
+    $_SESSION['error'] = "Vous n'avez pas l'autorisation d'accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }

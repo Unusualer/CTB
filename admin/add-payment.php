@@ -6,7 +6,7 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
     } catch (PDOException $e) {
-        $error = "Database error: " . $e->getMessage();
+        $_SESSION['error'] = "Erreur de base de données : " . $e->getMessage();
         
         // Preserve form data
         $payment = [
@@ -149,11 +149,11 @@ try {
 }
 
 // Page title
-$page_title = "Add New Payment";
+$page_title = "Ajouter un Paiement";
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -385,8 +385,8 @@ $page_title = "Add New Payment";
         <main class="main-content">
             <div class="page-header">
                 <div class="breadcrumb">
-                    <a href="payments.php">Payments</a>
-                    <span>Add New Payment</span>
+                    <a href="payments.php">Paiements</a>
+                    <span>Ajouter un Paiement</span>
                 </div>
             </div>
 
@@ -405,15 +405,15 @@ $page_title = "Add New Payment";
             <div class="content-wrapper">
                 <div class="card">
                     <div class="card-header">
-                        <h3><i class="fas fa-credit-card"></i> Add New Payment</h3>
+                        <h3><i class="fas fa-money-bill-wave"></i> Ajouter un Paiement</h3>
                     </div>
                     <div class="card-body">
                         <form action="add-payment.php" method="POST">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="user_id">User <span class="text-danger">*</span></label>
+                                    <label for="user_id">Utilisateur <span class="text-danger">*</span></label>
                                     <select name="user_id" id="user_id" required>
-                                        <option value="">-- Select User --</option>
+                                        <option value="">Sélectionner un utilisateur</option>
                                         <?php foreach ($users as $user): ?>
                                             <option value="<?php echo $user['id']; ?>" <?php echo $payment['user_id'] == $user['id'] ? 'selected' : ''; ?>>
                                                 <?php echo htmlspecialchars($user['name']); ?> (<?php echo htmlspecialchars($user['email']); ?>)
@@ -439,36 +439,40 @@ $page_title = "Add New Payment";
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="amount">Amount ($) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.01" min="0.01" name="amount" id="amount" value="<?php echo htmlspecialchars($payment['amount']); ?>" required>
+                                    <label for="amount">Montant <span class="text-danger">*</span></label>
+                                    <input type="number" name="amount" id="amount" step="0.01" min="0" value="<?php echo htmlspecialchars($payment['amount']); ?>" required>
+                                    <small class="form-text text-muted">Entrez le montant du paiement en dollars.</small>
                                 </div>
                             </div>
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="payment_method">Payment Method <span class="text-danger">*</span></label>
+                                    <label for="payment_method">Méthode de Paiement <span class="text-danger">*</span></label>
                                     <select name="payment_method" id="payment_method" required>
-                                        <option value="transfer" <?php echo $payment['payment_method'] === 'transfer' ? 'selected' : ''; ?>>Bank Transfer</option>
-                                        <option value="cheque" <?php echo $payment['payment_method'] === 'cheque' ? 'selected' : ''; ?>>Cheque</option>
+                                        <option value="credit_card" <?php echo $payment['payment_method'] === 'credit_card' ? 'selected' : ''; ?>>Carte de Crédit</option>
+                                        <option value="debit_card" <?php echo $payment['payment_method'] === 'debit_card' ? 'selected' : ''; ?>>Carte de Débit</option>
+                                        <option value="bank_transfer" <?php echo $payment['payment_method'] === 'bank_transfer' ? 'selected' : ''; ?>>Virement Bancaire</option>
+                                        <option value="cash" <?php echo $payment['payment_method'] === 'cash' ? 'selected' : ''; ?>>Espèces</option>
+                                        <option value="check" <?php echo $payment['payment_method'] === 'check' ? 'selected' : ''; ?>>Chèque</option>
                                     </select>
                                 </div>
                             </div>
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="month">Payment Month <span class="text-danger">*</span></label>
+                                    <label for="month">Date de Paiement <span class="text-danger">*</span></label>
                                     <input type="date" name="month" id="month" value="<?php echo htmlspecialchars($payment['month']); ?>" required>
                                 </div>
                             </div>
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="status">Status <span class="text-danger">*</span></label>
+                                    <label for="status">Statut <span class="text-danger">*</span></label>
                                     <select name="status" id="status" required>
-                                        <option value="paid" <?php echo $payment['status'] === 'paid' ? 'selected' : ''; ?>>Paid</option>
-                                        <option value="pending" <?php echo $payment['status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                                        <option value="cancelled" <?php echo $payment['status'] === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
-                                        <option value="failed" <?php echo $payment['status'] === 'failed' ? 'selected' : ''; ?>>Failed</option>
+                                        <option value="pending" <?php echo $payment['status'] === 'pending' ? 'selected' : ''; ?>>En Attente</option>
+                                        <option value="completed" <?php echo $payment['status'] === 'completed' ? 'selected' : ''; ?>>Terminé</option>
+                                        <option value="failed" <?php echo $payment['status'] === 'failed' ? 'selected' : ''; ?>>Échoué</option>
+                                        <option value="refunded" <?php echo $payment['status'] === 'refunded' ? 'selected' : ''; ?>>Remboursé</option>
                                     </select>
                                 </div>
                             </div>
@@ -484,13 +488,14 @@ $page_title = "Add New Payment";
                                 <div class="form-group">
                                     <label for="description">Description</label>
                                     <textarea name="description" id="description" rows="4"><?php echo htmlspecialchars($payment['description']); ?></textarea>
+                                    <small class="form-text text-muted">Ajoutez des détails supplémentaires sur le paiement si nécessaire.</small>
                                 </div>
                             </div>
                             
                             <div class="form-actions">
-                                <a href="payments.php" class="btn btn-secondary">Cancel</a>
+                                <a href="payments.php" class="btn btn-secondary">Annuler</a>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-plus-circle"></i> Add Payment
+                                    <i class="fas fa-plus-circle"></i> Ajouter le Paiement
                                 </button>
                             </div>
                         </form>

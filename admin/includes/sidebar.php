@@ -35,22 +35,22 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
     <!-- Menu Section -->
     <nav class="sidebar-menu">
-        <div class="sidebar-menu-category">Dashboard</div>
+        <div class="sidebar-menu-category">Tableau de Bord</div>
         <ul class="sidebar-menu-items list-unstyled">
             <li class="sidebar-menu-item">
                 <a href="index.php" class="sidebar-menu-link <?php echo $current_page == 'index.php' ? 'active' : ''; ?>">
                     <i class="fas fa-tachometer-alt sidebar-menu-icon"></i>
-                    <span class="sidebar-menu-text">Dashboard</span>
+                    <span class="sidebar-menu-text">Tableau de Bord</span>
                 </a>
             </li>
         </ul>
 
-        <div class="sidebar-menu-category">Management</div>
+        <div class="sidebar-menu-category">Gestion</div>
         <ul class="sidebar-menu-items list-unstyled">
             <li class="sidebar-menu-item">
                 <a href="properties.php" class="sidebar-menu-link <?php echo $current_page == 'properties.php' || $current_page == 'add-property.php' || $current_page == 'edit-property.php' ? 'active' : ''; ?>">
                     <i class="fas fa-building sidebar-menu-icon"></i>
-                    <span class="sidebar-menu-text">Properties</span>
+                    <span class="sidebar-menu-text">Propriétés</span>
                 </a>
             </li>
             <li class="sidebar-menu-item">
@@ -62,45 +62,45 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <li class="sidebar-menu-item">
                 <a href="users.php" class="sidebar-menu-link <?php echo $current_page == 'users.php' ? 'active' : ''; ?>">
                     <i class="fas fa-users sidebar-menu-icon"></i>
-                    <span class="sidebar-menu-text">Users</span>
+                    <span class="sidebar-menu-text">Utilisateurs</span>
                 </a>
             </li>
             <li class="sidebar-menu-item">
                 <a href="payments.php" class="sidebar-menu-link <?php echo $current_page == 'payments.php' ? 'active' : ''; ?>">
                     <i class="fas fa-money-bill-wave sidebar-menu-icon"></i>
-                    <span class="sidebar-menu-text">Payments</span>
+                    <span class="sidebar-menu-text">Paiements</span>
                 </a>
             </li>
         </ul>
 
-        <div class="sidebar-menu-category">Reports</div>
+        <div class="sidebar-menu-category">Rapports</div>
         <ul class="sidebar-menu-items list-unstyled">
             <li class="sidebar-menu-item">
                 <a href="reports.php" class="sidebar-menu-link <?php echo $current_page == 'reports.php' ? 'active' : ''; ?>">
                     <i class="fas fa-chart-bar sidebar-menu-icon"></i>
-                    <span class="sidebar-menu-text">Reports</span>
+                    <span class="sidebar-menu-text">Rapports</span>
                 </a>
             </li>
             <li class="sidebar-menu-item">
                 <a href="activity-log.php" class="sidebar-menu-link <?php echo $current_page == 'activity-log.php' ? 'active' : ''; ?>">
                     <i class="fas fa-history sidebar-menu-icon"></i>
-                    <span class="sidebar-menu-text">Activity Log</span>
+                    <span class="sidebar-menu-text">Journal d'Activité</span>
                 </a>
             </li>
         </ul>
 
-        <div class="sidebar-menu-category">Settings</div>
+        <div class="sidebar-menu-category">Paramètres</div>
         <ul class="sidebar-menu-items list-unstyled">
             <li class="sidebar-menu-item">
                 <a href="settings.php" class="sidebar-menu-link <?php echo $current_page == 'settings.php' ? 'active' : ''; ?>">
                     <i class="fas fa-cogs sidebar-menu-icon"></i>
-                    <span class="sidebar-menu-text">Settings</span>
+                    <span class="sidebar-menu-text">Paramètres</span>
                 </a>
             </li>
             <li class="sidebar-menu-item">
                 <a href="profile.php" class="sidebar-menu-link <?php echo $current_page == 'profile.php' ? 'active' : ''; ?>">
                     <i class="fas fa-user-cog sidebar-menu-icon"></i>
-                    <span class="sidebar-menu-text">Profile</span>
+                    <span class="sidebar-menu-text">Profil</span>
                 </a>
             </li>
         </ul>
@@ -111,7 +111,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <div class="dark-mode-toggle">
             <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" id="darkModeToggle" <?php echo isset($_COOKIE['dark_mode']) && $_COOKIE['dark_mode'] === 'true' ? 'checked' : ''; ?>>
-                <label class="form-check-label" for="darkModeToggle">Dark Mode</label>
+                <label class="form-check-label" for="darkModeToggle">Mode Sombre</label>
             </div>
         </div>
         <div class="sidebar-version">v1.0.0</div>

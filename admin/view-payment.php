@@ -5,14 +5,14 @@ require_once '../includes/config.php';
 require_once '../includes/functions.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
 
 // Check if payment ID is set
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    $_SESSION['error'] = "Payment ID is required.";
+    $_SESSION['error'] = "L'ID du paiement est requis.";
     header("Location: payments.php");
     exit();
 }
@@ -38,7 +38,7 @@ try {
     $stmt->execute();
     
     if ($stmt->rowCount() === 0) {
-        $_SESSION['error'] = "Payment not found.";
+        $_SESSION['error'] = "Paiement non trouvé.";
         header("Location: payments.php");
         exit();
     }
@@ -115,10 +115,10 @@ function formatDate($date) {
 }
 
 // Page title
-$page_title = "Payment Details";
+$page_title = "Détails du Paiement";
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -295,7 +295,7 @@ $page_title = "Payment Details";
         <main class="main-content">
             <div class="content-header">
                 <a href="payments.php" class="back-button">
-                    <i class="fas fa-arrow-left"></i> Back to Payments
+                    <i class="fas fa-arrow-left"></i> Retour aux Paiements
                 </a>
                 <h1><?php echo $page_title; ?></h1>
             </div>
@@ -328,10 +328,10 @@ $page_title = "Payment Details";
             <?php if ($payment): ?>
                 <div class="card">
                     <div class="card-header">
-                        <h3>Payment #<?php echo $payment_id; ?></h3>
+                        <h3>Paiement #<?php echo $payment_id; ?></h3>
                         <div class="card-actions">
                             <a href="export-payment.php?id=<?php echo $payment_id; ?>" class="btn btn-secondary">
-                                <i class="fas fa-file-export"></i> Export
+                                <i class="fas fa-file-export"></i> Exporter
                             </a>
                         </div>
                     </div>
@@ -339,21 +339,38 @@ $page_title = "Payment Details";
                         <div class="payment-details">
                             <div class="payment-main">
                                 <div class="detail-group">
-                                    <div class="label">Amount</div>
+                                    <div class="label">Montant</div>
                                     <div class="value"><strong>$<?php echo number_format($payment['amount'], 2); ?></strong></div>
                                 </div>
                                 
                                 <div class="detail-group">
-                                    <div class="label">Status</div>
+                                    <div class="label">Statut</div>
                                     <div class="value">
                                         <span class="status-indicator status-<?php echo getStatusBadgeClass($payment['status']); ?>">
-                                            <?php echo ucfirst($payment['status']); ?>
+                                            <?php 
+                                                switch($payment['status']) {
+                                                    case 'pending':
+                                                        echo 'En Attente';
+                                                        break;
+                                                    case 'paid':
+                                                        echo 'Payé';
+                                                        break;
+                                                    case 'cancelled':
+                                                        echo 'Annulé';
+                                                        break;
+                                                    case 'failed':
+                                                        echo 'Échoué';
+                                                        break;
+                                                    default:
+                                                        echo ucfirst($payment['status']);
+                                                }
+                                            ?>
                                         </span>
                                     </div>
                                 </div>
                                 
                                 <div class="detail-group">
-                                    <div class="label">Payment Method</div>
+                                    <div class="label">Méthode de Paiement</div>
                                     <div class="value">
                                         <?php 
                                             $methodIcon = '';
@@ -361,25 +378,27 @@ $page_title = "Payment Details";
                                             switch ($paymentMethod) {
                                                 case 'transfer': 
                                                     $methodIcon = '<i class="fas fa-university"></i> ';
+                                                    echo $methodIcon . 'Virement';
                                                     break;
                                                 case 'cheque': 
                                                     $methodIcon = '<i class="fas fa-money-check"></i> ';
+                                                    echo $methodIcon . 'Chèque';
                                                     break;
                                                 default: 
                                                     $methodIcon = '<i class="fas fa-money-check"></i> ';
+                                                    echo $methodIcon . ucfirst($paymentMethod);
                                             }
-                                            echo $methodIcon . formatPaymentMethod($paymentMethod);
                                         ?>
                                     </div>
                                 </div>
                                 
                                 <div class="detail-group">
-                                    <div class="label">Payment Month</div>
+                                    <div class="label">Mois de Paiement</div>
                                     <div class="value"><?php echo formatDate($payment['month']); ?></div>
                                 </div>
                                 
                                 <div class="detail-group">
-                                    <div class="label">Transaction ID</div>
+                                    <div class="label">ID de Transaction</div>
                                     <div class="value"><?php echo htmlspecialchars($payment['transaction_id'] ?? 'N/A'); ?></div>
                                 </div>
                                 
@@ -387,14 +406,14 @@ $page_title = "Payment Details";
                                 <div class="detail-group">
                                     <div class="label">Description</div>
                                     <div class="description-box">
-                                        <?php echo nl2br(htmlspecialchars($payment['description'] ?? 'No description available')); ?>
+                                        <?php echo nl2br(htmlspecialchars($payment['description'] ?? 'Aucune description disponible')); ?>
                                     </div>
                                 </div>
                                 <?php endif; ?>
                                 
                                 <?php if (!empty($payment['admin_notes'])): ?>
                                 <div class="detail-group">
-                                    <div class="label">Admin Notes</div>
+                                    <div class="label">Notes Administrateur</div>
                                     <div class="description-box">
                                         <?php echo nl2br(htmlspecialchars($payment['admin_notes'])); ?>
                                     </div>
@@ -402,36 +421,36 @@ $page_title = "Payment Details";
                                 <?php endif; ?>
                                 
                                 <div class="meta-info">
-                                    <p>Created on <?php echo date('F j, Y \a\t g:i a', strtotime($payment['created_at'])); ?></p>
+                                    <p>Créé le <?php echo date('d F Y \à G:i', strtotime($payment['created_at'])); ?></p>
                                     <?php if (isset($payment['updated_at'])): ?>
-                                        <p>Last updated on <?php echo date('F j, Y \a\t g:i a', strtotime($payment['updated_at'])); ?></p>
+                                        <p>Dernière mise à jour le <?php echo date('d F Y \à G:i', strtotime($payment['updated_at'])); ?></p>
                                     <?php endif; ?>
                                 </div>
                                 
                                 <div class="card mt-4">
                                     <div class="card-header">
-                                        <h4>Update Payment Status</h4>
+                                        <h4>Mettre à Jour le Statut du Paiement</h4>
                                     </div>
                                     <div class="card-body">
                                         <form method="POST" action="">
                                             <input type="hidden" name="update_status" value="1">
                                             <div class="form-group">
-                                                <label for="status">Status:</label>
+                                                <label for="status">Statut:</label>
                                                 <select name="status" id="status" class="form-control">
-                                                    <option value="pending" <?php echo $payment['status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                                                    <option value="paid" <?php echo $payment['status'] === 'paid' ? 'selected' : ''; ?>>Paid</option>
-                                                    <option value="cancelled" <?php echo $payment['status'] === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
-                                                    <option value="failed" <?php echo $payment['status'] === 'failed' ? 'selected' : ''; ?>>Failed</option>
+                                                    <option value="pending" <?php echo $payment['status'] === 'pending' ? 'selected' : ''; ?>>En Attente</option>
+                                                    <option value="paid" <?php echo $payment['status'] === 'paid' ? 'selected' : ''; ?>>Payé</option>
+                                                    <option value="cancelled" <?php echo $payment['status'] === 'cancelled' ? 'selected' : ''; ?>>Annulé</option>
+                                                    <option value="failed" <?php echo $payment['status'] === 'failed' ? 'selected' : ''; ?>>Échoué</option>
                                                 </select>
                                             </div>
                                             <div class="form-group">
-                                                <label for="admin_notes">Admin Notes:</label>
+                                                <label for="admin_notes">Notes Administrateur:</label>
                                                 <textarea name="admin_notes" id="admin_notes" class="form-control" rows="4"><?php echo htmlspecialchars($payment['admin_notes'] ?? ''); ?></textarea>
-                                                <small>Internal notes visible only to administrators</small>
+                                                <small>Notes internes visibles uniquement par les administrateurs</small>
                                             </div>
                                             <div class="form-actions">
                                                 <button type="submit" class="btn btn-primary">
-                                                    <i class="fas fa-save"></i> Update Payment
+                                                    <i class="fas fa-save"></i> Mettre à Jour le Paiement
                                                 </button>
                                             </div>
                                         </form>
@@ -442,12 +461,12 @@ $page_title = "Payment Details";
                             <div class="payment-sidebar">
                                 <div class="card sidebar-card">
                                     <div class="card-header">
-                                        <h4>User Information</h4>
+                                        <h4>Informations Utilisateur</h4>
                                     </div>
                                     <div class="card-body">
                                         <?php if (isset($payment['user_id']) && $payment['user_id']): ?>
                                             <div class="detail-group">
-                                                <div class="label">Name</div>
+                                                <div class="label">Nom</div>
                                                 <div class="value"><?php echo htmlspecialchars($payment['user_name']); ?></div>
                                             </div>
                                             
@@ -457,22 +476,22 @@ $page_title = "Payment Details";
                                             </div>
                                             
                                             <div class="detail-group">
-                                                <div class="label">Phone</div>
+                                                <div class="label">Téléphone</div>
                                                 <div class="value"><?php echo htmlspecialchars($payment['user_phone'] ?? 'N/A'); ?></div>
                                             </div>
                                             
                                             <div class="detail-group">
-                                                <div class="label">User ID</div>
+                                                <div class="label">ID Utilisateur</div>
                                                 <div class="value">#<?php echo $payment['user_id']; ?></div>
                                             </div>
                                             
                                             <a href="view-user.php?id=<?php echo $payment['user_id']; ?>" class="btn btn-primary btn-block mt-3">
-                                                <i class="fas fa-user"></i> View User Profile
+                                                <i class="fas fa-user"></i> Voir le Profil Utilisateur
                                             </a>
                                         <?php else: ?>
                                             <div class="empty-state">
                                                 <i class="fas fa-user-slash"></i>
-                                                <p>No user associated with this payment.</p>
+                                                <p>Aucun utilisateur associé à ce paiement.</p>
                                             </div>
                                         <?php endif; ?>
                                     </div>
@@ -480,12 +499,12 @@ $page_title = "Payment Details";
                                 
                                 <div class="card sidebar-card mt-4">
                                     <div class="card-header">
-                                        <h4>Property Information</h4>
+                                        <h4>Informations Propriété</h4>
                                     </div>
                                     <div class="card-body">
                                         <?php if (isset($payment['property_id']) && $payment['property_id']): ?>
                                             <div class="detail-group">
-                                                <div class="label">Identifier</div>
+                                                <div class="label">Identifiant</div>
                                                 <div class="value"><?php echo htmlspecialchars($payment['property_identifier'] ?? 'N/A'); ?></div>
                                             </div>
                                             
@@ -495,17 +514,17 @@ $page_title = "Payment Details";
                                             </div>
                                             
                                             <div class="detail-group">
-                                                <div class="label">Property ID</div>
+                                                <div class="label">ID Propriété</div>
                                                 <div class="value">#<?php echo $payment['property_id']; ?></div>
                                             </div>
                                             
                                             <a href="view-property.php?id=<?php echo $payment['property_id']; ?>" class="btn btn-primary btn-block mt-3">
-                                                <i class="fas fa-home"></i> View Property
+                                                <i class="fas fa-home"></i> Voir la Propriété
                                             </a>
                                         <?php else: ?>
                                             <div class="empty-state">
                                                 <i class="fas fa-building"></i>
-                                                <p>No property associated with this payment.</p>
+                                                <p>Aucune propriété associée à ce paiement.</p>
                                             </div>
                                         <?php endif; ?>
                                     </div>

@@ -6,7 +6,7 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
@@ -38,15 +38,15 @@ fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
 // Add CSV header
 fputcsv($output, [
     'ID',
-    'User ID',
-    'User Name',
-    'User Email',
+    'ID Utilisateur',
+    'Nom Utilisateur',
+    'Email Utilisateur',
     'Action',
-    'Entity Type',
-    'Entity ID',
-    'Details',
-    'IP Address',
-    'Date & Time'
+    'Type d\'Entité',
+    'ID de l\'Entité',
+    'Détails',
+    'Adresse IP',
+    'Date & Heure'
 ]);
 
 try {

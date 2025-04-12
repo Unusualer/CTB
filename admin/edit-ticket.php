@@ -6,14 +6,14 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
 
 // Check if ID is provided
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-    $_SESSION['error'] = "Ticket ID is required.";
+    $_SESSION['error'] = "L'ID du ticket est requis.";
     header("Location: tickets.php");
     exit();
 }
@@ -33,7 +33,7 @@ try {
     $users_stmt->execute();
     $users = $users_stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    $_SESSION['error'] = "Database error: " . $e->getMessage();
+    $_SESSION['error'] = "Erreur de base de données: " . $e->getMessage();
 }
 
 // Process form submission
@@ -50,22 +50,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validate user_id
     if (empty($user_id)) {
-        $errors[] = "User is required.";
+        $errors[] = "L'utilisateur est requis.";
     }
     
     // Validate subject
     if (empty($subject)) {
-        $errors[] = "Subject is required.";
+        $errors[] = "Le sujet est requis.";
     }
     
     // Validate description
     if (empty($description)) {
-        $errors[] = "Description is required.";
+        $errors[] = "La description est requise.";
     }
     
     // Validate status
     if (empty($status) || !in_array($status, $statuses)) {
-        $errors[] = "Valid status is required.";
+        $errors[] = "Un statut valide est requis.";
     }
     
     // If no errors, update ticket
@@ -110,20 +110,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Log the activity - include status change in the description if it changed
             $admin_id = $_SESSION['user_id'];
-            $log_description = "Updated ticket #$ticket_id: $subject";
+            $log_description = "Ticket mis à jour #$ticket_id: $subject";
             
             if ($current_status !== $status) {
-                $log_description .= " (Status changed from '" . ucfirst($current_status) . "' to '" . ucfirst($status) . "')";
+                $log_description .= " (Statut changé de '" . ucfirst($current_status) . "' à '" . ucfirst($status) . "')";
             }
             
             log_activity($db, $admin_id, 'update', 'ticket', $ticket_id, $log_description);
             
-            $_SESSION['success'] = "Ticket updated successfully.";
+            $_SESSION['success'] = "Ticket mis à jour avec succès.";
             header("Location: view-ticket.php?id=$ticket_id");
             exit();
             
         } catch (PDOException $e) {
-            $_SESSION['error'] = "Database error: " . $e->getMessage();
+            $_SESSION['error'] = "Erreur de base de données: " . $e->getMessage();
         }
     } else {
         $_SESSION['error'] = implode("<br>", $errors);
@@ -141,7 +141,7 @@ try {
     $stmt->execute();
     
     if ($stmt->rowCount() === 0) {
-        $_SESSION['error'] = "Ticket not found.";
+        $_SESSION['error'] = "Ticket non trouvé.";
         header("Location: tickets.php");
         exit();
     }
@@ -149,22 +149,29 @@ try {
     $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
     
 } catch (PDOException $e) {
-    $_SESSION['error'] = "Database error: " . $e->getMessage();
+    $_SESSION['error'] = "Erreur de base de données: " . $e->getMessage();
     header("Location: tickets.php");
     exit();
 }
 
 // Helper function to get status label
 function getStatusLabel($status) {
-    return ucfirst(str_replace('_', ' ', $status));
+    $labels = [
+        'open' => 'Ouvert',
+        'in_progress' => 'En cours',
+        'closed' => 'Fermé',
+        'reopened' => 'Réouvert'
+    ];
+    
+    return $labels[$status] ?? ucfirst(str_replace('_', ' ', $status));
 }
 
 // Page title
-$page_title = "Edit Ticket";
+$page_title = "Modifier le Ticket";
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -413,8 +420,8 @@ $page_title = "Edit Ticket";
             <div class="page-header">
                 <div class="breadcrumb">
                     <a href="tickets.php">Tickets</a>
-                    <a href="view-ticket.php?id=<?php echo $ticket_id; ?>">View Ticket</a>
-                    <span>Edit Ticket</span>
+                    <a href="view-ticket.php?id=<?php echo $ticket_id; ?>">Voir le Ticket</a>
+                    <span>Modifier le Ticket</span>
                 </div>
             </div>
 
@@ -439,15 +446,15 @@ $page_title = "Edit Ticket";
             <div class="content-wrapper">
                 <div class="card">
                     <div class="card-header">
-                        <h3><i class="fas fa-edit"></i> Edit Ticket #<?php echo $ticket_id; ?></h3>
+                        <h3><i class="fas fa-edit"></i> Modifier le Ticket #<?php echo $ticket_id; ?></h3>
                     </div>
                     <div class="card-body">
                         <form action="edit-ticket.php?id=<?php echo $ticket_id; ?>" method="POST" class="form">
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="user_id">User <span class="required">*</span></label>
+                                    <label for="user_id">Utilisateur <span class="required">*</span></label>
                                     <select id="user_id" name="user_id" required>
-                                        <option value="" disabled>Select User</option>
+                                        <option value="" disabled>Sélectionner un Utilisateur</option>
                                         <?php foreach ($users as $user): ?>
                                             <option value="<?php echo $user['id']; ?>" <?php echo $ticket['user_id'] == $user['id'] ? 'selected' : ''; ?>>
                                                 <?php echo htmlspecialchars($user['name'] . ' (' . $user['email'] . ')'); ?>
@@ -457,7 +464,7 @@ $page_title = "Edit Ticket";
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="status">Status <span class="required">*</span></label>
+                                    <label for="status">Statut <span class="required">*</span></label>
                                     <select id="status" name="status" required>
                                         <?php foreach ($statuses as $status): ?>
                                             <option value="<?php echo $status; ?>" <?php echo $ticket['status'] === $status ? 'selected' : ''; ?>>
@@ -469,7 +476,7 @@ $page_title = "Edit Ticket";
                             </div>
                             
                             <div class="form-group">
-                                <label for="subject">Subject <span class="required">*</span></label>
+                                <label for="subject">Sujet <span class="required">*</span></label>
                                 <input type="text" id="subject" name="subject" value="<?php echo htmlspecialchars($ticket['subject']); ?>" required>
                             </div>
                             
@@ -479,21 +486,21 @@ $page_title = "Edit Ticket";
                             </div>
                             
                             <div class="form-group">
-                                <label for="response">Response</label>
+                                <label for="response">Réponse</label>
                                 <textarea id="response" name="response" rows="4"><?php echo isset($ticket['response']) ? htmlspecialchars($ticket['response']) : ''; ?></textarea>
-                                <small>Response to the ticket (visible to the user)</small>
+                                <small>Réponse au ticket (visible par l'utilisateur)</small>
                             </div>
                             
                             <div class="form-group">
-                                <label for="admin_notes">Admin Notes</label>
+                                <label for="admin_notes">Notes Administrateur</label>
                                 <textarea id="admin_notes" name="admin_notes" rows="3"><?php echo isset($ticket['admin_notes']) ? htmlspecialchars($ticket['admin_notes']) : ''; ?></textarea>
-                                <small>Internal notes (not visible to the user)</small>
+                                <small>Notes internes (non visibles par l'utilisateur)</small>
                             </div>
                             
                             <div class="form-actions">
-                                <a href="view-ticket.php?id=<?php echo $ticket_id; ?>" class="btn btn-secondary">Cancel</a>
+                                <a href="view-ticket.php?id=<?php echo $ticket_id; ?>" class="btn btn-secondary">Annuler</a>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> Update Ticket
+                                    <i class="fas fa-save"></i> Mettre à Jour le Ticket
                                 </button>
                             </div>
                         </form>

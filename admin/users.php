@@ -6,7 +6,7 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
@@ -100,11 +100,11 @@ try {
 }
 
 // Page title
-$page_title = "User Management";
+$page_title = "Gestion des Utilisateurs";
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -120,10 +120,10 @@ $page_title = "User Management";
         <!-- Main Content -->
         <main class="main-content">
             <div class="page-header">
-                <h1>User Management</h1>
+                <h1>Gestion des Utilisateurs</h1>
                 <a href="add-user.php" class="btn btn-primary">
                     <i class="fas fa-plus"></i>
-                    Add New User
+                    Ajouter un Utilisateur
                 </a>
             </div>
 
@@ -153,7 +153,7 @@ $page_title = "User Management";
                             <i class="fas fa-user-tie"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Admin Users</h3>
+                            <h3>Administrateurs</h3>
                             <div class="stat-number"><?php echo isset($role_counts['admin']) ? $role_counts['admin'] : 0; ?></div>
                         </div>
                     </div>
@@ -163,7 +163,7 @@ $page_title = "User Management";
                             <i class="fas fa-user-cog"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Managers</h3>
+                            <h3>Gestionnaires</h3>
                             <div class="stat-number"><?php echo isset($role_counts['manager']) ? $role_counts['manager'] : 0; ?></div>
                         </div>
                     </div>
@@ -173,7 +173,7 @@ $page_title = "User Management";
                             <i class="fas fa-user"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Residents</h3>
+                            <h3>Résidents</h3>
                             <div class="stat-number"><?php echo isset($role_counts['resident']) ? $role_counts['resident'] : 0; ?></div>
                         </div>
                     </div>
@@ -183,11 +183,11 @@ $page_title = "User Management";
                             <i class="fas fa-users"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Total Users</h3>
+                            <h3>Total Utilisateurs</h3>
                             <div class="stat-number"><?php echo $total; ?></div>
                             <div class="stat-breakdown">
-                                <span><i class="fas fa-circle" style="color: #28a745;"></i> Active: <?php echo isset($status_counts['active']) ? $status_counts['active'] : 0; ?></span>
-                                <span><i class="fas fa-circle" style="color: #dc3545;"></i> Inactive: <?php echo isset($status_counts['inactive']) ? $status_counts['inactive'] : 0; ?></span>
+                                <span><i class="fas fa-circle" style="color: #28a745;"></i> Actifs: <?php echo isset($status_counts['active']) ? $status_counts['active'] : 0; ?></span>
+                                <span><i class="fas fa-circle" style="color: #dc3545;"></i> Inactifs: <?php echo isset($status_counts['inactive']) ? $status_counts['inactive'] : 0; ?></span>
                             </div>
                         </div>
                     </div>
@@ -196,33 +196,33 @@ $page_title = "User Management";
                 <!-- Filters -->
                 <div class="card user-filter-card">
                     <div class="card-header user-filter-header">
-                        <h3><i class="fas fa-filter"></i> Users List</h3>
+                        <h3><i class="fas fa-filter"></i> Liste des Utilisateurs</h3>
                         <form id="filter-form" action="users.php" method="GET" class="filter-form">
                             <div class="filter-wrapper">
                                 <div class="search-filter">
                                     <div class="search-bar">
                                         <i class="fas fa-search"></i>
-                                        <input type="text" placeholder="Search..." name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
+                                        <input type="text" placeholder="Rechercher..." name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
                                     </div>
                                 </div>
                                 <div class="filter-group">
-                                    <label for="role">Role:</label>
+                                    <label for="role">Rôle:</label>
                                     <select name="role" id="role" onchange="this.form.submit()">
-                                        <option value="">All Roles</option>
-                                        <option value="admin" <?php echo $role_filter === 'admin' ? 'selected' : ''; ?>>Admin</option>
-                                        <option value="manager" <?php echo $role_filter === 'manager' ? 'selected' : ''; ?>>Manager</option>
-                                        <option value="resident" <?php echo $role_filter === 'resident' ? 'selected' : ''; ?>>Resident</option>
+                                        <option value="">Tous les Rôles</option>
+                                        <option value="admin" <?php echo $role_filter === 'admin' ? 'selected' : ''; ?>>Administrateur</option>
+                                        <option value="manager" <?php echo $role_filter === 'manager' ? 'selected' : ''; ?>>Gestionnaire</option>
+                                        <option value="resident" <?php echo $role_filter === 'resident' ? 'selected' : ''; ?>>Résident</option>
                                     </select>
                                 </div>
                                 <div class="filter-group">
-                                    <label for="status">Status:</label>
+                                    <label for="status">Statut:</label>
                                     <select name="status" id="status" onchange="this.form.submit()">
-                                        <option value="">All Statuses</option>
-                                        <option value="active" <?php echo $status_filter === 'active' ? 'selected' : ''; ?>>Active</option>
-                                        <option value="inactive" <?php echo $status_filter === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
+                                        <option value="">Tous les Statuts</option>
+                                        <option value="active" <?php echo $status_filter === 'active' ? 'selected' : ''; ?>>Actif</option>
+                                        <option value="inactive" <?php echo $status_filter === 'inactive' ? 'selected' : ''; ?>>Inactif</option>
                                     </select>
                                 </div>
-                                <a href="users.php" class="reset-link">Reset</a>
+                                <a href="users.php" class="reset-link">Réinitialiser</a>
                             </div>
                         </form>
                     </div>
@@ -230,8 +230,8 @@ $page_title = "User Management";
                         <?php if (empty($users)): ?>
                             <div class="no-data">
                                 <i class="fas fa-users"></i>
-                                <p>No users found. Try adjusting your filters or add a new user.</p>
-                                <a href="add-user.php" class="btn btn-primary">Add New User</a>
+                                <p>Aucun utilisateur trouvé. Essayez d'ajuster vos filtres ou d'ajouter un nouvel utilisateur.</p>
+                                <a href="add-user.php" class="btn btn-primary">Ajouter un Utilisateur</a>
                             </div>
                         <?php else: ?>
                             <div class="table-responsive">
@@ -239,11 +239,11 @@ $page_title = "User Management";
                                     <thead>
                                         <tr>
                                             <th>ID</th>
-                                            <th>Name</th>
+                                            <th>Nom</th>
                                             <th>Email</th>
-                                            <th>Role</th>
-                                            <th>Status</th>
-                                            <th>Created</th>
+                                            <th>Rôle</th>
+                                            <th>Statut</th>
+                                            <th>Créé le</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>

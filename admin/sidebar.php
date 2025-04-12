@@ -30,28 +30,28 @@ if (!defined('BASE_PATH')) {
     
     <div class="sidebar-menu">
         <ul class="menu-items">
-            <li class="menu-title">Main</li>
+            <li class="menu-title">Principal</li>
             
             <li class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>admin/dashboard.php">
                     <i class="fas fa-tachometer-alt"></i>
-                    <span>Dashboard</span>
+                    <span>Tableau de Bord</span>
                 </a>
             </li>
             
-            <li class="menu-title">Management</li>
+            <li class="menu-title">Gestion</li>
             
             <li class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'users.php' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>admin/users.php">
                     <i class="fas fa-users"></i>
-                    <span>Users</span>
+                    <span>Utilisateurs</span>
                 </a>
             </li>
             
             <li class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'properties.php' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>admin/properties.php">
                     <i class="fas fa-building"></i>
-                    <span>Properties</span>
+                    <span>Propriétés</span>
                 </a>
             </li>
             
@@ -65,30 +65,30 @@ if (!defined('BASE_PATH')) {
             <li class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'payments.php' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>admin/payments.php">
                     <i class="fas fa-credit-card"></i>
-                    <span>Payments</span>
+                    <span>Paiements</span>
                 </a>
             </li>
             
-            <li class="menu-title">System</li>
+            <li class="menu-title">Système</li>
             
             <li class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'activity-log.php' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>admin/activity-log.php">
                     <i class="fas fa-history"></i>
-                    <span>Activity Log</span>
+                    <span>Journal d'Activité</span>
                 </a>
             </li>
             
             <li class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'settings.php' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>admin/settings.php">
                     <i class="fas fa-cog"></i>
-                    <span>Settings</span>
+                    <span>Paramètres</span>
                 </a>
             </li>
             
             <li class="menu-item">
                 <a href="<?php echo BASE_URL; ?>includes/logout.php">
                     <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
+                    <span>Déconnexion</span>
                 </a>
             </li>
         </ul>
@@ -100,7 +100,7 @@ if (!defined('BASE_PATH')) {
                 <input type="checkbox" id="darkModeToggle">
                 <span class="dark-mode-slider"></span>
             </label>
-            <span class="dark-mode-label">Dark Mode</span>
+            <span class="dark-mode-label">Mode Sombre</span>
         </div>
         <div class="sidebar-version">
             <span>v1.0.0</span>

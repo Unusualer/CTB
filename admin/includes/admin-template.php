@@ -101,7 +101,7 @@ try {
 }
 ?>
 <!DOCTYPE html>
-<html lang="en" data-theme="<?php echo isset($_COOKIE['darkMode']) && $_COOKIE['darkMode'] === 'true' ? 'dark' : 'light'; ?>">
+<html lang="fr" data-theme="<?php echo isset($_COOKIE['darkMode']) && $_COOKIE['darkMode'] === 'true' ? 'dark' : 'light'; ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -159,49 +159,49 @@ try {
         
         <!-- Sidebar Menu -->
         <div class="sidebar-menu">
-            <div class="sidebar-menu-category">Dashboard</div>
+            <div class="sidebar-menu-category">Tableau de Bord</div>
             
             <div class="sidebar-menu-item">
                 <a href="dashboard.php" class="sidebar-menu-link <?php echo $currentPage === 'dashboard.php' ? 'active' : ''; ?>">
                     <i class="fas fa-tachometer-alt"></i>
-                    <span class="sidebar-menu-text">Dashboard</span>
+                    <span class="sidebar-menu-text">Tableau de Bord</span>
                 </a>
             </div>
             
-            <div class="sidebar-menu-category">Residents</div>
+            <div class="sidebar-menu-category">Résidents</div>
             
             <div class="sidebar-menu-item">
                 <a href="residents.php" class="sidebar-menu-link <?php echo in_array($currentPage, ['residents.php', 'resident-details.php', 'add-resident.php', 'edit-resident.php']) ? 'active' : ''; ?>">
                     <i class="fas fa-users"></i>
-                    <span class="sidebar-menu-text">Manage Residents</span>
+                    <span class="sidebar-menu-text">Gérer les Résidents</span>
                     <?php if (isset($systemNotifications) && !empty($systemNotifications)): ?>
-                    <span class="sidebar-badge">New</span>
+                    <span class="sidebar-badge">Nouveau</span>
                     <?php endif; ?>
                 </a>
             </div>
             
-            <div class="sidebar-menu-category">Properties</div>
+            <div class="sidebar-menu-category">Propriétés</div>
             
             <div class="sidebar-menu-item">
                 <a href="properties.php" class="sidebar-menu-link <?php echo in_array($currentPage, ['properties.php', 'property-details.php', 'add-property.php', 'edit-property.php']) ? 'active' : ''; ?>">
                     <i class="fas fa-building"></i>
-                    <span class="sidebar-menu-text">Manage Properties</span>
+                    <span class="sidebar-menu-text">Gérer les Propriétés</span>
                 </a>
             </div>
             
             <div class="sidebar-menu-item">
                 <a href="units.php" class="sidebar-menu-link <?php echo in_array($currentPage, ['units.php', 'unit-details.php', 'add-unit.php', 'edit-unit.php']) ? 'active' : ''; ?>">
                     <i class="fas fa-door-open"></i>
-                    <span class="sidebar-menu-text">Manage Units</span>
+                    <span class="sidebar-menu-text">Gérer les Unités</span>
                 </a>
             </div>
             
-            <div class="sidebar-menu-category">Financial</div>
+            <div class="sidebar-menu-category">Finances</div>
             
             <div class="sidebar-menu-item">
                 <a href="payments.php" class="sidebar-menu-link <?php echo in_array($currentPage, ['payments.php', 'payment-details.php', 'add-payment.php']) ? 'active' : ''; ?>">
                     <i class="fas fa-credit-card"></i>
-                    <span class="sidebar-menu-text">Payments</span>
+                    <span class="sidebar-menu-text">Paiements</span>
                     <?php if (isset($pendingPayments) && $pendingPayments > 0): ?>
                     <span class="sidebar-badge"><?php echo $pendingPayments; ?></span>
                     <?php endif; ?>
@@ -211,7 +211,7 @@ try {
             <div class="sidebar-menu-item">
                 <a href="invoices.php" class="sidebar-menu-link <?php echo in_array($currentPage, ['invoices.php', 'invoice-details.php', 'create-invoice.php']) ? 'active' : ''; ?>">
                     <i class="fas fa-file-invoice-dollar"></i>
-                    <span class="sidebar-menu-text">Invoices</span>
+                    <span class="sidebar-menu-text">Factures</span>
                 </a>
             </div>
             
@@ -220,42 +220,42 @@ try {
             <div class="sidebar-menu-item">
                 <a href="tickets.php" class="sidebar-menu-link <?php echo in_array($currentPage, ['tickets.php', 'view-ticket.php']) ? 'active' : ''; ?>">
                     <i class="fas fa-ticket-alt"></i>
-                    <span class="sidebar-menu-text">Support Tickets</span>
+                    <span class="sidebar-menu-text">Tickets Support</span>
                     <?php if (isset($openTickets) && $openTickets > 0): ?>
                     <span class="sidebar-badge"><?php echo $openTickets; ?></span>
                     <?php endif; ?>
                 </a>
             </div>
             
-            <div class="sidebar-menu-category">Activity</div>
+            <div class="sidebar-menu-category">Activité</div>
             
             <div class="sidebar-menu-item">
                 <a href="activity-log.php" class="sidebar-menu-link <?php echo $currentPage === 'activity-log.php' ? 'active' : ''; ?>">
                     <i class="fas fa-history"></i>
-                    <span class="sidebar-menu-text">Activity Log</span>
+                    <span class="sidebar-menu-text">Journal d'Activité</span>
                 </a>
             </div>
             
-            <div class="sidebar-menu-category">Settings</div>
+            <div class="sidebar-menu-category">Paramètres</div>
             
             <div class="sidebar-menu-item">
                 <a href="profile.php" class="sidebar-menu-link <?php echo $currentPage === 'profile.php' ? 'active' : ''; ?>">
                     <i class="fas fa-user-cog"></i>
-                    <span class="sidebar-menu-text">Profile</span>
+                    <span class="sidebar-menu-text">Profil</span>
                 </a>
             </div>
             
             <div class="sidebar-menu-item">
                 <a href="settings.php" class="sidebar-menu-link <?php echo $currentPage === 'settings.php' ? 'active' : ''; ?>">
                     <i class="fas fa-cog"></i>
-                    <span class="sidebar-menu-text">Settings</span>
+                    <span class="sidebar-menu-text">Paramètres Système</span>
                 </a>
             </div>
             
             <div class="sidebar-menu-item">
                 <a href="../logout.php" class="sidebar-menu-link">
                     <i class="fas fa-sign-out-alt"></i>
-                    <span class="sidebar-menu-text">Logout</span>
+                    <span class="sidebar-menu-text">Déconnexion</span>
                 </a>
             </div>
         </div>
@@ -267,7 +267,7 @@ try {
                     <input type="checkbox" id="darkModeToggle">
                     <span class="slider round"></span>
                 </label>
-                <span class="toggle-label">Dark Mode</span>
+                <span class="toggle-label">Mode Sombre</span>
             </div>
         </div>
     </aside>
@@ -281,7 +281,7 @@ try {
             </button>
             
             <!-- Page title -->
-            <h1 class="page-title"><?php echo isset($page_title) ? htmlspecialchars($page_title) : 'Dashboard'; ?></h1>
+            <h1 class="page-title"><?php echo isset($page_title) ? htmlspecialchars($page_title) : 'Tableau de Bord'; ?></h1>
             
             <!-- Topbar Navbar -->
             <ul class="navbar-nav ml-auto">
@@ -294,7 +294,7 @@ try {
                         <?php endif; ?>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end" aria-labelledby="alertsDropdown">
-                        <h6 class="dropdown-header">Alerts Center</h6>
+                        <h6 class="dropdown-header">Centre de Notifications</h6>
                         
                         <?php if (!empty($systemNotifications)): ?>
                             <?php foreach ($systemNotifications as $notification): ?>
@@ -306,8 +306,8 @@ try {
                                         </div>
                                     </div>
                                     <div>
-                                        <div class="small text-gray-500">Today</div>
-                                        <span><?php echo $notification['count']; ?> new support tickets</span>
+                                        <div class="small text-gray-500">Aujourd'hui</div>
+                                        <span><?php echo $notification['count']; ?> nouveaux tickets support</span>
                                     </div>
                                 </a>
                                 <?php elseif ($notification['type'] === 'payments'): ?>
@@ -318,19 +318,19 @@ try {
                                         </div>
                                     </div>
                                     <div>
-                                        <div class="small text-gray-500">Today</div>
-                                        <span><?php echo $notification['count']; ?> pending payments</span>
+                                        <div class="small text-gray-500">Aujourd'hui</div>
+                                        <span><?php echo $notification['count']; ?> paiements en attente</span>
                                     </div>
                                 </a>
                                 <?php endif; ?>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <a class="dropdown-item d-flex align-items-center" href="#">
-                                <div>No new notifications</div>
+                                <div>Aucune nouvelle notification</div>
                             </a>
                         <?php endif; ?>
                         
-                        <a class="dropdown-item text-center small text-gray-500" href="activity-log.php">Show All Alerts</a>
+                        <a class="dropdown-item text-center small text-gray-500" href="activity-log.php">Voir Toutes les Notifications</a>
                     </div>
                 </li>
                 
@@ -348,20 +348,20 @@ try {
                     <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in" aria-labelledby="userDropdown">
                         <a class="dropdown-item" href="profile.php">
                             <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                            Profile
+                            Profil
                         </a>
                         <a class="dropdown-item" href="settings.php">
                             <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                            Settings
+                            Paramètres
                         </a>
                         <a class="dropdown-item" href="activity-log.php">
                             <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
-                            Activity Log
+                            Journal d'Activité
                         </a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="../logout.php">
                             <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                            Logout
+                            Déconnexion
                         </a>
                     </div>
                 </li>

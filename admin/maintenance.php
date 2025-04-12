@@ -6,7 +6,7 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
@@ -172,10 +172,10 @@ function getPriorityBadgeClass($priority) {
     }
 }
 
-$page_title = "Maintenance Updates";
+$page_title = "Mises à Jour de Maintenance";
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -191,10 +191,10 @@ $page_title = "Maintenance Updates";
         <!-- Main Content -->
         <main class="main-content">
             <div class="page-header">
-                <h1>Maintenance Updates</h1>
+                <h1>Mises à Jour de Maintenance</h1>
                 <a href="add-maintenance.php" class="btn btn-primary">
                     <i class="fas fa-plus"></i>
-                    Add Maintenance Update
+                    Ajouter une Mise à Jour
                 </a>
             </div>
 
@@ -217,10 +217,10 @@ $page_title = "Maintenance Updates";
                         <i class="fas fa-tools"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Total Updates</h3>
+                        <h3>Total des Mises à Jour</h3>
                         <div class="stat-number"><?php echo number_format($total); ?></div>
                         <div class="stat-breakdown">
-                            <span>All time</span>
+                            <span>Tout le temps</span>
                         </div>
                     </div>
                 </div>
@@ -230,10 +230,10 @@ $page_title = "Maintenance Updates";
                         <i class="fas fa-calendar-check"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Upcoming</h3>
+                        <h3>À Venir</h3>
                         <div class="stat-number"><?php echo isset($upcoming_stats['count']) ? number_format($upcoming_stats['count']) : 0; ?></div>
                         <div class="stat-breakdown">
-                            <span>Next 7 days</span>
+                            <span>7 prochains jours</span>
                         </div>
                     </div>
                 </div>
@@ -243,11 +243,11 @@ $page_title = "Maintenance Updates";
                         <i class="fas fa-chart-pie"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Status</h3>
+                        <h3>Statut</h3>
                         <div class="stat-breakdown">
-                            <span><i class="fas fa-circle" style="color: var(--status-info);"></i> Scheduled: <?php echo isset($status_stats['scheduled']) ? $status_stats['scheduled'] : 0; ?></span>
-                            <span><i class="fas fa-circle" style="color: var(--status-primary);"></i> In Progress: <?php echo isset($status_stats['in_progress']) ? $status_stats['in_progress'] : 0; ?></span>
-                            <span><i class="fas fa-circle" style="color: var(--status-success);"></i> Completed: <?php echo isset($status_stats['completed']) ? $status_stats['completed'] : 0; ?></span>
+                            <span><i class="fas fa-circle" style="color: var(--status-info);"></i> Planifiée: <?php echo isset($status_stats['scheduled']) ? $status_stats['scheduled'] : 0; ?></span>
+                            <span><i class="fas fa-circle" style="color: var(--status-primary);"></i> En Cours: <?php echo isset($status_stats['in_progress']) ? $status_stats['in_progress'] : 0; ?></span>
+                            <span><i class="fas fa-circle" style="color: var(--status-success);"></i> Terminée: <?php echo isset($status_stats['completed']) ? $status_stats['completed'] : 0; ?></span>
                         </div>
                     </div>
                 </div>
@@ -257,58 +257,60 @@ $page_title = "Maintenance Updates";
                         <i class="fas fa-exclamation-triangle"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Priority</h3>
+                        <h3>Priorité</h3>
                         <div class="stat-breakdown">
-                            <span><i class="fas fa-circle" style="color: var(--status-danger);"></i> Emergency: <?php echo isset($priority_stats['emergency']) ? $priority_stats['emergency'] : 0; ?></span>
-                            <span><i class="fas fa-circle" style="color: var(--status-warning);"></i> High: <?php echo isset($priority_stats['high']) ? $priority_stats['high'] : 0; ?></span>
-                            <span><i class="fas fa-circle" style="color: var(--status-info);"></i> Medium: <?php echo isset($priority_stats['medium']) ? $priority_stats['medium'] : 0; ?></span>
+                            <span><i class="fas fa-circle" style="color: var(--priority-success);"></i> Basse: <?php echo isset($priority_stats['low']) ? $priority_stats['low'] : 0; ?></span>
+                            <span><i class="fas fa-circle" style="color: var(--priority-info);"></i> Moyenne: <?php echo isset($priority_stats['medium']) ? $priority_stats['medium'] : 0; ?></span>
+                            <span><i class="fas fa-circle" style="color: var(--priority-warning);"></i> Haute: <?php echo isset($priority_stats['high']) ? $priority_stats['high'] : 0; ?></span>
+                            <span><i class="fas fa-circle" style="color: var(--priority-danger);"></i> Urgente: <?php echo isset($priority_stats['emergency']) ? $priority_stats['emergency'] : 0; ?></span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Filters -->
-            <div class="card user-filter-card">
-                <div class="card-header user-filter-header">
-                    <h3><i class="fas fa-filter"></i> Maintenance List</h3>
+            <div class="card maintenance-filter-card">
+                <div class="card-header maintenance-filter-header">
+                    <h3><i class="fas fa-filter"></i> Liste des Mises à Jour</h3>
                     <form id="filter-form" action="maintenance.php" method="GET" class="filter-form">
                         <div class="filter-wrapper">
                             <div class="search-filter">
                                 <div class="search-bar">
                                     <i class="fas fa-search"></i>
-                                    <input type="text" placeholder="Search maintenance updates..." name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
+                                    <input type="text" placeholder="Rechercher..." name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
                                 </div>
                             </div>
                             <div class="filter-group">
-                                <label for="status">Status:</label>
+                                <label for="status">Statut:</label>
                                 <select name="status" id="status" onchange="this.form.submit()">
-                                    <option value="">All Statuses</option>
-                                    <option value="scheduled" <?php echo $status_filter === 'scheduled' ? 'selected' : ''; ?>>Scheduled</option>
-                                    <option value="in_progress" <?php echo $status_filter === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
-                                    <option value="completed" <?php echo $status_filter === 'completed' ? 'selected' : ''; ?>>Completed</option>
-                                    <option value="delayed" <?php echo $status_filter === 'delayed' ? 'selected' : ''; ?>>Delayed</option>
-                                    <option value="cancelled" <?php echo $status_filter === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
+                                    <option value="">Tous les Statuts</option>
+                                    <option value="scheduled" <?php echo $status_filter === 'scheduled' ? 'selected' : ''; ?>>Planifiée</option>
+                                    <option value="in_progress" <?php echo $status_filter === 'in_progress' ? 'selected' : ''; ?>>En Cours</option>
+                                    <option value="completed" <?php echo $status_filter === 'completed' ? 'selected' : ''; ?>>Terminée</option>
+                                    <option value="delayed" <?php echo $status_filter === 'delayed' ? 'selected' : ''; ?>>Retardée</option>
+                                    <option value="cancelled" <?php echo $status_filter === 'cancelled' ? 'selected' : ''; ?>>Annulée</option>
                                 </select>
                             </div>
                             <div class="filter-group">
-                                <label for="priority">Priority:</label>
+                                <label for="priority">Priorité:</label>
                                 <select name="priority" id="priority" onchange="this.form.submit()">
-                                    <option value="">All Priorities</option>
-                                    <option value="low" <?php echo $priority_filter === 'low' ? 'selected' : ''; ?>>Low</option>
-                                    <option value="medium" <?php echo $priority_filter === 'medium' ? 'selected' : ''; ?>>Medium</option>
-                                    <option value="high" <?php echo $priority_filter === 'high' ? 'selected' : ''; ?>>High</option>
-                                    <option value="emergency" <?php echo $priority_filter === 'emergency' ? 'selected' : ''; ?>>Emergency</option>
+                                    <option value="">Toutes les Priorités</option>
+                                    <option value="low" <?php echo $priority_filter === 'low' ? 'selected' : ''; ?>>Basse</option>
+                                    <option value="medium" <?php echo $priority_filter === 'medium' ? 'selected' : ''; ?>>Moyenne</option>
+                                    <option value="high" <?php echo $priority_filter === 'high' ? 'selected' : ''; ?>>Haute</option>
+                                    <option value="emergency" <?php echo $priority_filter === 'emergency' ? 'selected' : ''; ?>>Urgente</option>
                                 </select>
                             </div>
                             <div class="filter-group">
-                                <label for="date_from">From:</label>
+                                <label for="date_from">De:</label>
                                 <input type="date" id="date_from" name="date_from" value="<?php echo $date_from; ?>">
                             </div>
                             <div class="filter-group">
-                                <label for="date_to">To:</label>
+                                <label for="date_to">À:</label>
                                 <input type="date" id="date_to" name="date_to" value="<?php echo $date_to; ?>">
                             </div>
-                            <a href="maintenance.php" class="reset-link">Reset</a>
+                            <button type="submit" class="btn btn-primary btn-sm">Appliquer</button>
+                            <a href="maintenance.php" class="reset-link">Réinitialiser</a>
                         </div>
                     </form>
                 </div>
@@ -316,8 +318,8 @@ $page_title = "Maintenance Updates";
                     <?php if (empty($maintenance_items)): ?>
                         <div class="empty-state">
                             <i class="fas fa-tools"></i>
-                            <p>No maintenance updates found. Try adjusting your filters or add a new maintenance update.</p>
-                            <a href="add-maintenance.php" class="btn btn-primary">Add Maintenance Update</a>
+                            <p>Aucune mise à jour trouvée. Essayez d'ajuster vos filtres ou d'ajouter une nouvelle mise à jour.</p>
+                            <a href="add-maintenance.php" class="btn btn-primary">Ajouter une Mise à Jour</a>
                         </div>
                     <?php else: ?>
                         <div class="table-responsive">
@@ -325,12 +327,13 @@ $page_title = "Maintenance Updates";
                                 <thead>
                                     <tr>
                                         <th>ID</th>
-                                        <th>Title</th>
-                                        <th>Location</th>
-                                        <th>Dates</th>
-                                        <th>Status</th>
-                                        <th>Priority</th>
-                                        <th class="actions-header">Actions</th>
+                                        <th>Titre</th>
+                                        <th>Emplacement</th>
+                                        <th>Statut</th>
+                                        <th>Priorité</th>
+                                        <th>Date de Début</th>
+                                        <th>Date de Fin</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -339,10 +342,6 @@ $page_title = "Maintenance Updates";
                                             <td class="align-middle"><?php echo $update['id']; ?></td>
                                             <td class="align-middle"><?php echo htmlspecialchars($update['title']); ?></td>
                                             <td class="align-middle"><?php echo htmlspecialchars($update['location']); ?></td>
-                                            <td class="align-middle">
-                                                <div><strong>Start:</strong> <?php echo date('M d, Y', strtotime($update['start_date'])); ?></div>
-                                                <div><strong>End:</strong> <?php echo date('M d, Y', strtotime($update['end_date'])); ?></div>
-                                            </td>
                                             <td class="align-middle">
                                                 <span class="status-indicator status-<?php echo getStatusBadgeClass($update['status']); ?>">
                                                     <?php echo ucfirst(str_replace('_', ' ', $update['status'])); ?>
@@ -353,14 +352,20 @@ $page_title = "Maintenance Updates";
                                                     <?php echo ucfirst($update['priority']); ?>
                                                 </span>
                                             </td>
+                                            <td class="align-middle">
+                                                <div><?php echo date('M d, Y', strtotime($update['start_date'])); ?></div>
+                                            </td>
+                                            <td class="align-middle">
+                                                <div><?php echo date('M d, Y', strtotime($update['end_date'])); ?></div>
+                                            </td>
                                             <td class="actions">
-                                                <a href="view-maintenance.php?id=<?php echo $update['id']; ?>" class="btn-icon" title="View Maintenance Update">
+                                                <a href="view-maintenance.php?id=<?php echo $update['id']; ?>" class="btn-icon" title="Voir la Mise à Jour">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="edit-maintenance.php?id=<?php echo $update['id']; ?>" class="btn-icon" title="Edit Maintenance Update">
+                                                <a href="edit-maintenance.php?id=<?php echo $update['id']; ?>" class="btn-icon" title="Modifier la Mise à Jour">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <button type="button" class="btn-icon delete-maintenance" data-id="<?php echo $update['id']; ?>" title="Delete Maintenance Update">
+                                                <button type="button" class="btn-icon delete-maintenance" data-id="<?php echo $update['id']; ?>" title="Supprimer la Mise à Jour">
                                                     <i class="fas fa-trash-alt"></i>
                                                 </button>
                                             </td>
@@ -403,17 +408,17 @@ $page_title = "Maintenance Updates";
     <div id="deleteModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Confirm Deletion</h3>
+                <h3>Confirmation de Suppression</h3>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete this maintenance update? This action cannot be undone.</p>
+                <p>Êtes-vous sûr de vouloir supprimer cette mise à jour de maintenance? Cette action ne peut être annulée.</p>
             </div>
             <div class="modal-footer">
                 <form id="deleteForm" action="delete-maintenance.php" method="POST">
                     <input type="hidden" name="maintenance_id" id="deleteMaintenanceId">
-                    <button type="button" class="btn btn-secondary close-modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="button" class="btn btn-secondary close-modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger">Supprimer</button>
                 </form>
             </div>
         </div>

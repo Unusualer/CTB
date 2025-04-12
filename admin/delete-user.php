@@ -6,21 +6,21 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
 
 // Check if this is a POST request
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $_SESSION['error'] = "Invalid request method.";
+    $_SESSION['error'] = "Méthode de requête invalide.";
     header("Location: users.php");
     exit();
 }
 
 // Check if user_id is provided
 if (!isset($_POST['user_id']) || empty($_POST['user_id'])) {
-    $_SESSION['error'] = "User ID is required.";
+    $_SESSION['error'] = "L'ID de l'utilisateur est requis.";
     header("Location: users.php");
     exit();
 }
@@ -29,7 +29,7 @@ $user_id = (int)$_POST['user_id'];
 
 // Prevent admin from deleting their own account
 if ($user_id === (int)$_SESSION['user_id']) {
-    $_SESSION['error'] = "You cannot delete your own account.";
+    $_SESSION['error'] = "Vous ne pouvez pas supprimer votre propre compte.";
     header("Location: users.php");
     exit();
 }
@@ -44,7 +44,7 @@ try {
     $check_stmt->execute();
     
     if ($check_stmt->rowCount() === 0) {
-        $_SESSION['error'] = "User not found.";
+        $_SESSION['error'] = "Utilisateur non trouvé.";
         header("Location: users.php");
         exit();
     }
@@ -77,7 +77,7 @@ try {
     // Commit transaction
     $db->commit();
     
-    $_SESSION['success'] = "User deleted successfully.";
+    $_SESSION['success'] = "Utilisateur supprimé avec succès.";
     header("Location: users.php");
     exit();
     
@@ -87,7 +87,7 @@ try {
         $db->rollBack();
     }
     
-    $_SESSION['error'] = "Database error: " . $e->getMessage();
+    $_SESSION['error'] = "Erreur de base de données : " . $e->getMessage();
     header("Location: users.php");
     exit();
 } 

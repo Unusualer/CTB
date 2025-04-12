@@ -6,7 +6,7 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
@@ -177,11 +177,11 @@ try {
 }
 
 // Page title
-$page_title = "Admin Dashboard";
+$page_title = "Tableau de Bord Admin";
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -199,11 +199,11 @@ $page_title = "Admin Dashboard";
         <main class="main-content">
             <div class="dashboard-content">
                 <div class="page-header">
-                    <h1>Dashboard Overview</h1>
+                    <h1>Aperçu du Tableau de Bord</h1>
                     <div class="header-actions">
                         <button class="btn btn-primary">
                             <i class="fas fa-download"></i>
-                            Generate Report
+                            Générer un Rapport
                         </button>
                     </div>
                 </div>
@@ -215,12 +215,12 @@ $page_title = "Admin Dashboard";
                             <i class="fas fa-users"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Total Users</h3>
+                            <h3>Utilisateurs Totaux</h3>
                             <p class="stat-number"><?php echo number_format($total_users); ?></p>
                             <div class="stat-breakdown">
-                                <span><i class="fas fa-user-shield"></i> Admins: <?php echo number_format($total_admins ?? 0); ?></span>
-                                <span><i class="fas fa-user-tie"></i> Managers: <?php echo number_format($total_managers); ?></span>
-                                <span><i class="fas fa-user"></i> Residents: <?php echo number_format($total_residents); ?></span>
+                                <span><i class="fas fa-user-shield"></i> Administrateurs: <?php echo number_format($total_admins ?? 0); ?></span>
+                                <span><i class="fas fa-user-tie"></i> Gestionnaires: <?php echo number_format($total_managers); ?></span>
+                                <span><i class="fas fa-user"></i> Résidents: <?php echo number_format($total_residents); ?></span>
                             </div>
                         </div>
                     </div>
@@ -230,12 +230,12 @@ $page_title = "Admin Dashboard";
                             <i class="fas fa-building"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Properties</h3>
+                            <h3>Propriétés</h3>
                             <p class="stat-number"><?php echo number_format($total_properties); ?></p>
                             <div class="stat-breakdown">
-                                <span><i class="fas fa-home"></i> Apartments: <?php echo number_format($total_apartments); ?></span>
-                                <span><i class="fas fa-car"></i> Parking: <?php echo number_format($total_parking); ?></span>
-                                <span><i class="fas fa-check-circle"></i> Occupied: <?php echo number_format($occupied_properties); ?></span>
+                                <span><i class="fas fa-home"></i> Appartements: <?php echo number_format($total_apartments); ?></span>
+                                <span><i class="fas fa-car"></i> Places de Parking: <?php echo number_format($total_parking); ?></span>
+                                <span><i class="fas fa-check-circle"></i> Occupées: <?php echo number_format($occupied_properties); ?></span>
                             </div>
                         </div>
                     </div>
@@ -248,9 +248,9 @@ $page_title = "Admin Dashboard";
                             <h3>Tickets</h3>
                             <p class="stat-number"><?php echo number_format($total_tickets); ?></p>
                             <div class="stat-breakdown">
-                                <span><i class="fas fa-exclamation-circle"></i> Open: <?php echo number_format($open_tickets); ?></span>
-                                <span><i class="fas fa-clock"></i> In Progress: <?php echo number_format($in_progress_tickets); ?></span>
-                                <span><i class="fas fa-check"></i> Closed: <?php echo number_format($closed_tickets); ?></span>
+                                <span><i class="fas fa-exclamation-circle"></i> Ouverts: <?php echo number_format($open_tickets); ?></span>
+                                <span><i class="fas fa-clock"></i> En Cours: <?php echo number_format($in_progress_tickets); ?></span>
+                                <span><i class="fas fa-check"></i> Fermés: <?php echo number_format($closed_tickets); ?></span>
                             </div>
                         </div>
                     </div>

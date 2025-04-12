@@ -6,7 +6,7 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
@@ -107,11 +107,11 @@ try {
 }
 
 // Page title
-$page_title = "Property Management";
+$page_title = "Gestion des Propriétés";
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -127,7 +127,7 @@ $page_title = "Property Management";
         <!-- Main Content -->
         <main class="main-content">
             <div class="page-header">
-                <h1>Property Management</h1>
+                <h1>Gestion des Propriétés</h1>
             </div>
 
             <?php if (isset($_SESSION['success'])): ?>
@@ -156,7 +156,7 @@ $page_title = "Property Management";
                             <i class="fas fa-home"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Apartments</h3>
+                            <h3>Appartements</h3>
                             <div class="stat-number"><?php echo isset($type_counts['apartment']) ? $type_counts['apartment'] : 0; ?></div>
                         </div>
                     </div>
@@ -166,7 +166,7 @@ $page_title = "Property Management";
                             <i class="fas fa-car"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Parking Spots</h3>
+                            <h3>Places de Parking</h3>
                             <div class="stat-number"><?php echo isset($type_counts['parking']) ? $type_counts['parking'] : 0; ?></div>
                         </div>
                     </div>
@@ -176,7 +176,7 @@ $page_title = "Property Management";
                             <i class="fas fa-check-circle"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Assigned</h3>
+                            <h3>Assignées</h3>
                             <div class="stat-number"><?php echo $assigned_count; ?></div>
                         </div>
                     </div>
@@ -186,11 +186,11 @@ $page_title = "Property Management";
                             <i class="fas fa-building"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Total Properties</h3>
+                            <h3>Total Propriétés</h3>
                             <div class="stat-number"><?php echo $total; ?></div>
                             <div class="stat-breakdown">
-                                <span><i class="fas fa-circle" style="color: #28a745;"></i> Assigned: <?php echo $assigned_count; ?></span>
-                                <span><i class="fas fa-circle" style="color: #dc3545;"></i> Unassigned: <?php echo $unassigned_count; ?></span>
+                                <span><i class="fas fa-circle" style="color: #28a745;"></i> Assignées: <?php echo $assigned_count; ?></span>
+                                <span><i class="fas fa-circle" style="color: #dc3545;"></i> Non Assignées: <?php echo $unassigned_count; ?></span>
                             </div>
                         </div>
                     </div>
@@ -199,32 +199,32 @@ $page_title = "Property Management";
                 <!-- Filters -->
                 <div class="card user-filter-card">
                     <div class="card-header user-filter-header">
-                        <h3><i class="fas fa-filter"></i> Properties List</h3>
+                        <h3><i class="fas fa-filter"></i> Liste des Propriétés</h3>
                         <form id="filter-form" action="properties.php" method="GET" class="filter-form">
                             <div class="filter-wrapper">
                                 <div class="search-filter">
                                     <div class="search-bar">
                                         <i class="fas fa-search"></i>
-                                        <input type="text" placeholder="Search..." name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
+                                        <input type="text" placeholder="Rechercher..." name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
                                     </div>
                                 </div>
                                 <div class="filter-group">
                                     <label for="type">Type:</label>
                                     <select name="type" id="type" onchange="this.form.submit()">
-                                        <option value="">All Types</option>
-                                        <option value="apartment" <?php echo $type_filter === 'apartment' ? 'selected' : ''; ?>>Apartment</option>
+                                        <option value="">Tous les Types</option>
+                                        <option value="apartment" <?php echo $type_filter === 'apartment' ? 'selected' : ''; ?>>Appartement</option>
                                         <option value="parking" <?php echo $type_filter === 'parking' ? 'selected' : ''; ?>>Parking</option>
                                     </select>
                                 </div>
                                 <div class="filter-group">
-                                    <label for="status">Status:</label>
+                                    <label for="status">Statut:</label>
                                     <select name="status" id="status" onchange="this.form.submit()">
-                                        <option value="">All Statuses</option>
-                                        <option value="assigned" <?php echo $status_filter === 'assigned' ? 'selected' : ''; ?>>Assigned</option>
-                                        <option value="unassigned" <?php echo $status_filter === 'unassigned' ? 'selected' : ''; ?>>Unassigned</option>
+                                        <option value="">Tous les Statuts</option>
+                                        <option value="assigned" <?php echo $status_filter === 'assigned' ? 'selected' : ''; ?>>Assignée</option>
+                                        <option value="unassigned" <?php echo $status_filter === 'unassigned' ? 'selected' : ''; ?>>Non Assignée</option>
                                     </select>
                                 </div>
-                                <a href="properties.php" class="reset-link">Reset</a>
+                                <a href="properties.php" class="reset-link">Réinitialiser</a>
                             </div>
                         </form>
                     </div>
@@ -232,7 +232,7 @@ $page_title = "Property Management";
                         <?php if (empty($properties)): ?>
                             <div class="no-data">
                                 <i class="fas fa-building"></i>
-                                <p>No properties found. Try adjusting your filters.</p>
+                                <p>Aucune propriété trouvée. Essayez d'ajuster vos filtres.</p>
                             </div>
                         <?php else: ?>
                             <div class="table-responsive">
@@ -240,10 +240,10 @@ $page_title = "Property Management";
                                     <thead>
                                         <tr>
                                             <th>ID</th>
-                                            <th>Identifier</th>
+                                            <th>Identifiant</th>
                                             <th>Type</th>
-                                            <th>Assigned To</th>
-                                            <th>Created</th>
+                                            <th>Assignée à</th>
+                                            <th>Créée le</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>

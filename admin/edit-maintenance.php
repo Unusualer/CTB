@@ -6,14 +6,14 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
 
 // Check if ID is provided
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-    $_SESSION['error'] = "Maintenance ID is required.";
+    $_SESSION['error'] = "L'ID de maintenance est requis.";
     header("Location: maintenance.php");
     exit();
 }
@@ -51,40 +51,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validate title
     if (empty($title)) {
-        $errors[] = "Title is required.";
+        $errors[] = "Le titre est requis.";
     }
     
     // Validate description
     if (empty($description)) {
-        $errors[] = "Description is required.";
+        $errors[] = "La description est requise.";
     }
     
     // Validate location
     if (empty($location)) {
-        $errors[] = "Location is required.";
+        $errors[] = "L'emplacement est requis.";
     }
     
     // Validate dates
     if (empty($start_date)) {
-        $errors[] = "Start date is required.";
+        $errors[] = "La date de début est requise.";
     }
     
     if (empty($end_date)) {
-        $errors[] = "End date is required.";
+        $errors[] = "La date de fin est requise.";
     }
     
     if (!empty($start_date) && !empty($end_date) && strtotime($end_date) < strtotime($start_date)) {
-        $errors[] = "End date must be after start date.";
+        $errors[] = "La date de fin doit être postérieure à la date de début.";
     }
     
     // Validate status
     if (empty($status) || !in_array($status, $statuses)) {
-        $errors[] = "Valid status is required.";
+        $errors[] = "Un statut valide est requis.";
     }
     
     // Validate priority
     if (empty($priority) || !in_array($priority, $priorities)) {
-        $errors[] = "Valid priority is required.";
+        $errors[] = "Une priorité valide est requise.";
     }
     
     // If no errors, update maintenance update
@@ -122,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $admin_id = $_SESSION['user_id'];
             log_activity($db, $admin_id, 'update', 'maintenance', $maintenance_id, "Updated maintenance record #$maintenance_id: $title");
             
-            $_SESSION['success'] = "Maintenance update modified successfully.";
+            $_SESSION['success'] = "Mise à jour de maintenance modifiée avec succès.";
             header("Location: view-maintenance.php?id=$maintenance_id");
             exit();
             
@@ -145,7 +145,7 @@ try {
     $stmt->execute();
     
     if ($stmt->rowCount() === 0) {
-        $_SESSION['error'] = "Maintenance record not found.";
+        $_SESSION['error'] = "Enregistrement de maintenance non trouvé.";
         header("Location: maintenance.php");
         exit();
     }
@@ -159,19 +159,19 @@ try {
 }
 
 // Page title
-$page_title = "Edit Maintenance";
+$page_title = "Modifier la Maintenance";
 
 // Helper function to get priority label
 function getPriorityLabel($priority) {
     switch ($priority) {
         case 'low':
-            return 'Low';
+            return 'Basse';
         case 'medium':
-            return 'Medium';
+            return 'Moyenne';
         case 'high':
-            return 'High';
+            return 'Haute';
         case 'emergency':
-            return 'Emergency';
+            return 'Urgence';
         default:
             return ucfirst($priority);
     }
@@ -179,12 +179,25 @@ function getPriorityLabel($priority) {
 
 // Helper function to get status label
 function getStatusLabel($status) {
-    return ucfirst(str_replace('_', ' ', $status));
+    switch($status) {
+        case 'scheduled':
+            return 'Planifié';
+        case 'in_progress':
+            return 'En Cours';
+        case 'completed':
+            return 'Terminé';
+        case 'delayed':
+            return 'Retardé';
+        case 'cancelled':
+            return 'Annulé';
+        default:
+            return ucfirst(str_replace('_', ' ', $status));
+    }
 }
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -202,8 +215,8 @@ function getStatusLabel($status) {
             <div class="page-header">
                 <div class="breadcrumb">
                     <a href="maintenance.php">Maintenance</a>
-                    <a href="view-maintenance.php?id=<?php echo $maintenance_id; ?>">View Maintenance</a>
-                    <span>Edit Maintenance</span>
+                    <a href="view-maintenance.php?id=<?php echo $maintenance_id; ?>">Voir la Maintenance</a>
+                    <span>Modifier la Maintenance</span>
                 </div>
             </div>
 
@@ -228,37 +241,37 @@ function getStatusLabel($status) {
             <div class="content-wrapper">
                 <div class="card">
                     <div class="card-header">
-                        <h3><i class="fas fa-edit"></i> Edit Maintenance Update #<?php echo $maintenance_id; ?></h3>
+                        <h3><i class="fas fa-edit"></i> Modifier la Maintenance #<?php echo $maintenance_id; ?></h3>
                     </div>
                     <div class="card-body">
                         <form action="edit-maintenance.php?id=<?php echo $maintenance_id; ?>" method="POST" class="form">
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="title">Title <span class="required">*</span></label>
+                                    <label for="title">Titre <span class="required">*</span></label>
                                     <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($maintenance['title']); ?>" required>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="location">Location <span class="required">*</span></label>
+                                    <label for="location">Emplacement <span class="required">*</span></label>
                                     <input type="text" id="location" name="location" value="<?php echo htmlspecialchars($maintenance['location']); ?>" required>
                                 </div>
                             </div>
                             
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="start_date">Start Date <span class="required">*</span></label>
+                                    <label for="start_date">Date de Début <span class="required">*</span></label>
                                     <input type="date" id="start_date" name="start_date" value="<?php echo htmlspecialchars($maintenance['start_date']); ?>" required>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="end_date">End Date <span class="required">*</span></label>
+                                    <label for="end_date">Date de Fin <span class="required">*</span></label>
                                     <input type="date" id="end_date" name="end_date" value="<?php echo htmlspecialchars($maintenance['end_date']); ?>" required>
                                 </div>
                             </div>
                             
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="status">Status <span class="required">*</span></label>
+                                    <label for="status">Statut <span class="required">*</span></label>
                                     <select id="status" name="status" required>
                                         <?php foreach ($statuses as $status): ?>
                                             <option value="<?php echo $status; ?>" <?php echo $maintenance['status'] === $status ? 'selected' : ''; ?>>
@@ -269,7 +282,7 @@ function getStatusLabel($status) {
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="priority">Priority <span class="required">*</span></label>
+                                    <label for="priority">Priorité <span class="required">*</span></label>
                                     <select id="priority" name="priority" required>
                                         <?php foreach ($priorities as $priority): ?>
                                             <option value="<?php echo $priority; ?>" <?php echo $maintenance['priority'] === $priority ? 'selected' : ''; ?>>
@@ -286,8 +299,8 @@ function getStatusLabel($status) {
                             </div>
                             
                             <div class="form-actions">
-                                <a href="view-maintenance.php?id=<?php echo $maintenance_id; ?>" class="btn btn-secondary">Cancel</a>
-                                <button type="submit" class="btn btn-primary">Update Maintenance</button>
+                                <a href="view-maintenance.php?id=<?php echo $maintenance_id; ?>" class="btn btn-secondary">Annuler</a>
+                                <button type="submit" class="btn btn-primary">Mettre à Jour la Maintenance</button>
                             </div>
                         </form>
                     </div>
@@ -310,7 +323,7 @@ function getStatusLabel($status) {
                 const endDate = new Date(endDateInput.value);
                 
                 if (endDate < startDate) {
-                    endDateInput.setCustomValidity('End date must be after start date');
+                    endDateInput.setCustomValidity('La date de fin doit être postérieure à la date de début');
                 } else {
                     endDateInput.setCustomValidity('');
                 }

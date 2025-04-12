@@ -6,21 +6,21 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
 
 // Check if this is a POST request
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $_SESSION['error'] = "Invalid request method.";
+    $_SESSION['error'] = "Méthode de requête invalide.";
     header("Location: payments.php");
     exit();
 }
 
 // Check if payment_id is provided
 if (!isset($_POST['payment_id']) || empty($_POST['payment_id'])) {
-    $_SESSION['error'] = "Payment ID is required.";
+    $_SESSION['error'] = "L'ID du paiement est requis.";
     header("Location: payments.php");
     exit();
 }
@@ -37,7 +37,7 @@ try {
     $check_stmt->execute();
     
     if ($check_stmt->rowCount() === 0) {
-        $_SESSION['error'] = "Payment not found.";
+        $_SESSION['error'] = "Paiement non trouvé.";
         header("Location: payments.php");
         exit();
     }
@@ -54,13 +54,13 @@ try {
     
     // Log the activity
     $admin_id = $_SESSION['user_id'];
-    $description = "Deleted payment: Amount $" . number_format($payment_info['amount'], 2) . " (ID: $payment_id, Property ID: " . $payment_info['property_id'] . ")";
+    $description = "Paiement supprimé : Montant $" . number_format($payment_info['amount'], 2) . " (ID: $payment_id, ID Propriété: " . $payment_info['property_id'] . ")";
     log_activity($db, $admin_id, 'delete', 'payment', $payment_id, $description);
     
     // Commit transaction
     $db->commit();
     
-    $_SESSION['success'] = "Payment deleted successfully.";
+    $_SESSION['success'] = "Paiement supprimé avec succès.";
     header("Location: payments.php");
     exit();
     
@@ -70,7 +70,7 @@ try {
         $db->rollBack();
     }
     
-    $_SESSION['error'] = "Database error: " . $e->getMessage();
+    $_SESSION['error'] = "Erreur de base de données : " . $e->getMessage();
     header("Location: payments.php");
     exit();
 } 

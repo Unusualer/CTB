@@ -6,14 +6,14 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
 
 // Check if payment ID is provided
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    $_SESSION['error'] = "Invalid payment ID.";
+    $_SESSION['error'] = "ID de paiement invalide.";
     header("Location: payments.php");
     exit();
 }
@@ -39,7 +39,7 @@ try {
     $stmt->execute();
     
     if ($stmt->rowCount() === 0) {
-        $_SESSION['error'] = "Payment not found.";
+        $_SESSION['error'] = "Paiement non trouvé.";
         header("Location: payments.php");
         exit();
     }
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Validate required fields
         if (empty($property_id) || empty($amount) || $amount <= 0) {
-            throw new Exception("Property and amount are required fields. Amount must be greater than zero.");
+            throw new Exception("La propriété et le montant sont requis. Le montant doit être supérieur à zéro.");
         }
         
         // Update payment record
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Log activity
             log_activity($db, $_SESSION['user_id'], 'update', 'payment', $payment_id, "Updated payment #$payment_id");
             
-            $success = "Payment updated successfully!";
+            $success = "Paiement mis à jour avec succès !";
             
             // Refresh payment data
             $query = "SELECT p.*, p.type as payment_method 
@@ -105,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             $payment = $stmt->fetch(PDO::FETCH_ASSOC);
         } else {
-            throw new Exception("Failed to update payment. Please try again.");
+            throw new Exception("Échec de la mise à jour du paiement. Veuillez réessayer.");
         }
         
     } catch (PDOException $e) {
@@ -131,11 +131,11 @@ try {
 }
 
 // Page title
-$page_title = "Edit Payment";
+$page_title = "Modifier le Paiement";
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -376,8 +376,8 @@ $page_title = "Edit Payment";
         <main class="main-content">
             <div class="page-header">
                 <div class="breadcrumb">
-                    <a href="payments.php">Payments</a>
-                    <span>Edit Payment</span>
+                    <a href="payments.php">Paiements</a>
+                    <span>Modifier le Paiement</span>
                 </div>
             </div>
 
@@ -396,15 +396,15 @@ $page_title = "Edit Payment";
             <div class="content-wrapper">
                 <div class="card">
                     <div class="card-header">
-                        <h3><i class="fas fa-edit"></i> Edit Payment</h3>
+                        <h3><i class="fas fa-edit"></i> Modifier le Paiement</h3>
                     </div>
                     <div class="card-body">
                         <form action="edit-payment.php?id=<?php echo $payment_id; ?>" method="POST">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="property_id">Property <span class="text-danger">*</span></label>
+                                    <label for="property_id">Propriété <span class="text-danger">*</span></label>
                                     <select name="property_id" id="property_id" required>
-                                        <option value="">-- Select Property --</option>
+                                        <option value="">-- Sélectionner une Propriété --</option>
                                         <?php foreach ($properties as $property): ?>
                                             <option value="<?php echo $property['id']; ?>" <?php echo $payment['property_id'] == $property['id'] ? 'selected' : ''; ?>>
                                                 <?php echo htmlspecialchars($property['identifier']); ?> - <?php echo htmlspecialchars($property['type']); ?>
@@ -416,36 +416,36 @@ $page_title = "Edit Payment";
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="amount">Amount ($) <span class="text-danger">*</span></label>
+                                    <label for="amount">Montant ($) <span class="text-danger">*</span></label>
                                     <input type="number" step="0.01" min="0.01" name="amount" id="amount" value="<?php echo htmlspecialchars($payment['amount']); ?>" required>
                                 </div>
                             </div>
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="payment_method">Payment Method <span class="text-danger">*</span></label>
+                                    <label for="payment_method">Méthode de Paiement <span class="text-danger">*</span></label>
                                     <select name="payment_method" id="payment_method" required>
-                                        <option value="transfer" <?php echo $payment['payment_method'] === 'transfer' ? 'selected' : ''; ?>>Bank Transfer</option>
-                                        <option value="cheque" <?php echo $payment['payment_method'] === 'cheque' ? 'selected' : ''; ?>>Cheque</option>
+                                        <option value="transfer" <?php echo $payment['payment_method'] === 'transfer' ? 'selected' : ''; ?>>Virement Bancaire</option>
+                                        <option value="cheque" <?php echo $payment['payment_method'] === 'cheque' ? 'selected' : ''; ?>>Chèque</option>
                                     </select>
                                 </div>
                             </div>
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="month">Payment Month <span class="text-danger">*</span></label>
+                                    <label for="month">Mois de Paiement <span class="text-danger">*</span></label>
                                     <input type="date" name="month" id="month" value="<?php echo htmlspecialchars($payment['month']); ?>" required>
                                 </div>
                             </div>
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="status">Status <span class="text-danger">*</span></label>
+                                    <label for="status">Statut <span class="text-danger">*</span></label>
                                     <select name="status" id="status" required>
-                                        <option value="paid" <?php echo $payment['status'] === 'paid' ? 'selected' : ''; ?>>Paid</option>
-                                        <option value="pending" <?php echo $payment['status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                                        <option value="cancelled" <?php echo $payment['status'] === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
-                                        <option value="failed" <?php echo $payment['status'] === 'failed' ? 'selected' : ''; ?>>Failed</option>
+                                        <option value="paid" <?php echo $payment['status'] === 'paid' ? 'selected' : ''; ?>>Payé</option>
+                                        <option value="pending" <?php echo $payment['status'] === 'pending' ? 'selected' : ''; ?>>En Attente</option>
+                                        <option value="cancelled" <?php echo $payment['status'] === 'cancelled' ? 'selected' : ''; ?>>Annulé</option>
+                                        <option value="failed" <?php echo $payment['status'] === 'failed' ? 'selected' : ''; ?>>Échoué</option>
                                     </select>
                                 </div>
                             </div>
@@ -458,9 +458,9 @@ $page_title = "Edit Payment";
                             </div>
                             
                             <div class="form-actions">
-                                <a href="payments.php" class="btn btn-secondary">Cancel</a>
+                                <a href="payments.php" class="btn btn-secondary">Annuler</a>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> Update Payment
+                                    <i class="fas fa-save"></i> Mettre à Jour le Paiement
                                 </button>
                             </div>
                         </form>

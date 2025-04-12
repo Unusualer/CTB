@@ -58,7 +58,7 @@ try {
 } catch (PDOException $e) {
     // Log error
     error_log("Database error in admin sidebar: " . $e->getMessage());
-    $error_message = "A database error occurred.";
+    $error_message = "Une erreur de base de données s'est produite.";
 }
 
 // Define current page
@@ -75,40 +75,40 @@ $new_messages = 0;  // This would be populated from a database query
     </div>
     
     <div class="admin-profile">
-        <img src="../images/avatar-placeholder.png" alt="Admin Profile">
-        <h4><?= htmlspecialchars($admin['name'] ?? 'Administrator') ?></h4>
-        <p>Administrator</p>
+        <img src="../images/avatar-placeholder.png" alt="Profil Admin">
+        <h4><?= htmlspecialchars($admin['name'] ?? 'Administrateur') ?></h4>
+        <p>Administrateur</p>
     </div>
     
     <div class="sidebar-menu">
         <div class="menu-section">
-            <div class="menu-header">Main</div>
+            <div class="menu-header">Principal</div>
             
             <a href="dashboard.php" class="menu-item <?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
                 <div class="menu-icon"><i class="fas fa-tachometer-alt"></i></div>
-                <span class="menu-text">Dashboard</span>
+                <span class="menu-text">Tableau de Bord</span>
             </a>
             
             <a href="analytics.php" class="menu-item <?php echo ($current_page == 'analytics.php') ? 'active' : ''; ?>">
                 <div class="menu-icon"><i class="fas fa-chart-bar"></i></div>
-                <span class="menu-text">Analytics</span>
+                <span class="menu-text">Analytiques</span>
             </a>
         </div>
         
         <div class="menu-section">
-            <div class="menu-header">Management</div>
+            <div class="menu-header">Gestion</div>
             
             <a href="properties.php" class="menu-item has-submenu <?php echo (strpos($current_page, 'properties') !== false) ? 'open' : ''; ?>">
                 <div class="menu-icon"><i class="fas fa-building"></i></div>
-                <span class="menu-text">Properties</span>
+                <span class="menu-text">Propriétés</span>
             </a>
             
             <div class="submenu">
                 <a href="properties-list.php" class="submenu-item <?php echo ($current_page == 'properties-list.php') ? 'active' : ''; ?>">
-                    Property List
+                    Liste des Propriétés
                 </a>
                 <a href="properties-add.php" class="submenu-item <?php echo ($current_page == 'properties-add.php') ? 'active' : ''; ?>">
-                    Add Property
+                    Ajouter une Propriété
                 </a>
                 <a href="properties-maintenance.php" class="submenu-item <?php echo ($current_page == 'properties-maintenance.php') ? 'active' : ''; ?>">
                     Maintenance
@@ -117,29 +117,29 @@ $new_messages = 0;  // This would be populated from a database query
             
             <a href="residents.php" class="menu-item has-submenu <?php echo (strpos($current_page, 'residents') !== false) ? 'open' : ''; ?>">
                 <div class="menu-icon"><i class="fas fa-users"></i></div>
-                <span class="menu-text">Residents</span>
+                <span class="menu-text">Résidents</span>
             </a>
             
             <div class="submenu">
                 <a href="residents-list.php" class="submenu-item <?php echo ($current_page == 'residents-list.php') ? 'active' : ''; ?>">
-                    Resident List
+                    Liste des Résidents
                 </a>
                 <a href="residents-add.php" class="submenu-item <?php echo ($current_page == 'residents-add.php') ? 'active' : ''; ?>">
-                    Add Resident
+                    Ajouter un Résident
                 </a>
                 <a href="residents-approval.php" class="submenu-item <?php echo ($current_page == 'residents-approval.php') ? 'active' : ''; ?>">
-                    Approval Requests
+                    Demandes d'Approbation
                 </a>
             </div>
             
             <a href="payments.php" class="menu-item <?php echo ($current_page == 'payments.php') ? 'active' : ''; ?>">
                 <div class="menu-icon"><i class="fas fa-money-bill-wave"></i></div>
-                <span class="menu-text">Payments</span>
+                <span class="menu-text">Paiements</span>
             </a>
             
             <a href="tickets.php" class="menu-item <?php echo ($current_page == 'tickets.php') ? 'active' : ''; ?>">
                 <div class="menu-icon"><i class="fas fa-ticket-alt"></i></div>
-                <span class="menu-text">Support Tickets</span>
+                <span class="menu-text">Tickets de Support</span>
                 <?php if ($pending_tickets > 0): ?>
                 <span class="menu-badge"><?php echo $pending_tickets; ?></span>
                 <?php endif; ?>
@@ -159,31 +159,31 @@ $new_messages = 0;  // This would be populated from a database query
             
             <a href="announcements.php" class="menu-item <?php echo ($current_page == 'announcements.php') ? 'active' : ''; ?>">
                 <div class="menu-icon"><i class="fas fa-bullhorn"></i></div>
-                <span class="menu-text">Announcements</span>
+                <span class="menu-text">Annonces</span>
             </a>
             
             <a href="activity-log.php" class="menu-item <?php echo ($current_page == 'activity-log.php') ? 'active' : ''; ?>">
                 <div class="menu-icon"><i class="fas fa-history"></i></div>
-                <span class="menu-text">Activity Log</span>
+                <span class="menu-text">Journal d'Activité</span>
             </a>
         </div>
         
         <div class="menu-section">
-            <div class="menu-header">Settings</div>
+            <div class="menu-header">Paramètres</div>
             
             <a href="profile.php" class="menu-item <?php echo ($current_page == 'profile.php') ? 'active' : ''; ?>">
                 <div class="menu-icon"><i class="fas fa-user-cog"></i></div>
-                <span class="menu-text">Profile</span>
+                <span class="menu-text">Profil</span>
             </a>
             
             <a href="settings.php" class="menu-item <?php echo ($current_page == 'settings.php') ? 'active' : ''; ?>">
                 <div class="menu-icon"><i class="fas fa-cog"></i></div>
-                <span class="menu-text">System Settings</span>
+                <span class="menu-text">Paramètres Système</span>
             </a>
             
             <a href="../logout.php" class="menu-item">
                 <div class="menu-icon"><i class="fas fa-sign-out-alt"></i></div>
-                <span class="menu-text">Logout</span>
+                <span class="menu-text">Déconnexion</span>
             </a>
         </div>
     </div>

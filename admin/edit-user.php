@@ -6,14 +6,14 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
 
 // Check if ID is provided
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-    $_SESSION['error'] = "User ID is required.";
+    $_SESSION['error'] = "L'ID de l'utilisateur est requis.";
     header("Location: users.php");
     exit();
 }
@@ -36,24 +36,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validate name
     if (empty($name)) {
-        $errors[] = "Name is required.";
+        $errors[] = "Le nom est requis.";
     }
     
     // Validate email
     if (empty($email)) {
-        $errors[] = "Email is required.";
+        $errors[] = "L'email est requis.";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = "Invalid email format.";
+        $errors[] = "Format d'email invalide.";
     }
     
     // Validate role
     if (empty($role) || !in_array($role, $roles)) {
-        $errors[] = "Valid role is required.";
+        $errors[] = "Un rôle valide est requis.";
     }
     
     // Validate status
     if (empty($status) || !in_array($status, $statuses)) {
-        $errors[] = "Valid status is required.";
+        $errors[] = "Un statut valide est requis.";
     }
     
     // If no errors, update user
@@ -82,9 +82,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $confirm_password = $_POST['confirm_password'];
                 
                 if ($password !== $confirm_password) {
-                    $_SESSION['error'] = "Passwords do not match.";
+                    $_SESSION['error'] = "Les mots de passe ne correspondent pas.";
                 } elseif (strlen($password) < 8) {
-                    $_SESSION['error'] = "Password must be at least 8 characters.";
+                    $_SESSION['error'] = "Le mot de passe doit contenir au moins 8 caractères.";
                 } else {
                     // Hash the password
                     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
@@ -102,17 +102,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $log_stmt = $db->prepare("INSERT INTO activity_log (user_id, action, description) 
                                      VALUES (:admin_id, 'update', :description)");
             
-            $description = "Updated user information for user ID: $user_id";
+            $description = "Informations utilisateur mises à jour pour l'ID utilisateur : $user_id";
             $log_stmt->bindParam(':admin_id', $admin_id);
             $log_stmt->bindParam(':description', $description);
             $log_stmt->execute();
             
-            $_SESSION['success'] = "User updated successfully.";
+            $_SESSION['success'] = "Utilisateur mis à jour avec succès.";
             header("Location: view-user.php?id=$user_id");
             exit();
             
         } catch (PDOException $e) {
-            $_SESSION['error'] = "Database error: " . $e->getMessage();
+            $_SESSION['error'] = "Erreur de base de données : " . $e->getMessage();
         }
     } else {
         $_SESSION['error'] = implode("<br>", $errors);
@@ -130,7 +130,7 @@ try {
     $stmt->execute();
     
     if ($stmt->rowCount() === 0) {
-        $_SESSION['error'] = "User not found.";
+        $_SESSION['error'] = "Utilisateur non trouvé.";
         header("Location: users.php");
         exit();
     }
@@ -138,17 +138,17 @@ try {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     
 } catch (PDOException $e) {
-    $_SESSION['error'] = "Database error: " . $e->getMessage();
+    $_SESSION['error'] = "Erreur de base de données : " . $e->getMessage();
     header("Location: users.php");
     exit();
 }
 
 // Page title
-$page_title = "Edit User";
+$page_title = "Modifier l'Utilisateur";
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -387,9 +387,9 @@ $page_title = "Edit User";
         <main class="main-content">
             <div class="page-header">
                 <div class="breadcrumb">
-                    <a href="users.php">Users</a>
-                    <a href="view-user.php?id=<?php echo $user_id; ?>">View User</a>
-                    <span>Edit User</span>
+                    <a href="users.php">Utilisateurs</a>
+                    <a href="view-user.php?id=<?php echo $user_id; ?>">Voir l'Utilisateur</a>
+                    <span>Modifier l'Utilisateur</span>
                 </div>
             </div>
 
@@ -414,13 +414,13 @@ $page_title = "Edit User";
             <div class="content-wrapper">
                 <div class="card">
                     <div class="card-header">
-                        <h3><i class="fas fa-user-edit"></i> Edit User</h3>
+                        <h3><i class="fas fa-user-edit"></i> Modifier l'Utilisateur</h3>
                     </div>
                     <div class="card-body">
                         <form action="edit-user.php?id=<?php echo $user_id; ?>" method="POST" class="form">
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="name">Name <span class="required">*</span></label>
+                                    <label for="name">Nom <span class="required">*</span></label>
                                     <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($user['name']); ?>" required>
                                 </div>
                                 
@@ -430,51 +430,76 @@ $page_title = "Edit User";
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="phone">Phone</label>
+                                    <label for="phone">Téléphone</label>
                                     <input type="text" id="phone" name="phone" value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>">
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="role">Role <span class="required">*</span></label>
+                                    <label for="role">Rôle <span class="required">*</span></label>
                                     <select id="role" name="role" required>
                                         <?php foreach ($roles as $role): ?>
                                             <option value="<?php echo $role; ?>" <?php echo $user['role'] === $role ? 'selected' : ''; ?>>
-                                                <?php echo ucfirst($role); ?>
+                                                <?php 
+                                                    switch($role) {
+                                                        case 'admin':
+                                                            echo 'Administrateur';
+                                                            break;
+                                                        case 'manager':
+                                                            echo 'Gestionnaire';
+                                                            break;
+                                                        case 'resident':
+                                                            echo 'Résident';
+                                                            break;
+                                                        default:
+                                                            echo ucfirst($role);
+                                                    }
+                                                ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="status">Status <span class="required">*</span></label>
+                                    <label for="status">Statut <span class="required">*</span></label>
                                     <select id="status" name="status" required>
                                         <?php foreach ($statuses as $status): ?>
                                             <option value="<?php echo $status; ?>" <?php echo $user['status'] === $status ? 'selected' : ''; ?>>
-                                                <?php echo ucfirst($status); ?>
+                                                <?php 
+                                                    switch($status) {
+                                                        case 'active':
+                                                            echo 'Actif';
+                                                            break;
+                                                        case 'inactive':
+                                                            echo 'Inactif';
+                                                            break;
+                                                        default:
+                                                            echo ucfirst($status);
+                                                    }
+                                                ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
                             </div>
                             
-                            <h4 class="form-section-title">Change Password (leave blank to keep current password)</h4>
+                            <h4 class="form-section-title">Changer le mot de passe (laisser vide pour conserver le mot de passe actuel)</h4>
                             
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="password">New Password</label>
+                                    <label for="password">Nouveau mot de passe</label>
                                     <input type="password" id="password" name="password" minlength="8">
-                                    <small>Minimum 8 characters</small>
+                                    <small>Minimum 8 caractères</small>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="confirm_password">Confirm New Password</label>
+                                    <label for="confirm_password">Confirmer le nouveau mot de passe</label>
                                     <input type="password" id="confirm_password" name="confirm_password">
                                 </div>
                             </div>
                             
                             <div class="form-actions">
-                                <a href="view-user.php?id=<?php echo $user_id; ?>" class="btn btn-secondary">Cancel</a>
-                                <button type="submit" class="btn btn-primary">Update User</button>
+                                <a href="view-user.php?id=<?php echo $user_id; ?>" class="btn btn-secondary">Annuler</a>
+                                <button type="submit" class="btn btn-primary">Mettre à jour l'utilisateur</button>
                             </div>
                         </form>
                     </div>
@@ -491,7 +516,7 @@ $page_title = "Edit User";
         
         function validatePassword() {
             if (password.value !== confirmPassword.value) {
-                confirmPassword.setCustomValidity("Passwords don't match");
+                confirmPassword.setCustomValidity("Les mots de passe ne correspondent pas");
             } else {
                 confirmPassword.setCustomValidity('');
             }

@@ -6,7 +6,7 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
     } catch (PDOException $e) {
-        $error_message = "Database error: " . $e->getMessage();
+        $_SESSION['error'] = "Erreur de base de données : " . $e->getMessage();
         
         // Preserve form data
         $maintenance = [
@@ -132,10 +132,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$page_title = "Add Maintenance Update";
+$page_title = "Ajouter une Mise à Jour de Maintenance";
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -372,7 +372,7 @@ $page_title = "Add Maintenance Update";
             <div class="page-header">
                 <div class="breadcrumb">
                     <a href="maintenance.php">Maintenance</a>
-                    <span>Add Maintenance Update</span>
+                    <span>Ajouter une Mise à Jour de Maintenance</span>
                 </div>
             </div>
 
@@ -391,22 +391,22 @@ $page_title = "Add Maintenance Update";
             <div class="content-wrapper">
             <div class="card">
                 <div class="card-header">
-                        <h3><i class="fas fa-tools"></i> Add Maintenance Update</h3>
+                        <h3><i class="fas fa-tools"></i> Ajouter une Mise à Jour de Maintenance</h3>
                 </div>
                 <div class="card-body">
                     <form action="add-maintenance.php" method="POST">
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="title">Title <span class="text-danger">*</span></label>
+                                <label for="title">Titre <span class="text-danger">*</span></label>
                                     <input type="text" name="title" id="title" value="<?php echo htmlspecialchars($maintenance['title']); ?>" required>
                                 </div>
                         </div>
                         
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="location">Location <span class="text-danger">*</span></label>
+                                <label for="location">Emplacement <span class="text-danger">*</span></label>
                                     <input type="text" name="location" id="location" value="<?php echo htmlspecialchars($maintenance['location']); ?>" required>
-                                <small class="form-text text-muted">Specify where in the residential complex the maintenance will occur.</small>
+                                <small class="form-text text-muted">Spécifiez où dans le complexe résidentiel la maintenance aura lieu.</small>
                             </div>
                         </div>
                         
@@ -414,53 +414,53 @@ $page_title = "Add Maintenance Update";
                             <div class="form-group">
                                 <label for="description">Description <span class="text-danger">*</span></label>
                                     <textarea name="description" id="description" required><?php echo htmlspecialchars($maintenance['description']); ?></textarea>
-                                <small class="form-text text-muted">Provide detailed information about the maintenance work being performed.</small>
+                                <small class="form-text text-muted">Fournissez des informations détaillées sur les travaux de maintenance à effectuer.</small>
                             </div>
                         </div>
                         
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="start_date">Start Date <span class="text-danger">*</span></label>
+                                <label for="start_date">Date de Début <span class="text-danger">*</span></label>
                                     <input type="date" name="start_date" id="start_date" value="<?php echo htmlspecialchars($maintenance['start_date']); ?>" required>
                                 </div>
                         </div>
                         
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="end_date">End Date <span class="text-danger">*</span></label>
+                                <label for="end_date">Date de Fin <span class="text-danger">*</span></label>
                                     <input type="date" name="end_date" id="end_date" value="<?php echo htmlspecialchars($maintenance['end_date']); ?>" required>
                                 </div>
                         </div>
                         
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="status">Status <span class="text-danger">*</span></label>
+                                <label for="status">Statut <span class="text-danger">*</span></label>
                                     <select name="status" id="status" required>
-                                    <option value="scheduled" <?php echo $maintenance['status'] === 'scheduled' ? 'selected' : ''; ?>>Scheduled</option>
-                                    <option value="in_progress" <?php echo $maintenance['status'] === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
-                                    <option value="completed" <?php echo $maintenance['status'] === 'completed' ? 'selected' : ''; ?>>Completed</option>
-                                    <option value="delayed" <?php echo $maintenance['status'] === 'delayed' ? 'selected' : ''; ?>>Delayed</option>
-                                    <option value="cancelled" <?php echo $maintenance['status'] === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
+                                    <option value="scheduled" <?php echo $maintenance['status'] === 'scheduled' ? 'selected' : ''; ?>>Planifié</option>
+                                    <option value="in_progress" <?php echo $maintenance['status'] === 'in_progress' ? 'selected' : ''; ?>>En Cours</option>
+                                    <option value="completed" <?php echo $maintenance['status'] === 'completed' ? 'selected' : ''; ?>>Terminé</option>
+                                    <option value="delayed" <?php echo $maintenance['status'] === 'delayed' ? 'selected' : ''; ?>>Retardé</option>
+                                    <option value="cancelled" <?php echo $maintenance['status'] === 'cancelled' ? 'selected' : ''; ?>>Annulé</option>
                                 </select>
                             </div>
                         </div>
                         
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="priority">Priority <span class="text-danger">*</span></label>
+                                <label for="priority">Priorité <span class="text-danger">*</span></label>
                                     <select name="priority" id="priority" required>
-                                    <option value="low" <?php echo $maintenance['priority'] === 'low' ? 'selected' : ''; ?>>Low</option>
-                                    <option value="medium" <?php echo $maintenance['priority'] === 'medium' ? 'selected' : ''; ?>>Medium</option>
-                                    <option value="high" <?php echo $maintenance['priority'] === 'high' ? 'selected' : ''; ?>>High</option>
-                                    <option value="emergency" <?php echo $maintenance['priority'] === 'emergency' ? 'selected' : ''; ?>>Emergency</option>
+                                    <option value="low" <?php echo $maintenance['priority'] === 'low' ? 'selected' : ''; ?>>Basse</option>
+                                    <option value="medium" <?php echo $maintenance['priority'] === 'medium' ? 'selected' : ''; ?>>Moyenne</option>
+                                    <option value="high" <?php echo $maintenance['priority'] === 'high' ? 'selected' : ''; ?>>Haute</option>
+                                    <option value="emergency" <?php echo $maintenance['priority'] === 'emergency' ? 'selected' : ''; ?>>Urgence</option>
                                 </select>
                             </div>
                         </div>
                         
                         <div class="form-actions">
-                            <a href="maintenance.php" class="btn btn-secondary">Cancel</a>
+                            <a href="maintenance.php" class="btn btn-secondary">Annuler</a>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-plus-circle"></i> Add Maintenance Update
+                                    <i class="fas fa-plus-circle"></i> Ajouter la Mise à Jour de Maintenance
                                 </button>
                         </div>
                     </form>

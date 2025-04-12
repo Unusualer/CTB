@@ -6,7 +6,7 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
@@ -146,7 +146,7 @@ try {
     $recent_stats = $recent_stmt->fetch(PDO::FETCH_ASSOC);
     
 } catch (PDOException $e) {
-    $_SESSION['error'] = "Database error: " . $e->getMessage();
+    $_SESSION['error'] = "Erreur de base de données : " . $e->getMessage();
     $activity_logs = [];
     $total = 0;
     $total_pages = 0;
@@ -180,11 +180,11 @@ function getActionBadgeClass($action) {
 }
 
 // Page title
-$page_title = "Activity Log";
+$page_title = "Journal d'Activité";
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -200,11 +200,11 @@ $page_title = "Activity Log";
         <!-- Main Content -->
         <main class="main-content">
             <div class="page-header">
-                <h1>Activity Log</h1>
+                <h1>Journal d'Activité</h1>
                 <div class="page-header-actions">
                     <button class="btn btn-secondary" onclick="exportActivityLog()">
                         <i class="fas fa-download"></i>
-                        Export Log
+                        Exporter le Journal
                     </button>
                 </div>
             </div>
@@ -216,10 +216,10 @@ $page_title = "Activity Log";
                         <i class="fas fa-list-ul"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Total Activities</h3>
+                        <h3>Total des Activités</h3>
                         <div class="stat-number"><?php echo isset($activity_stats['total_count']) ? number_format($activity_stats['total_count']) : 0; ?></div>
                         <div class="stat-breakdown">
-                            <span>All time</span>
+                            <span>Tout le temps</span>
                         </div>
                     </div>
                 </div>
@@ -229,10 +229,10 @@ $page_title = "Activity Log";
                         <i class="fas fa-clock"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Recent Activity</h3>
+                        <h3>Activité Récente</h3>
                         <div class="stat-number"><?php echo isset($recent_stats['count']) ? number_format($recent_stats['count']) : 0; ?></div>
                         <div class="stat-breakdown">
-                            <span>Last 24 hours</span>
+                            <span>Dernières 24 heures</span>
                         </div>
                     </div>
                 </div>
@@ -242,7 +242,7 @@ $page_title = "Activity Log";
                         <i class="fas fa-edit"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Top Actions</h3>
+                        <h3>Actions Principales</h3>
                         <div class="stat-breakdown">
                             <?php
                             $top_actions = array_slice($action_stats, 0, 3, true);
@@ -260,7 +260,7 @@ $page_title = "Activity Log";
                         <i class="fas fa-database"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Entity Types</h3>
+                        <h3>Types d'Entités</h3>
                         <div class="stat-breakdown">
                             <?php
                             $top_entities = array_slice($entity_stats, 0, 3, true);
@@ -276,19 +276,19 @@ $page_title = "Activity Log";
             <!-- Filters -->
             <div class="card user-filter-card">
                 <div class="card-header user-filter-header">
-                    <h3><i class="fas fa-filter"></i> Activity Log</h3>
+                    <h3><i class="fas fa-filter"></i> Journal d'Activité</h3>
                     <form id="filter-form" action="activity-log.php" method="GET" class="filter-form">
                         <div class="filter-wrapper">
                             <div class="search-filter">
                                 <div class="search-bar">
                                     <i class="fas fa-search"></i>
-                                    <input type="text" placeholder="Search activity logs..." name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
+                                    <input type="text" placeholder="Rechercher dans les journaux..." name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
                                 </div>
                             </div>
                             <div class="filter-group">
-                                <label for="user_id">User:</label>
+                                <label for="user_id">Utilisateur:</label>
                                 <select name="user_id" id="user_id" onchange="this.form.submit()">
-                                    <option value="0">All Users</option>
+                                    <option value="0">Tous les Utilisateurs</option>
                                     <?php foreach ($users as $user): ?>
                                         <option value="<?php echo $user['id']; ?>" <?php echo $user_filter === $user['id'] ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($user['name']); ?>
@@ -299,7 +299,7 @@ $page_title = "Activity Log";
                             <div class="filter-group">
                                 <label for="action">Action:</label>
                                 <select name="action" id="action" onchange="this.form.submit()">
-                                    <option value="">All Actions</option>
+                                    <option value="">Toutes les Actions</option>
                                     <?php foreach ($actions as $action): ?>
                                         <option value="<?php echo $action; ?>" <?php echo $action_filter === $action ? 'selected' : ''; ?>>
                                             <?php echo ucfirst($action); ?>
@@ -308,9 +308,9 @@ $page_title = "Activity Log";
                                 </select>
                             </div>
                             <div class="filter-group">
-                                <label for="entity_type">Entity Type:</label>
+                                <label for="entity_type">Type d'Entité:</label>
                                 <select name="entity_type" id="entity_type" onchange="this.form.submit()">
-                                    <option value="">All Types</option>
+                                    <option value="">Tous les Types</option>
                                     <?php foreach ($entity_types as $type): ?>
                                         <option value="<?php echo $type; ?>" <?php echo $entity_type_filter === $type ? 'selected' : ''; ?>>
                                             <?php echo ucfirst($type); ?>
@@ -319,15 +319,15 @@ $page_title = "Activity Log";
                                 </select>
                             </div>
                             <div class="filter-group">
-                                <label for="date_from">From:</label>
+                                <label for="date_from">De:</label>
                                 <input type="date" id="date_from" name="date_from" value="<?php echo $date_from; ?>">
                             </div>
                             <div class="filter-group">
-                                <label for="date_to">To:</label>
+                                <label for="date_to">À:</label>
                                 <input type="date" id="date_to" name="date_to" value="<?php echo $date_to; ?>">
                             </div>
-                            <button type="submit" class="btn btn-primary btn-sm">Apply</button>
-                            <a href="activity-log.php" class="reset-link">Reset</a>
+                            <button type="submit" class="btn btn-primary btn-sm">Appliquer</button>
+                            <a href="activity-log.php" class="reset-link">Réinitialiser</a>
                         </div>
                     </form>
                 </div>
@@ -335,7 +335,7 @@ $page_title = "Activity Log";
                     <?php if (empty($activity_logs)): ?>
                         <div class="empty-state">
                             <i class="fas fa-history"></i>
-                            <p>No activity logs found. Try adjusting your filters.</p>
+                            <p>Aucun journal d'activité trouvé. Essayez d'ajuster vos filtres.</p>
                         </div>
                     <?php else: ?>
                         <div class="table-responsive">
@@ -343,12 +343,12 @@ $page_title = "Activity Log";
                                 <thead>
                                     <tr>
                                         <th>ID</th>
-                                        <th>User</th>
+                                        <th>Utilisateur</th>
                                         <th>Action</th>
-                                        <th>Entity Type</th>
-                                        <th>Entity ID</th>
-                                        <th>Details</th>
-                                        <th>Date & Time</th>
+                                        <th>Type d'Entité</th>
+                                        <th>ID de l'Entité</th>
+                                        <th>Détails</th>
+                                        <th>Date & Heure</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -362,7 +362,7 @@ $page_title = "Activity Log";
                                                     </a>
                                                     <div class="text-muted small"><?php echo htmlspecialchars($log['user_email'] ?? ''); ?></div>
                                                 <?php else: ?>
-                                                    <span class="text-muted">User ID: <?php echo $log['user_id']; ?></span>
+                                                    <span class="text-muted">ID Utilisateur: <?php echo $log['user_id']; ?></span>
                                                 <?php endif; ?>
                                             </td>
                                             <td>

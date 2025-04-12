@@ -6,14 +6,14 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
 
 // Check if ID is provided
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-    $_SESSION['error'] = "Ticket ID is required.";
+    $_SESSION['error'] = "L'ID du ticket est requis.";
     header("Location: tickets.php");
     exit();
 }
@@ -36,7 +36,7 @@ try {
     $stmt->execute();
     
     if ($stmt->rowCount() === 0) {
-        $_SESSION['error'] = "Ticket not found.";
+        $_SESSION['error'] = "Ticket non trouvé.";
         header("Location: tickets.php");
         exit();
     }
@@ -148,11 +148,11 @@ function getPriorityClass($priority) {
 }
 
 // Page title
-$page_title = "View Ticket";
+$page_title = "Voir le Ticket";
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -767,14 +767,14 @@ $page_title = "View Ticket";
             <div class="page-header">
                 <div class="breadcrumb">
                     <a href="tickets.php">Tickets</a>
-                    <span>View Ticket</span>
+                    <span>Voir le Ticket</span>
                 </div>
                 <div class="actions">
                     <a href="edit-ticket.php?id=<?php echo $ticket['id']; ?>" class="btn btn-primary">
-                        <i class="fas fa-edit"></i> Edit Ticket
+                        <i class="fas fa-edit"></i> Modifier le Ticket
                     </a>
                     <a href="javascript:void(0);" class="btn btn-danger delete-ticket" data-id="<?php echo $ticket['id']; ?>">
-                        <i class="fas fa-trash-alt"></i> Delete Ticket
+                        <i class="fas fa-trash-alt"></i> Supprimer le Ticket
                     </a>
                 </div>
             </div>
@@ -829,7 +829,7 @@ $page_title = "View Ticket";
                                         <?php echo ucfirst($ticket['category']); ?>
                                     </span>
                                     <?php endif; ?>
-                                    <span class="user-joined"><i class="far fa-calendar-alt"></i> Created <?php echo date('M d, Y', strtotime($ticket['created_at'])); ?></span>
+                                    <span class="user-joined"><i class="far fa-calendar-alt"></i> Créé <?php echo date('M d, Y', strtotime($ticket['created_at'])); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -839,7 +839,7 @@ $page_title = "View Ticket";
                         <!-- Ticket Information Card -->
                         <div class="card user-info-card">
                             <div class="card-header">
-                                <h3><i class="fas fa-info-circle"></i> Ticket Information</h3>
+                                <h3><i class="fas fa-info-circle"></i> Informations du Ticket</h3>
                             </div>
                             <div class="card-body">
                                 <div class="detail-group">
@@ -851,7 +851,7 @@ $page_title = "View Ticket";
                                 
                                 <?php if (!empty($ticket['response'])): ?>
                                 <div class="detail-group">
-                                    <div class="label">Response</div>
+                                    <div class="label">Réponse</div>
                                     <div class="description-box">
                                         <?php echo nl2br(htmlspecialchars($ticket['response'])); ?>
                                     </div>
@@ -860,7 +860,7 @@ $page_title = "View Ticket";
                                 
                                 <div class="info-grid">
                                     <div class="info-group">
-                                        <label><i class="fas fa-user"></i> Submitted By:</label>
+                                        <label><i class="fas fa-user"></i> Soumis par:</label>
                                         <span class="info-value">
                                             <a href="view-user.php?id=<?php echo $ticket['user_id']; ?>">
                                                 <?php echo htmlspecialchars($ticket['name']); ?>
@@ -868,14 +868,14 @@ $page_title = "View Ticket";
                                         </span>
                                     </div>
                                     <div class="info-group">
-                                        <label><i class="fas fa-check-circle"></i> Status:</label>
+                                        <label><i class="fas fa-check-circle"></i> Statut:</label>
                                         <span class="status-badge <?php echo $ticket['status']; ?>">
                                             <?php echo ucfirst(str_replace('_', ' ', $ticket['status'])); ?>
                                         </span>
                                     </div>
                                     <?php if (isset($ticket['priority']) && !empty($ticket['priority'])): ?>
                                     <div class="info-group">
-                                        <label><i class="fas fa-exclamation-triangle"></i> Priority:</label>
+                                        <label><i class="fas fa-exclamation-triangle"></i> Priorité:</label>
                                         <span class="status-badge <?php echo getPriorityClass($ticket['priority']); ?>">
                                             <?php echo ucfirst($ticket['priority']); ?>
                                         </span>
@@ -883,17 +883,17 @@ $page_title = "View Ticket";
                                     <?php endif; ?>
                                     <?php if (isset($ticket['category']) && !empty($ticket['category'])): ?>
                                     <div class="info-group">
-                                        <label><i class="fas fa-tag"></i> Category:</label>
+                                        <label><i class="fas fa-tag"></i> Catégorie:</label>
                                         <span class="info-value"><?php echo htmlspecialchars($ticket['category']); ?></span>
                                     </div>
                                     <?php endif; ?>
                                     <div class="info-group">
-                                        <label><i class="fas fa-calendar-plus"></i> Created:</label>
-                                        <span class="info-value"><?php echo date('F d, Y', strtotime($ticket['created_at'])); ?></span>
+                                        <label><i class="fas fa-calendar-plus"></i> Créé le:</label>
+                                        <span class="info-value"><?php echo date('d F Y', strtotime($ticket['created_at'])); ?></span>
                                     </div>
                                     <div class="info-group">
-                                        <label><i class="fas fa-edit"></i> Last Updated:</label>
-                                        <span class="info-value"><?php echo date('F d, Y', strtotime($ticket['updated_at'])); ?></span>
+                                        <label><i class="fas fa-edit"></i> Dernière mise à jour:</label>
+                                        <span class="info-value"><?php echo date('d F Y', strtotime($ticket['updated_at'])); ?></span>
                                     </div>
                                 </div>
                             </div>
@@ -902,7 +902,7 @@ $page_title = "View Ticket";
                         <!-- User Information Card -->
                         <div class="card property-assignments-card">
                             <div class="card-header">
-                                <h3><i class="fas fa-user"></i> User Information</h3>
+                                <h3><i class="fas fa-user"></i> Informations Utilisateur</h3>
                             </div>
                             <div class="card-body">
                                 <div class="property-list">
@@ -915,7 +915,7 @@ $page_title = "View Ticket";
                                             <div class="property-meta">
                                                 <span class="property-id">ID: <?php echo $ticket['user_id']; ?></span>
                                                 <a href="view-user.php?id=<?php echo $ticket['user_id']; ?>" class="view-link">
-                                                    View User <i class="fas fa-arrow-right"></i>
+                                                    Voir l'Utilisateur <i class="fas fa-arrow-right"></i>
                                                 </a>
                                             </div>
                                         </div>
@@ -941,7 +941,7 @@ $page_title = "View Ticket";
                                         <div class="property-details">
                                             <h4><?php echo htmlspecialchars($ticket['phone']); ?></h4>
                                             <div class="property-meta">
-                                                <span class="property-id">Phone</span>
+                                                <span class="property-id">Téléphone</span>
                                             </div>
                                         </div>
                                     </div>
@@ -953,13 +953,13 @@ $page_title = "View Ticket";
                         <!-- Activity Log Card -->
                         <div class="card activity-card">
                             <div class="card-header">
-                                <h3><i class="fas fa-history"></i> Recent Activity</h3>
+                                <h3><i class="fas fa-history"></i> Activité Récente</h3>
                             </div>
                             <div class="card-body">
                                 <?php if (empty($activity_logs)): ?>
                                     <div class="no-data">
                                         <i class="far fa-clock"></i>
-                                        <p>No recent activity found.</p>
+                                        <p>Aucune activité récente trouvée.</p>
                                     </div>
                                 <?php else: ?>
                                     <div class="activity-timeline">
@@ -969,8 +969,8 @@ $page_title = "View Ticket";
                                                     <i class="fas fa-circle"></i>
                                                 </div>
                                                 <div class="activity-content">
-                                                    <p class="activity-text"><?php echo isset($log['description']) ? htmlspecialchars($log['description']) : 'No description available'; ?></p>
-                                                    <p class="activity-time"><?php echo isset($log['created_at']) ? date('M d, Y H:i', strtotime($log['created_at'])) : 'Unknown date'; ?></p>
+                                                    <p class="activity-text"><?php echo isset($log['description']) ? htmlspecialchars($log['description']) : 'Aucune description disponible'; ?></p>
+                                                    <p class="activity-time"><?php echo isset($log['created_at']) ? date('d M Y H:i', strtotime($log['created_at'])) : 'Date inconnue'; ?></p>
                                                 </div>
                                             </div>
                                         <?php endforeach; ?>
@@ -982,36 +982,36 @@ $page_title = "View Ticket";
                         <!-- Update Status Card -->
                         <div class="card">
                             <div class="card-header">
-                                <h3><i class="fas fa-edit"></i> Update Status</h3>
+                                <h3><i class="fas fa-edit"></i> Mettre à Jour le Statut</h3>
                             </div>
                             <div class="card-body">
                                 <form action="view-ticket.php?id=<?php echo $ticket_id; ?>" method="POST" class="form">
                                     <input type="hidden" name="update_status" value="1">
                                     
                                     <div class="form-group">
-                                        <label for="status">Status:</label>
+                                        <label for="status">Statut:</label>
                                         <select id="status" name="status" class="form-control">
-                                            <option value="open" <?php echo $ticket['status'] === 'open' ? 'selected' : ''; ?>>Open</option>
-                                            <option value="in_progress" <?php echo $ticket['status'] === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
-                                            <option value="closed" <?php echo $ticket['status'] === 'closed' ? 'selected' : ''; ?>>Closed</option>
-                                            <option value="reopened" <?php echo $ticket['status'] === 'reopened' ? 'selected' : ''; ?>>Reopened</option>
+                                            <option value="open" <?php echo $ticket['status'] === 'open' ? 'selected' : ''; ?>>Ouvert</option>
+                                            <option value="in_progress" <?php echo $ticket['status'] === 'in_progress' ? 'selected' : ''; ?>>En Cours</option>
+                                            <option value="closed" <?php echo $ticket['status'] === 'closed' ? 'selected' : ''; ?>>Fermé</option>
+                                            <option value="reopened" <?php echo $ticket['status'] === 'reopened' ? 'selected' : ''; ?>>Réouvert</option>
                                         </select>
                                     </div>
                                     
                                     <div class="form-group">
-                                        <label for="response">Response:</label>
+                                        <label for="response">Réponse:</label>
                                         <textarea id="response" name="response" class="form-control" rows="4"><?php echo isset($ticket['response']) ? htmlspecialchars($ticket['response']) : ''; ?></textarea>
-                                        <small>Response to the ticket (visible to the user)</small>
+                                        <small>Réponse au ticket (visible par l'utilisateur)</small>
                                     </div>
                                     
                                     <div class="form-group">
-                                        <label for="admin_notes">Admin Notes:</label>
+                                        <label for="admin_notes">Notes Administrateur:</label>
                                         <textarea id="admin_notes" name="admin_notes" class="form-control" rows="3"><?php echo isset($ticket['admin_notes']) ? htmlspecialchars($ticket['admin_notes']) : ''; ?></textarea>
-                                        <small>Internal notes (not visible to the user)</small>
+                                        <small>Notes internes (non visibles par l'utilisateur)</small>
                                     </div>
                                     
                                     <div class="form-actions">
-                                        <button type="submit" class="btn btn-primary">Update Status</button>
+                                        <button type="submit" class="btn btn-primary">Mettre à Jour le Statut</button>
                                     </div>
                                 </form>
                             </div>
@@ -1026,17 +1026,17 @@ $page_title = "View Ticket";
     <div id="deleteModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Confirm Deletion</h3>
+                <h3>Confirmer la Suppression</h3>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete this ticket? This action cannot be undone.</p>
+                <p>Êtes-vous sûr de vouloir supprimer ce ticket ? Cette action est irréversible.</p>
             </div>
             <div class="modal-footer">
                 <form id="deleteForm" action="view-ticket.php?id=<?php echo $ticket_id; ?>" method="POST">
                     <input type="hidden" name="delete_ticket" value="1">
-                    <button type="button" class="btn btn-secondary close-modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="button" class="btn btn-secondary close-modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger">Supprimer</button>
                 </form>
             </div>
         </div>

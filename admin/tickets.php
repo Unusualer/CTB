@@ -6,7 +6,7 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
@@ -85,11 +85,11 @@ try {
 }
 
 // Page title
-$page_title = "Ticket Management";
+$page_title = "Gestion des Tickets";
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -105,10 +105,10 @@ $page_title = "Ticket Management";
         <!-- Main Content -->
         <main class="main-content">
             <div class="page-header">
-                <h1>Ticket Management</h1>
+                <h1>Gestion des Tickets</h1>
                 <a href="add-ticket.php" class="btn btn-primary">
                     <i class="fas fa-plus"></i>
-                    Create New Ticket
+                    Créer un Nouveau Ticket
                 </a>
             </div>
 
@@ -137,7 +137,7 @@ $page_title = "Ticket Management";
                         <i class="fas fa-clipboard-list"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Reported</h3>
+                        <h3>Signalés</h3>
                         <div class="stat-number"><?php echo isset($status_counts['reported']) ? $status_counts['reported'] : 0; ?></div>
                     </div>
                 </div>
@@ -147,7 +147,7 @@ $page_title = "Ticket Management";
                         <i class="fas fa-tools"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>In Progress</h3>
+                        <h3>En Cours</h3>
                         <div class="stat-number"><?php echo isset($status_counts['in_progress']) ? $status_counts['in_progress'] : 0; ?></div>
                     </div>
                 </div>
@@ -157,7 +157,7 @@ $page_title = "Ticket Management";
                         <i class="fas fa-check-circle"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Completed</h3>
+                        <h3>Terminés</h3>
                         <div class="stat-number"><?php echo isset($status_counts['completed']) ? $status_counts['completed'] : 0; ?></div>
                     </div>
                 </div>
@@ -167,12 +167,12 @@ $page_title = "Ticket Management";
                         <i class="fas fa-exclamation-triangle"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Priority Status</h3>
+                        <h3>Statut de Priorité</h3>
                         <div class="stat-number"><?php echo $total; ?> Total</div>
                         <div class="stat-breakdown">
-                            <span><i class="fas fa-circle" style="color: #28a745;"></i> Low: <?php echo isset($priority_counts['low']) ? $priority_counts['low'] : 0; ?></span>
-                            <span><i class="fas fa-circle" style="color: #ffc107;"></i> Medium: <?php echo isset($priority_counts['medium']) ? $priority_counts['medium'] : 0; ?></span>
-                            <span><i class="fas fa-circle" style="color: #dc3545;"></i> High/Urgent: <?php echo isset($priority_counts['high']) + isset($priority_counts['urgent']) ? $priority_counts['high'] + $priority_counts['urgent'] : 0; ?></span>
+                            <span><i class="fas fa-circle" style="color: #28a745;"></i> Basse: <?php echo isset($priority_counts['low']) ? $priority_counts['low'] : 0; ?></span>
+                            <span><i class="fas fa-circle" style="color: #ffc107;"></i> Moyenne: <?php echo isset($priority_counts['medium']) ? $priority_counts['medium'] : 0; ?></span>
+                            <span><i class="fas fa-circle" style="color: #dc3545;"></i> Haute/Urgente: <?php echo isset($priority_counts['high']) + isset($priority_counts['urgent']) ? $priority_counts['high'] + $priority_counts['urgent'] : 0; ?></span>
                         </div>
                     </div>
                 </div>
@@ -181,36 +181,36 @@ $page_title = "Ticket Management";
             <!-- Filters -->
             <div class="card user-filter-card">
                 <div class="card-header user-filter-header">
-                    <h3><i class="fas fa-filter"></i> Tickets List</h3>
+                    <h3><i class="fas fa-filter"></i> Liste des Tickets</h3>
                     <form id="filter-form" action="tickets.php" method="GET" class="filter-form">
                         <div class="filter-wrapper">
                             <div class="search-filter">
                                 <div class="search-bar">
                                     <i class="fas fa-search"></i>
-                                    <input type="text" placeholder="Search..." name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
+                                    <input type="text" placeholder="Rechercher..." name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
                                 </div>
                             </div>
                             <div class="filter-group">
-                                <label for="status">Status:</label>
+                                <label for="status">Statut:</label>
                                 <select name="status" id="status" onchange="this.form.submit()">
-                                    <option value="">All Statuses</option>
-                                    <option value="reported" <?php echo $status_filter === 'reported' ? 'selected' : ''; ?>>Reported</option>
-                                    <option value="in_progress" <?php echo $status_filter === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
-                                    <option value="completed" <?php echo $status_filter === 'completed' ? 'selected' : ''; ?>>Completed</option>
-                                    <option value="cancelled" <?php echo $status_filter === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
+                                    <option value="">Tous les Statuts</option>
+                                    <option value="reported" <?php echo $status_filter === 'reported' ? 'selected' : ''; ?>>Signalé</option>
+                                    <option value="in_progress" <?php echo $status_filter === 'in_progress' ? 'selected' : ''; ?>>En Cours</option>
+                                    <option value="completed" <?php echo $status_filter === 'completed' ? 'selected' : ''; ?>>Terminé</option>
+                                    <option value="cancelled" <?php echo $status_filter === 'cancelled' ? 'selected' : ''; ?>>Annulé</option>
                                 </select>
                             </div>
                             <div class="filter-group">
-                                <label for="priority">Priority:</label>
+                                <label for="priority">Priorité:</label>
                                 <select name="priority" id="priority" onchange="this.form.submit()">
-                                    <option value="">All Priorities</option>
-                                    <option value="low" <?php echo $priority_filter === 'low' ? 'selected' : ''; ?>>Low</option>
-                                    <option value="medium" <?php echo $priority_filter === 'medium' ? 'selected' : ''; ?>>Medium</option>
-                                    <option value="high" <?php echo $priority_filter === 'high' ? 'selected' : ''; ?>>High</option>
-                                    <option value="urgent" <?php echo $priority_filter === 'urgent' ? 'selected' : ''; ?>>Urgent</option>
+                                    <option value="">Toutes les Priorités</option>
+                                    <option value="low" <?php echo $priority_filter === 'low' ? 'selected' : ''; ?>>Basse</option>
+                                    <option value="medium" <?php echo $priority_filter === 'medium' ? 'selected' : ''; ?>>Moyenne</option>
+                                    <option value="high" <?php echo $priority_filter === 'high' ? 'selected' : ''; ?>>Haute</option>
+                                    <option value="urgent" <?php echo $priority_filter === 'urgent' ? 'selected' : ''; ?>>Urgente</option>
                                 </select>
                             </div>
-                            <a href="tickets.php" class="reset-link">Reset</a>
+                            <a href="tickets.php" class="reset-link">Réinitialiser</a>
                         </div>
                     </form>
                 </div>
@@ -218,8 +218,8 @@ $page_title = "Ticket Management";
                     <?php if (empty($tickets)): ?>
                         <div class="empty-state">
                             <i class="fas fa-ticket-alt"></i>
-                            <p>No tickets found. Try adjusting your filters or add a new ticket.</p>
-                            <a href="add-ticket.php" class="btn btn-primary">Add New Ticket</a>
+                            <p>Aucun ticket trouvé. Essayez d'ajuster vos filtres ou d'ajouter un nouveau ticket.</p>
+                            <a href="add-ticket.php" class="btn btn-primary">Ajouter un Ticket</a>
                         </div>
                     <?php else: ?>
                         <div class="table-responsive">
@@ -227,12 +227,12 @@ $page_title = "Ticket Management";
                                 <thead>
                                     <tr>
                                         <th>ID</th>
-                                        <th>Title</th>
-                                        <th>Property</th>
-                                        <th>Reported By</th>
-                                        <th>Status</th>
-                                        <th>Priority</th>
-                                        <th>Created</th>
+                                        <th>Titre</th>
+                                        <th>Propriété</th>
+                                        <th>Signalé par</th>
+                                        <th>Statut</th>
+                                        <th>Priorité</th>
+                                        <th>Créé le</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>

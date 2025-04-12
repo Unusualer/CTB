@@ -12,7 +12,7 @@ function isActive($page_name) {
 <aside class="sidebar">
     <div class="sidebar-header">
         <a href="dashboard.php" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px;">
-            <img src="../assets/images/logo.png" alt="CTB Logo" class="logo">
+            <img src="../assets/images/logo.png" alt="Logo CTB" class="logo">
             <h2>CTB Admin</h2>
         </a>
     </div>
@@ -23,7 +23,7 @@ function isActive($page_name) {
         </div>
         <div class="user-details">
             <h4><?php echo htmlspecialchars($_SESSION['name']); ?></h4>
-            <p>Administrator</p>
+            <p>Administrateur</p>
         </div>
     </div>
     
@@ -32,19 +32,19 @@ function isActive($page_name) {
             <li <?php echo isActive('dashboard.php'); ?>>
                 <a href="dashboard.php">
                     <i class="fas fa-chart-line"></i>
-                    <span>Dashboard</span>
+                    <span>Tableau de Bord</span>
                 </a>
             </li>
             <li <?php echo isActive('users.php') || $current_page == 'view-user.php' || $current_page == 'edit-user.php' || $current_page == 'add-user.php' ? 'class="active"' : ''; ?>>
                 <a href="users.php">
                     <i class="fas fa-users"></i>
-                    <span>Users</span>
+                    <span>Utilisateurs</span>
                 </a>
             </li>
             <li <?php echo isActive('properties.php') || $current_page == 'view-property.php' || $current_page == 'edit-property.php' || $current_page == 'add-property.php' ? 'class="active"' : ''; ?>>
                 <a href="properties.php">
-                    <i class="fas fa-building"></i>
-                    <span>Properties</span>
+                    <i class="fas fa-home"></i>
+                    <span>Propriétés</span>
                 </a>
             </li>
             <li <?php echo isActive('tickets.php') || $current_page == 'view-ticket.php' || $current_page == 'edit-ticket.php' || $current_page == 'add-ticket.php' ? 'class="active"' : ''; ?>>
@@ -56,13 +56,13 @@ function isActive($page_name) {
             <li <?php echo isActive('payments.php') || $current_page == 'view-payment.php' || $current_page == 'edit-payment.php' || $current_page == 'add-payment.php' ? 'class="active"' : ''; ?>>
                 <a href="payments.php">
                     <i class="fas fa-credit-card"></i>
-                    <span>Payments</span>
+                    <span>Paiements</span>
                 </a>
             </li>
             <li <?php echo isActive('activity-log.php'); ?>>
                 <a href="activity-log.php">
                     <i class="fas fa-history"></i>
-                    <span>Activity Log</span>
+                    <span>Journal d'Activité</span>
                 </a>
             </li>
             <li <?php echo isActive('maintenance.php') || $current_page == 'view-maintenance.php' || $current_page == 'edit-maintenance.php' || $current_page == 'add-maintenance.php' ? 'class="active"' : ''; ?>>

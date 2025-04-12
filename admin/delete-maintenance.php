@@ -6,21 +6,21 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
 
 // Check if this is a POST request
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $_SESSION['error'] = "Invalid request method.";
+    $_SESSION['error'] = "Méthode de requête invalide.";
     header("Location: maintenance.php");
     exit();
 }
 
 // Check if maintenance_id is provided
 if (!isset($_POST['maintenance_id']) || empty($_POST['maintenance_id'])) {
-    $_SESSION['error'] = "Maintenance ID is required.";
+    $_SESSION['error'] = "L'ID de la maintenance est requis.";
     header("Location: maintenance.php");
     exit();
 }
@@ -37,7 +37,7 @@ try {
     $check_stmt->execute();
     
     if ($check_stmt->rowCount() === 0) {
-        $_SESSION['error'] = "Maintenance update not found.";
+        $_SESSION['error'] = "Mise à jour de maintenance non trouvée.";
         header("Location: maintenance.php");
         exit();
     }
@@ -57,7 +57,7 @@ try {
     $log_stmt = $db->prepare("INSERT INTO activity_log (user_id, action, entity_type, entity_id, description) 
                              VALUES (:admin_id, 'delete', 'maintenance', :entity_id, :description)");
     
-    $description = "Deleted maintenance update: " . $maintenance_info['title'] . " (Location: " . $maintenance_info['location'] . ")";
+    $description = "Mise à jour de maintenance supprimée : " . $maintenance_info['title'] . " (Emplacement : " . $maintenance_info['location'] . ")";
     $log_stmt->bindParam(':admin_id', $admin_id);
     $log_stmt->bindParam(':entity_id', $maintenance_id, PDO::PARAM_INT);
     $log_stmt->bindParam(':description', $description);
@@ -66,7 +66,7 @@ try {
     // Commit transaction
     $db->commit();
     
-    $_SESSION['success'] = "Maintenance update deleted successfully.";
+    $_SESSION['success'] = "Mise à jour de maintenance supprimée avec succès.";
     header("Location: maintenance.php");
     exit();
     
@@ -76,7 +76,7 @@ try {
         $db->rollBack();
     }
     
-    $_SESSION['error'] = "Database error: " . $e->getMessage();
+    $_SESSION['error'] = "Erreur de base de données : " . $e->getMessage();
     header("Location: maintenance.php");
     exit();
 }

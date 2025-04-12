@@ -6,14 +6,14 @@ require_once '../includes/functions.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "You must be logged in as an administrator to access this page.";
+    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
     header("Location: ../login.php");
     exit();
 }
 
 // Check if maintenance ID is provided
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    $_SESSION['error'] = "Invalid maintenance update ID.";
+    $_SESSION['error'] = "L'ID de la maintenance est invalide.";
     header("Location: maintenance.php");
     exit();
 }
@@ -39,7 +39,7 @@ try {
     $maintenance = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if (!$maintenance) {
-        $_SESSION['error'] = "Maintenance update not found.";
+        $_SESSION['error'] = "Mise à jour de maintenance non trouvée.";
         header("Location: maintenance.php");
         exit();
     }
@@ -106,10 +106,10 @@ function getPriorityBadgeClass($priority) {
     }
 }
 
-$page_title = "View Maintenance Update";
+$page_title = "Voir la Maintenance";
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -203,7 +203,7 @@ $page_title = "View Maintenance Update";
         <main class="main-content">
             <div class="content-header">
                 <a href="maintenance.php" class="back-button">
-                    <i class="fas fa-arrow-left"></i> Back to Maintenance Updates
+                    <i class="fas fa-arrow-left"></i> Retour aux Mises à Jour de Maintenance
                 </a>
                 <h1><?php echo $page_title; ?></h1>
             </div>
@@ -220,7 +220,7 @@ $page_title = "View Maintenance Update";
                         <h3><?php echo htmlspecialchars($maintenance['title']); ?></h3>
                         <div class="card-actions">
                             <a href="edit-maintenance.php?id=<?php echo $maintenance['id']; ?>" class="btn btn-secondary">
-                                <i class="fas fa-edit"></i> Edit
+                                <i class="fas fa-edit"></i> Modifier
                             </a>
                         </div>
                     </div>
@@ -228,7 +228,7 @@ $page_title = "View Maintenance Update";
                         <div class="maintenance-details">
                             <div class="maintenance-main">
                                 <div class="detail-group">
-                                    <div class="label">Location</div>
+                                    <div class="label">Emplacement</div>
                                     <div class="value"><?php echo htmlspecialchars($maintenance['location']); ?></div>
                                 </div>
                                 
@@ -240,18 +240,38 @@ $page_title = "View Maintenance Update";
                                 </div>
                                 
                                 <div class="detail-group">
-                                    <div class="label">Status</div>
+                                    <div class="label">Statut</div>
                                     <div class="value">
                                         <span class="status-indicator status-<?php echo getStatusBadgeClass($maintenance['status']); ?>">
-                                            <?php echo ucfirst(str_replace('_', ' ', $maintenance['status'])); ?>
+                                            <?php 
+                                                switch($maintenance['status']) {
+                                                    case 'scheduled':
+                                                        echo 'Planifié';
+                                                        break;
+                                                    case 'in_progress':
+                                                        echo 'En Cours';
+                                                        break;
+                                                    case 'completed':
+                                                        echo 'Terminé';
+                                                        break;
+                                                    case 'delayed':
+                                                        echo 'Retardé';
+                                                        break;
+                                                    case 'cancelled':
+                                                        echo 'Annulé';
+                                                        break;
+                                                    default:
+                                                        echo ucfirst(str_replace('_', ' ', $maintenance['status']));
+                                                }
+                                            ?>
                                         </span>
                                     </div>
                                 </div>
                                 
                                 <div class="meta-info">
-                                    <p>Created by <?php echo htmlspecialchars($maintenance['created_by_name']); ?> on <?php echo date('F j, Y \a\t g:i a', strtotime($maintenance['created_at'])); ?></p>
+                                    <p>Créé par <?php echo htmlspecialchars($maintenance['created_by_name']); ?> le <?php echo date('d F Y \à G:i', strtotime($maintenance['created_at'])); ?></p>
                                     <?php if ($maintenance['updated_at']): ?>
-                                        <p>Last updated on <?php echo date('F j, Y \a\t g:i a', strtotime($maintenance['updated_at'])); ?></p>
+                                        <p>Dernière mise à jour le <?php echo date('d F Y \à G:i', strtotime($maintenance['updated_at'])); ?></p>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -259,7 +279,7 @@ $page_title = "View Maintenance Update";
                             <div class="maintenance-sidebar">
                                 <div class="card sidebar-card">
                                     <div class="card-header">
-                                        <h4>Maintenance Details</h4>
+                                        <h4>Détails de la Maintenance</h4>
                                     </div>
                                     <div class="card-body">
                                         <div class="detail-group">
@@ -268,32 +288,49 @@ $page_title = "View Maintenance Update";
                                         </div>
                                         
                                         <div class="detail-group">
-                                            <div class="label">Priority</div>
+                                            <div class="label">Priorité</div>
                                             <div class="value">
                                                 <span class="status-indicator status-<?php echo getPriorityBadgeClass($maintenance['priority']); ?>">
-                                                    <?php echo ucfirst($maintenance['priority']); ?>
+                                                    <?php 
+                                                        switch($maintenance['priority']) {
+                                                            case 'low':
+                                                                echo 'Basse';
+                                                                break;
+                                                            case 'medium':
+                                                                echo 'Moyenne';
+                                                                break;
+                                                            case 'high':
+                                                                echo 'Haute';
+                                                                break;
+                                                            case 'emergency':
+                                                                echo 'Urgence';
+                                                                break;
+                                                            default:
+                                                                echo ucfirst($maintenance['priority']);
+                                                        }
+                                                    ?>
                                                 </span>
                                             </div>
                                         </div>
                                         
                                         <div class="detail-group">
-                                            <div class="label">Start Date</div>
+                                            <div class="label">Date de Début</div>
                                             <div class="value"><?php echo formatDate($maintenance['start_date']); ?></div>
                                         </div>
                                         
                                         <div class="detail-group">
-                                            <div class="label">End Date</div>
+                                            <div class="label">Date de Fin</div>
                                             <div class="value"><?php echo formatDate($maintenance['end_date']); ?></div>
                                         </div>
                                         
                                         <div class="detail-group">
-                                            <div class="label">Duration</div>
+                                            <div class="label">Durée</div>
                                             <div class="value">
                                                 <?php 
                                                 $start = new DateTime($maintenance['start_date']);
                                                 $end = new DateTime($maintenance['end_date']);
                                                 $interval = $start->diff($end);
-                                                echo $interval->days + 1; ?> days
+                                                echo $interval->days + 1; ?> jours
                                             </div>
                                         </div>
                                     </div>
@@ -303,13 +340,13 @@ $page_title = "View Maintenance Update";
                         
                         <?php if (!empty($comments)): ?>
                             <div class="comment-section">
-                                <h4>Comments</h4>
+                                <h4>Commentaires</h4>
                                 <div class="comment-list">
                                     <?php foreach ($comments as $comment): ?>
                                         <div class="comment">
                                             <div class="comment-header">
                                                 <div class="comment-author"><?php echo htmlspecialchars($comment['user_name']); ?></div>
-                                                <div class="comment-time"><?php echo date('M d, Y g:i a', strtotime($comment['created_at'])); ?></div>
+                                                <div class="comment-time"><?php echo date('d M Y G:i', strtotime($comment['created_at'])); ?></div>
                                             </div>
                                             <div class="comment-content">
                                                 <?php echo nl2br(htmlspecialchars($comment['comment'])); ?>
