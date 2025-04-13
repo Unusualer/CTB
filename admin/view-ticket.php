@@ -3,13 +3,11 @@
 session_start();
 require_once '../includes/config.php';
 require_once '../includes/functions.php';
+require_once '../includes/role_access.php';
 
-// Check if user is logged in and is an admin
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
-    header("Location: ../login.php");
-    exit();
-}
+// Check if user is logged in and has appropriate role
+requireRole('admin');
+
 
 // Check if ticket ID is provided
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {

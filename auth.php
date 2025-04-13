@@ -4,6 +4,7 @@ session_start();
 
 // Include database connection file
 require_once 'includes/config.php';
+require_once 'includes/role_access.php';
 
 // Enable debugging (REMOVE THIS IN PRODUCTION)
 $debug = false;
