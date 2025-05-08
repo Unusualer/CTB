@@ -70,11 +70,10 @@
                     <li><a href="#services" class="smoothscroll">Services</a></li>
                     <li><a href="#portfolio" class="smoothscroll">Facilities</a></li>
                     <li><a href="#contact" class="smoothscroll">Contact</a></li>
-                    <li><a href="login.php" class="btn btn--primary">Login</a></li>
                 </ul>
 
                 <p>
-                Welcome to Complexe Tanger Boulevard's Residential Management System.
+                Welcome to the Syndicate of the complexe of Tanger Boulevard.
                 </p>
 
                 <ul class="s-header__social">
@@ -172,13 +171,71 @@
 
                 <div class="row s-about__content" data-animate-block>
                     <div class="column lg-12">
-                        <h2 class="text-pretitle" data-animate-el>About Us</h2>
-                        <p class="s-about__desc" data-animate-el>
-                            <span>Complexe Tanger Boulevard</span> is a premier residential community in Tanger, Morocco. 
-                            Our management system provides residents with easy access to property information, payment tracking, and maintenance services.
+                        <h2 class="text-pretitle" data-animate-el>About Complexe Tanger Boulevard</h2>
+                    </div>
+                </div>
+
+                <div class="row services-list block-lg-one-half block-tab-whole" data-animate-block>
+                    <div class="column service-item" data-animate-el>
+                        <span class="service-icon-block">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 0c-4.198 0-8 3.403-8 7.602 0 4.198 3.469 9.21 8 16.398 4.531-7.188 8-12.2 8-16.398 0-4.199-3.801-7.602-8-7.602zm0 11c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z"/></svg>
+                        </span>
+                        <div class="service-content">
+                            <h3 class="h4">Luxurious Location</h3>
+                            <p>
+                                <span>Tangier Boulevard complex</span> is a fantastic and luxurious project in Tangier, offering a range of amenities and features that would surely attract residents looking for a comfortable and convenient living experience. With direct access from Boulevard Mohamed V, the complex combines accessibility with prominence.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="column service-item" data-animate-el>
+                        <span class="service-icon-block">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 2h-14c-1.104 0-2 .896-2 2v14c0 1.104.896 2.001 2 2.001h4v2.999l4.5-3 4.5 3v-2.999h1c1.104 0 2-.897 2-2.001v-14c0-1.104-.896-2-2-2zm-14 16.001v-14.001h14v14.001h-14z"/></svg>
+                        </span>
+                        <div class="service-content">
+                            <h3 class="h4">Diverse Living Options</h3>
+                            <p>
+                                The variety of apartment sizes, from 50 to 150 square meters, allows for a diverse range of living options to cater to different needs and preferences. Having private parking is a valuable addition, especially in urban areas where parking can be a challenge.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="column service-item" data-animate-el>
+                        <span class="service-icon-block">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M10.644 17.08c2.866-.662 4.539-1.241 3.246-3.682-3.932-7.427-1.042-11.398 3.111-11.398 4.235 0 7.054 4.124 3.11 11.398-1.332 2.455.437 3.034 3.242 3.682 2.483.574 2.647 1.787 2.647 3.889v1.031h-18c0-2.745-.22-4.258 2.644-4.92zm-12.644 4.92h7.809c-.035-8.177 3.436-5.313 3.436-11.127 0-2.511-1.639-3.873-3.748-3.873-3.115 0-5.282 2.979-2.333 8.549.969 1.83-1.031 2.265-3.181 2.761-1.862.43-1.983 1.34-1.983 2.917v.773z"/></svg>
+                        </span>
+                        <div class="service-content">
+                            <h3 class="h4">Premium Amenities</h3>
+                            <p>
+                                The communal swimming pool provides a great opportunity for residents to relax and enjoy leisure time without leaving the complex. The presence of a shopping mall within the complex adds to the overall lifestyle convenience for residents.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="column service-item" data-animate-el>
+                        <span class="service-icon-block">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M6 1v3h-2c-1.105 0-2 .895-2 2v3c0 1.105.895 2 2 2h3v3h-3c-1.105 0-2 .895-2 2v3c0 1.105.895 2 2 2h2v3h12v-3h2c1.105 0 2-.895 2-2v-3c0-1.105-.895-2-2-2h-3v-3h3c1.105 0 2-.895 2-2v-3c0-1.105-.895-2-2-2h-2v-3h-12zm2 2h8v1.634c1.142.363 2 1.422 2 2.716 0 1.555-1.255 2.769-2.811 2.769-1.862 0-2.917-2.38-1.182-3.833 0 0-.438-.387-.438-1.683h-3.239c0 1.296-.438 1.683-.438 1.683 1.735 1.453.681 3.833-1.182 3.833-1.555 0-2.81-1.214-2.81-2.769 0-1.295.858-2.353 2-2.717v-1.633zm4 2c-.552 0-1 .448-1 1s.448 1 1 1 1-.448 1-1-.448-1-1-1zm-7 2.25c-.414 0-.75.336-.75.75s.336.75.75.75.75-.336.75-.75-.336-.75-.75-.75zm14 0c-.414 0-.75.336-.75.75s.336.75.75.75.75-.336.75-.75-.336-.75-.75-.75zm-7 2.25c-.552 0-1 .448-1 1s.448 1 1 1 1-.448 1-1-.448-1-1-1zm0 4h3.239c0-1.296.438-1.683.438-1.683-1.735-1.453-.681-3.833 1.182-3.833 1.555 0 2.811 1.214 2.811 2.769 0 1.295-.858 2.353-2 2.717v1.63h-8v-1.634c-1.142-.363-2-1.422-2-2.716 0-1.555 1.255-2.769 2.811-2.769 1.862 0 2.916 2.38 1.182 3.833 0 0 .438.387.438 1.683h3.239zm3.5.25c.414 0 .75-.336.75-.75s-.336-.75-.75-.75-.75.336-.75.75.336.75.75.75zm-14 0c.414 0 .75-.336.75-.75s-.336-.75-.75-.75-.75.336-.75.75.336.75.75.75zm7-2.25c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/></svg>
+                        </span>
+                        <div class="service-content">
+                            <h3 class="h4">Natural Environment</h3>
+                            <p>
+                                The complex is surrounded by beautiful green areas, providing a sense of tranquility within the urban environment. These thoughtfully designed green spaces create a peaceful atmosphere and contribute to the overall wellbeing of residents.
                         </p>
-                    </div> <!-- end column  -->
-                </div> <!-- end s-about__content  -->
+                        </div>
+                    </div>
+
+                    <div class="column service-item" data-animate-el>
+                        <span class="service-icon-block">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M23 10.826v2.349c-1.562 0-3 1.312-3 2.857 0 2.181 1.281 5.968-6 5.968-4.837 0-5.389-3.644-6.5-3.644-.957 0-1.5.615-1.5 1.528v.316h-2v-12.678h2v.645c0 1.371.953 1.83 1.732 1.83 1.574 0 2.174-3.646 6.268-3.646 7.281 0 6 4.536 6 6.063 0 1.327 1.38 2.412 3 2.412z"/></svg>
+                        </span>
+                        <div class="service-content">
+                            <h3 class="h4">Management & Governance</h3>
+                            <p>
+                                The syndicate of the complexe of Tanger Boulevard plays a critical role in managing and governing the residential community. Its primary function is to oversee the administration, maintenance, and governance of the community and its shared spaces.
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
             </section> <!-- end about -->
 
@@ -195,7 +252,7 @@
                         <h3 class="text-pretitle">Services</h3>
                         <h1 class="text-display-title">What We Do.</h1>
                         
-                        <p class="lead">Lorem ipsum Elit ut consequat veniam eu nulla nulla reprehenderit reprehenderit sit velit in cupidatat ex aliquip ut cupidatat Excepteur tempor id irure sed dolore sint sunt voluptate ullamco nulla qui Duis qui culpa voluptate enim ea aute qui veniam in irure et nisi nostrud deserunt est officia minim.</p>
+                        <p class="lead">The syndicate handles all aspects of complex management, from maintenance to security, ensuring a comfortable living environment for all residents.</p>
                         
                     </div> <!-- end column -->
                 </div> <!-- end section header -->
@@ -211,14 +268,10 @@
                             </span>
 
                             <div class="service-content">
-                                <h3 class="h4">Branding</h3>
+                                <h3 class="h4">Maintenance</h3>
 
                                 <p>
-                                Sed ut perspiciatis unde omnis iste natus error sit voluptatem 
-                                accusantium doloremque laudantium, totam rem aperiam, eaque ipsa 
-                                quae ab illo inventore veritatis et quasi architecto beatae vitae 
-                                dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas 
-                                sit aspernatur aut odit aut fugit.
+                                Complex, pool and lift maintenance is a key service provided by the syndicate. We ensure all common areas and facilities are well-maintained and functioning properly for all residents. Regular inspections and timely repairs keep the property in excellent condition.
                                 </p>
                             </div>
 
@@ -231,14 +284,10 @@
                             </span>
 
                             <div class="service-content">
-                                <h3 class="h4">UI/UX Design</h3>
+                                <h3 class="h4">Security & Surveillance</h3>
 
                                 <p>
-                                Sed ut perspiciatis unde omnis iste natus error sit voluptatem 
-                                accusantium doloremque laudantium, totam rem aperiam, eaque ipsa 
-                                quae ab illo inventore veritatis et quasi architecto beatae vitae 
-                                dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas 
-                                sit aspernatur aut odit aut fugit.
+                                Security and surveillance services are provided 24/7 to ensure the safety of all residents. Our network video cameras monitor activity in parking areas and common spaces, allowing efficient management of visitor flow and enhanced security throughout the complex.
                                 </p>
                             </div>
 
@@ -251,14 +300,10 @@
                             </span>
 
                             <div class="service-content">
-                                <h3 class="h4">Web Development</h3>
+                                <h3 class="h4">Cleaning Services</h3>
 
                                 <p>
-                                Sed ut perspiciatis unde omnis iste natus error sit voluptatem 
-                                accusantium doloremque laudantium, totam rem aperiam, eaque ipsa 
-                                quae ab illo inventore veritatis et quasi architecto beatae vitae 
-                                dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas 
-                                sit aspernatur aut odit aut fugit.
+                                Regular cleaning of communal areas ensures a pleasant environment for all residents. Our dedicated cleaning staff maintains the highest standards of cleanliness in hallways, staircases, entrance areas, and other shared spaces. We've also installed recycling bins for better environmental protection.
                                 </p>
                             </div>
 
@@ -271,14 +316,10 @@
                             </span>
 
                             <div class="service-content">
-                                <h3 class="h4">Illustration</h3>
+                                <h3 class="h4">Support & Management</h3>
 
                                 <p>
-                                Sed ut perspiciatis unde omnis iste natus error sit voluptatem 
-                                accusantium doloremque laudantium, totam rem aperiam, eaque ipsa 
-                                quae ab illo inventore veritatis et quasi architecto beatae vitae 
-                                dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas 
-                                sit aspernatur aut odit aut fugit.
+                                Our team handles parking space maintenance, renovations/improvements, gardening and grounds maintenance, electricity, lights and water services, and provides ongoing support and help to all residents. We also organize syndicate meetings to keep everyone informed about complex affairs.
                                 </p>
                             </div>
 
@@ -300,13 +341,11 @@
                     <div class="row narrow section-header section-header--dark has-bottom-sep">
                         <div class="column lg-12">
                             
-                            <h3 class="text-pretitle">Showcase</h3>
-                            <h1 class="text-display-title">See Our Featured Projects.</h1>
+                            <h3 class="text-pretitle">Updates & News</h3>
+                            <h1 class="text-display-title">Latest Complex Updates.</h1>
                             
                             <p class="lead">
-                            Lorem ipsum Dolor adipisicing nostrud et aute Excepteur amet commodo 
-                            ea dolore irure esse Duis nulla sint fugiat cillum ullamco proident 
-                            aliquip quis qui voluptate dolore veniam Ut laborum non est in officia.
+                            Stay informed about the latest developments, meetings, and improvements happening within the Complexe Tanger Boulevard community.
                             </p>
                             
                         </div> <!-- end column -->
@@ -319,23 +358,23 @@
 
                         <div class="folio-list bricks">
          
-                            <div class="brick folio-item"   data-animate-el>
+                            <div class="brick folio-item" data-animate-el>
 
                                 <div class="folio-item__thumb">
-                                    <a class="folio-item__thumb-link" href="images/portfolio/gallery/g-shutterbug.jpg" Title="Shutterbug" data-size="1050x700">
+                                    <a class="folio-item__thumb-link" href="images/portfolio/gallery/g-shutterbug.jpg" Title="Syndicate Meetup 2023" data-size="1050x700">
                                         <img src="images/portfolio/shutterbug.jpg" 
                                              srcset="images/portfolio/shutterbug.jpg 1x, images/portfolio/shutterbug@2x.jpg 2x" alt="">
                                     </a>
                                 </div>
                                 <div class="folio-item__info">
-                                    <div class="folio-item__cat">Web Development</div>
-                                    <h4 class="folio-item__title">Shutterbug</h4>
+                                    <div class="folio-item__cat">Community Event</div>
+                                    <h4 class="folio-item__title">Syndicate Meetup 2023</h4>
                                 </div>
-                                <a href="https://www.behance.net/" title="Project Link" class="folio-item__project-link">
+                                <a href="#0" title="Event Details" class="folio-item__project-link">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;"><path d="M4.222 19.778a4.983 4.983 0 0 0 3.535 1.462 4.986 4.986 0 0 0 3.536-1.462l2.828-2.829-1.414-1.414-2.828 2.829a3.007 3.007 0 0 1-4.243 0 3.005 3.005 0 0 1 0-4.243l2.829-2.828-1.414-1.414-2.829 2.828a5.006 5.006 0 0 0 0 7.071zm15.556-8.485a5.008 5.008 0 0 0 0-7.071 5.006 5.006 0 0 0-7.071 0L9.879 7.051l1.414 1.414 2.828-2.829a3.007 3.007 0 0 1 4.243 0 3.005 3.005 0 0 1 0 4.243l-2.829 2.828 1.414 1.414 2.829-2.828z"></path><path d="m8.464 16.95-1.415-1.414 8.487-8.486 1.414 1.415z"></path></svg>
                                 </a>
                                 <div class="folio-item__caption">
-                                    <p>Vero molestiae sed aut natus excepturi. Et tempora numquam. Temporibus iusto quo.Unde dolorem corrupti neque nisi.</p>
+                                    <p>Ladies; Gentlemen Co-owners, we are pleased to invite you to the general meeting of the Co-owners of the Tanger Boulevard Residence: December 23, 2023 at 11:00 a.m. for AGM of the Residence and at 1:00 p.m. for AGO of the Parking at the Flandria hotel.</p>
                                 </div>
                                 
                              </div> <!-- end brick-->
@@ -343,20 +382,20 @@
                             <div class="brick folio-item" data-animate-el>
 
                                 <div class="folio-item__thumb">
-                                    <a class="folio-item__thumb-link" href="images/portfolio/gallery/g-yellowwall.jpg" Title="Yellow Wall" data-size="1050x700">
+                                    <a class="folio-item__thumb-link" href="images/portfolio/gallery/g-yellowwall.jpg" Title="Parking Security & Surveillance" data-size="1050x700">
                                         <img src="images/portfolio/yellowwall.jpg" 
                                              srcset="images/portfolio/yellowwall.jpg 1x, images/portfolio/yellowwall@2x.jpg 2x" alt="">
                                     </a>
                                 </div>
                                 <div class="folio-item__info">
-                                    <div class="folio-item__cat">Marketing</div>
-                                    <h4 class="folio-item__title">Yellow Wall</h4>
+                                    <div class="folio-item__cat">Security</div>
+                                    <h4 class="folio-item__title">Parking Security & Surveillance</h4>
                                 </div>
-                                <a href="https://www.behance.net/" title="Project Link" class="folio-item__project-link">
+                                <a href="#0" title="Security Details" class="folio-item__project-link">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;"><path d="M4.222 19.778a4.983 4.983 0 0 0 3.535 1.462 4.986 4.986 0 0 0 3.536-1.462l2.828-2.829-1.414-1.414-2.828 2.829a3.007 3.007 0 0 1-4.243 0 3.005 3.005 0 0 1 0-4.243l2.829-2.828-1.414-1.414-2.829 2.828a5.006 5.006 0 0 0 0 7.071zm15.556-8.485a5.008 5.008 0 0 0 0-7.071 5.006 5.006 0 0 0-7.071 0L9.879 7.051l1.414 1.414 2.828-2.829a3.007 3.007 0 0 1 4.243 0 3.005 3.005 0 0 1 0 4.243l-2.829 2.828 1.414 1.414 2.829-2.828z"></path><path d="m8.464 16.95-1.415-1.414 8.487-8.486 1.414 1.415z"></path></svg>
                                 </a>
                                 <div class="folio-item__caption">
-                                    <p>Vero molestiae sed aut natus excepturi. Et tempora numquam. Temporibus iusto quo.Unde dolorem corrupti neque nisi.</p>
+                                    <p>Network video cameras can be used to monitor the activity and capacity in parking areas effectively, allowing officials to support the flow of visitors and residents.</p>
                                 </div>
 
                             </div> <!-- end brick-->
@@ -364,20 +403,20 @@
                             <div class="brick folio-item" data-animate-el>
 
                                 <div class="folio-item__thumb">
-                                    <a class="folio-item__thumb-link" href="images/portfolio/gallery/g-architecture.jpg" Title="Architecture" data-size="1050x700">
+                                    <a class="folio-item__thumb-link" href="images/portfolio/gallery/g-architecture.jpg" Title="Recycling Bins" data-size="1050x700">
                                         <img src="images/portfolio/architecture.jpg" 
                                              srcset="images/portfolio/architecture.jpg 1x, images/portfolio/architecture@2x.jpg 2x" alt="">
                                     </a>
                                 </div>
                                 <div class="folio-item__info">
-                                    <div class="folio-item__cat">Marketing</div>
-                                    <h4 class="folio-item__title">Architecture</h4>
+                                    <div class="folio-item__cat">Environment</div>
+                                    <h4 class="folio-item__title">Recycling Bins</h4>
                                 </div>
-                                <a href="https://www.behance.net/" title="Project Link" class="folio-item__project-link">
+                                <a href="#0" title="Environment Initiative" class="folio-item__project-link">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;"><path d="M4.222 19.778a4.983 4.983 0 0 0 3.535 1.462 4.986 4.986 0 0 0 3.536-1.462l2.828-2.829-1.414-1.414-2.828 2.829a3.007 3.007 0 0 1-4.243 0 3.005 3.005 0 0 1 0-4.243l2.829-2.828-1.414-1.414-2.829 2.828a5.006 5.006 0 0 0 0 7.071zm15.556-8.485a5.008 5.008 0 0 0 0-7.071 5.006 5.006 0 0 0-7.071 0L9.879 7.051l1.414 1.414 2.828-2.829a3.007 3.007 0 0 1 4.243 0 3.005 3.005 0 0 1 0 4.243l-2.829 2.828 1.414 1.414 2.829-2.828z"></path><path d="m8.464 16.95-1.415-1.414 8.487-8.486 1.414 1.415z"></path></svg>
                                 </a>
                                 <div class="folio-item__caption">
-                                    <p>Vero molestiae sed aut natus excepturi. Et tempora numquam. Temporibus iusto quo.Unde dolorem corrupti neque nisi.</p>
+                                    <p>Recycling bins installed for better environment protection. Recycling is very important as waste has a huge negative impact on the natural environment. By correctly recycling items, it would have a hugely positive impact on the environment.</p>
                                 </div>
 
                             </div> <!-- end brick-->
@@ -385,20 +424,20 @@
                             <div class="brick folio-item" data-animate-el>
 
                                 <div class="folio-item__thumb">
-                                    <a class="folio-item__thumb-link" href="images/portfolio/gallery/g-minimalismo.jpg" Title="Minimalismo" data-size="1050x700">
+                                    <a class="folio-item__thumb-link" href="images/portfolio/gallery/g-minimalismo.jpg" Title="Entrance Re-design" data-size="1050x700">
                                         <img src="images/portfolio/minimalismo.jpg" 
                                              srcset="images/portfolio/minimalismo.jpg 1x, images/portfolio/minimalismo@2x.jpg 2x" alt="">
                                     </a>
                                 </div>
                                 <div class="folio-item__info">
-                                    <div class="folio-item__cat">UI/UX Design</div>
-                                    <h4 class="folio-item__title">Minimalismo</h4>
+                                    <div class="folio-item__cat">Renovations</div>
+                                    <h4 class="folio-item__title">Entrance Re-design</h4>
                                 </div>
-                                <a href="https://www.behance.net/" title="Project Link" class="folio-item__project-link">
+                                <a href="#0" title="Renovation Details" class="folio-item__project-link">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;"><path d="M4.222 19.778a4.983 4.983 0 0 0 3.535 1.462 4.986 4.986 0 0 0 3.536-1.462l2.828-2.829-1.414-1.414-2.828 2.829a3.007 3.007 0 0 1-4.243 0 3.005 3.005 0 0 1 0-4.243l2.829-2.828-1.414-1.414-2.829 2.828a5.006 5.006 0 0 0 0 7.071zm15.556-8.485a5.008 5.008 0 0 0 0-7.071 5.006 5.006 0 0 0-7.071 0L9.879 7.051l1.414 1.414 2.828-2.829a3.007 3.007 0 0 1 4.243 0 3.005 3.005 0 0 1 0 4.243l-2.829 2.828 1.414 1.414 2.829-2.828z"></path><path d="m8.464 16.95-1.415-1.414 8.487-8.486 1.414 1.415z"></path></svg>
                                 </a>
                                 <div class="folio-item__caption">
-                                    <p>Vero molestiae sed aut natus excepturi. Et tempora numquam. Temporibus iusto quo.Unde dolorem corrupti neque nisi.</p>
+                                    <p>2023 - Entrance re-design project to enhance the aesthetic appeal and functionality of the complex entrance.</p>
                                 </div>
 
                             </div> <!-- end brick-->
@@ -406,20 +445,20 @@
                             <div class="brick folio-item" data-animate-el>
 
                                 <div class="folio-item__thumb">
-                                    <a class="folio-item__thumb-link" href="images/portfolio/gallery/g-skaterboy.jpg" Title="Skaterboy" data-size="1050x700">
+                                    <a class="folio-item__thumb-link" href="images/portfolio/gallery/g-skaterboy.jpg" Title="Complex Cleaning" data-size="1050x700">
                                         <img src="images/portfolio/skaterboy.jpg" 
                                              srcset="images/portfolio/skaterboy.jpg 1x, images/portfolio/skaterboy@2x.jpg 2x" alt="">
                                     </a>
                                 </div>
                                 <div class="folio-item__info">
-                                    <div class="folio-item__cat">Branding</div>
-                                    <h4 class="folio-item__title">Skaterboy</h4>
+                                    <div class="folio-item__cat">Maintenance</div>
+                                    <h4 class="folio-item__title">Complex Cleaning</h4>
                                 </div>
-                                <a href="https://www.behance.net/" title="Project Link" class="folio-item__project-link">
+                                <a href="#0" title="Maintenance Details" class="folio-item__project-link">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;"><path d="M4.222 19.778a4.983 4.983 0 0 0 3.535 1.462 4.986 4.986 0 0 0 3.536-1.462l2.828-2.829-1.414-1.414-2.828 2.829a3.007 3.007 0 0 1-4.243 0 3.005 3.005 0 0 1 0-4.243l2.829-2.828-1.414-1.414-2.829 2.828a5.006 5.006 0 0 0 0 7.071zm15.556-8.485a5.008 5.008 0 0 0 0-7.071 5.006 5.006 0 0 0-7.071 0L9.879 7.051l1.414 1.414 2.828-2.829a3.007 3.007 0 0 1 4.243 0 3.005 3.005 0 0 1 0 4.243l-2.829 2.828 1.414 1.414 2.829-2.828z"></path><path d="m8.464 16.95-1.415-1.414 8.487-8.486 1.414 1.415z"></path></svg>
                                 </a>
                                 <div class="folio-item__caption">
-                                    <p>Vero molestiae sed aut natus excepturi. Et tempora numquam. Temporibus iusto quo.Unde dolorem corrupti neque nisi.</p>
+                                    <p>2023 - Cleaning of the complex and parking space to maintain the highest standards of cleanliness and hygiene throughout the common areas.</p>
                                 </div>
 
                             </div> <!-- end brick-->
@@ -427,20 +466,20 @@
                             <div class="brick folio-item" data-animate-el>
 
                                 <div class="folio-item__thumb">
-                                    <a class="folio-item__thumb-link" href="images/portfolio/gallery/g-salad.jpg" Title="Salad" data-size="1050x700">
+                                    <a class="folio-item__thumb-link" href="images/portfolio/gallery/g-salad.jpg" Title="Electricity Fix" data-size="1050x700">
                                         <img src="images/portfolio/salad.jpg" 
                                              srcset="images/portfolio/salad.jpg 1x, images/portfolio/salad@2x.jpg 2x" alt="">
                                     </a>
                                 </div>
                                 <div class="folio-item__info">
-                                    <div class="folio-item__cat">Branding</div>
-                                    <h4 class="folio-item__title">Salad</h4>
+                                    <div class="folio-item__cat">Infrastructure</div>
+                                    <h4 class="folio-item__title">Electricity Fix</h4>
                                 </div>
-                                <a href="https://www.behance.net/" title="Project Link" class="folio-item__project-link">
+                                <a href="#0" title="Infrastructure Details" class="folio-item__project-link">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;"><path d="M4.222 19.778a4.983 4.983 0 0 0 3.535 1.462 4.986 4.986 0 0 0 3.536-1.462l2.828-2.829-1.414-1.414-2.828 2.829a3.007 3.007 0 0 1-4.243 0 3.005 3.005 0 0 1 0-4.243l2.829-2.828-1.414-1.414-2.829 2.828a5.006 5.006 0 0 0 0 7.071zm15.556-8.485a5.008 5.008 0 0 0 0-7.071 5.006 5.006 0 0 0-7.071 0L9.879 7.051l1.414 1.414 2.828-2.829a3.007 3.007 0 0 1 4.243 0 3.005 3.005 0 0 1 0 4.243l-2.829 2.828 1.414 1.414 2.829-2.828z"></path><path d="m8.464 16.95-1.415-1.414 8.487-8.486 1.414 1.415z"></path></svg>
                                 </a>
                                 <div class="folio-item__caption">
-                                    <p>Vero molestiae sed aut natus excepturi. Et tempora numquam. Temporibus iusto quo.Unde dolorem corrupti neque nisi.</p>
+                                    <p>2023 - Residential community electricity fix to address electrical issues and ensure safe, reliable power throughout the complex.</p>
                                 </div>
 
                             </div> <!-- end brick-->
@@ -453,7 +492,7 @@
                 <div class="row testimonials">
                     <div class="column lg-12" data-animate-block>
 
-                        <h2 class="text-pretitle" data-animate-el>What They Say About Us</h2>
+                        <h2 class="text-pretitle" data-animate-el>What They Say About Our Complex</h2>
         
                         <div class="swiper-container testimonial-slider" data-animate-el>
         
@@ -461,60 +500,39 @@
     
                                 <div class="testimonial-slider__slide swiper-slide">
                                     <p>
-                                    Molestiae incidunt consequatur quis ipsa autem nam sit enim magni. Voluptas tempore rem. 
-                                    Explicabo a quaerat sint autem dolore ducimus ut consequatur neque. Nisi dolores quaerat fuga rem nihil nostrum.
-                                    Laudantium quia consequatur molestias.
+                                    The Tangier Boulevard complex is a fantastic place to live with excellent amenities and a well-managed community. The syndicate does a great job maintaining all common areas and responding to resident needs.
                                     </p>
                                     <div class="testimonial-slider__author">
                                         <img src="images/avatars/user-02.jpg" alt="Author image" class="testimonial-slider__avatar">
                                         <cite class="testimonial-slider__cite">
-                                            <strong>Tim Cook</strong>
-                                            <span>CEO, Apple</span>
+                                            <strong>Ahmed Benali</strong>
+                                            <span>Resident since 2020</span>
                                         </cite>
                                     </div>
                                 </div> <!-- end testimonial-slider__slide -->
                 
                                 <div class="testimonial-slider__slide swiper-slide">
                                     <p>
-                                    Excepturi nam cupiditate culpa doloremque deleniti repellat. Veniam quos repellat voluptas animi adipisci.
-                                    Nisi eaque consequatur. Voluptatem dignissimos ut ducimus accusantium perspiciatis.
-                                    Quasi voluptas eius distinctio. Atque eos maxime.
+                                    I appreciate the security measures implemented in our complex, especially the new surveillance system in the parking area. It gives me peace of mind knowing my vehicle and property are well protected.
                                     </p>
                                     <div class="testimonial-slider__author">
                                         <img src="images/avatars/user-03.jpg" alt="Author image" class="testimonial-slider__avatar">
                                         <cite class="testimonial-slider__cite">
-                                            <strong>Sundar Pichai</strong>
-                                            <span>CEO, Google</span>
+                                            <strong>Fatima Zahra</strong>
+                                            <span>Resident since 2021</span>
                                         </cite>
                                     </div>
                                 </div> <!-- end testimonial-slider__slide -->
                 
                                 <div class="testimonial-slider__slide swiper-slide">
                                     <p>
-                                    Repellat dignissimos libero. Qui sed at corrupti expedita voluptas odit. Nihil ea quia nesciunt. Ducimus aut sed ipsam.  
-                                    Autem eaque officia cum exercitationem sunt voluptatum accusamus. Quasi voluptas eius distinctio.
-                                    Voluptatem dignissimos ut.
+                                    The swimming pool and green areas are what sold me on this complex. The maintenance team does an excellent job keeping these facilities in pristine condition throughout the year.
                                     </p>
                                     <div class="testimonial-slider__author">
                                         <img src="images/avatars/user-01.jpg" alt="Author image" class="testimonial-slider__avatar">
                                         <cite class="testimonial-slider__cite">
-                                            <strong>Satya Nadella</strong>
-                                            <span>CEO, Microsoft</span>
-                                        </cite>
-                                    </div>
-                                </div> <!-- end testimonial-slider__slide -->
-        
-                                <div class="testimonial-slider__slide swiper-slide">
-                                    <p>
-                                    Nunc interdum lacus sit amet orci. Vestibulum dapibus nunc ac augue. Fusce vel dui. In ac felis 
-                                    quis tortor malesuada pretium. Curabitur vestibulum aliquam leo. Qui sed at corrupti expedita voluptas odit. 
-                                    Nihil ea quia nesciunt. Ducimus aut sed ipsam.
-                                    </p>
-                                    <div class="testimonial-slider__author">
-                                        <img src="images/avatars/user-06.jpg" alt="Author image" class="testimonial-slider__avatar">
-                                        <cite class="testimonial-slider__cite">
-                                            <strong>Jeff Bezos</strong>
-                                            <span>CEO, Amazon</span>
+                                            <strong>Karim Moussaoui</strong>
+                                            <span>Resident since 2019</span>
                                         </cite>
                                     </div>
                                 </div> <!-- end testimonial-slider__slide -->
@@ -528,29 +546,6 @@
                     </div> <!-- end column -->
                 </div> <!-- end row testimonials -->
 
-                <div class="clients-block">
-                    <div class="row">
-                        <div class="column lg-12" data-animate-block>
-        
-                            <div class="swiper-container clients" data-animate-el>
-                                <div class="swiper-wrapper clients__content">
-                                    <a href="#0" title="" class="swiper-slide clients__slide"><img src="images/icons/clients/dropbox.svg" /></a>
-                                    <a href="#0" title="" class="swiper-slide clients__slide"><img src="images/icons/clients/atom.svg" /></a>
-                                    <a href="#0" title="" class="swiper-slide clients__slide"><img src="images/icons/clients/github.svg" /></a>
-                                    <a href="#0" title="" class="swiper-slide clients__slide"><img src="images/icons/clients/redhat.svg" /></a>
-                                    <a href="#0" title="" class="swiper-slide clients__slide"><img src="images/icons/clients/medium.svg" /></a>
-                                    <a href="#0" title="" class="swiper-slide clients__slide"><img src="images/icons/clients/messenger.svg" /></a>
-                                    <a href="#0" title="" class="swiper-slide clients__slide"><img src="images/icons/clients/steam.svg" /></a>
-                                    <a href="#0" title="" class="swiper-slide clients__slide"><img src="images/icons/clients/spotify.svg" /></a>
-                                </div>
-        
-                                <div class="swiper-pagination"></div>
-                            </div> <!-- end clients -->
-        
-                        </div> <!-- end column -->
-                    </div> <!-- end clients-outer -->
-                </div> <!-- end clients-block -->
-
             </section> <!-- end portfolio -->
 
             <!-- contact
@@ -562,9 +557,9 @@
                         
                         <h3 class="text-pretitle">Get In Touch</h3>
                         <h1 class="text-display-title">
-                            Have an idea or an epic project in mind? Talk to us. 
-                            Let's work together and make something great. 
-                            Drop us a line at <a href="mailto:#0">hello@infinity.com</a>.
+                            Have a question or need assistance? Contact us. 
+                            We're here to help with all your residential needs.
+                            Drop us a line at <a href="mailto:info@complexe-tanger-boulevard.com">info@complexe-tanger-boulevard.com</a>.
                         </h1>
                         
                     </div> <!-- end column -->
@@ -576,9 +571,8 @@
                         <h5 class="with-top-line">Where to Find Us</h5>
         
                         <p>
-                        1600 Amphitheatre Parkway <br>
-                        Mountain View, California <br>
-                        94043  US
+                        Ave Mohammed V <br>
+                        Tangier, Morocco <br>
                         </p>
                     </div>
         
@@ -586,7 +580,7 @@
                         <h5 class="with-top-line">Follow Us</h5>
         
                         <ul class="s-contact__list">
-                            <li><a href="#0">Facebook</a></li>
+                            <li><a href="#0">Pinterest</a></li>
                             <li><a href="#0">Twitter</a></li>
                             <li><a href="#0">Instagram</a></li>
                         </ul>
@@ -596,9 +590,8 @@
                         <h5 class="with-top-line">Contact Us</h5>
         
                         <ul class="s-contact__list">
-                            <li><a href="mailto:#0">info@infinity.com</a></li>
-                            <li><a href="tel:197-543-2345">+197 543 2345</a></li>
-                            <li><a href="tel:197-123-9876">+197 123 9876</a></li>
+                            <li><a href="mailto:info@complexe-tanger-boulevard.com">info@complexe-tanger-boulevard.com</a></li>
+                            <li><a href="tel:+22-256-7890">+22 256 7890</a></li>
                         </ul>
                     </div>
         
@@ -607,7 +600,7 @@
                 <div class="row s-contact__bottom">
     
                     <div class="column lg-5 tab-12 s-contact__mail-block">
-                        <a href="mailto:#0" class="btn btn--stroke btn--mail">
+                        <a href="mailto:info@complexe-tanger-boulevard.com" class="btn btn--stroke btn--mail">
                             Let's Talk 
                         </a>
                     </div>
@@ -639,8 +632,8 @@
         <footer id="colophon" class="s-footer">
             <div class="row">
                 <div class="column lg-12 ss-copyright">
-                    <span>© Copyright Infinity 2022</span>
-                    <span>Design by <a href="https://www.styleshout.com/">StyleShout</a></span>
+                    <span>© Copyright Complexe Tanger Boulevard 2023</span>
+                    <span>Welcome to the Syndicate of the complexe of Tanger Boulevard</span>
                 </div>
             </div>
 
