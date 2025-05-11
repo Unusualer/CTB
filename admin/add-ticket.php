@@ -4,6 +4,7 @@ session_start();
 require_once '../includes/config.php';
 require_once '../includes/functions.php';
 require_once '../includes/role_access.php';
+require_once '../includes/translations.php';
 
 // Check if user is logged in and has appropriate role
 requireRole('admin');
@@ -21,7 +22,7 @@ try {
     $users_stmt->execute();
     $users = $users_stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    $_SESSION['error'] = "Erreur de base de données : " . $e->getMessage();
+    $_SESSION['error'] = __("Database error:") . " " . $e->getMessage();
 }
 
 // Process form submission
@@ -36,22 +37,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validate user_id
     if (empty($user_id)) {
-        $errors[] = "L'utilisateur est requis.";
+        $errors[] = __("User is required.");
     }
     
     // Validate subject
     if (empty($subject)) {
-        $errors[] = "Le sujet est requis.";
+        $errors[] = __("Subject is required.");
     }
     
     // Validate description
     if (empty($description)) {
-        $errors[] = "La description est requise.";
+        $errors[] = __("Description is required.");
     }
     
     // Validate status
     if (empty($status) || !in_array($status, $statuses)) {
-        $errors[] = "Un statut valide est requis.";
+        $errors[] = __("A valid status is required.");
     }
     
     // If no errors, add ticket
@@ -75,14 +76,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Log the activity
             $admin_id = $_SESSION['user_id'];
-            log_activity($db, $admin_id, 'create', 'ticket', $ticket_id, "Création d'un nouveau ticket : $subject");
+            log_activity($db, $admin_id, 'create', 'ticket', $ticket_id, __("Created new ticket:") . " $subject");
             
-            $_SESSION['success'] = "Ticket créé avec succès.";
+            $_SESSION['success'] = __("Ticket created successfully.");
             header("Location: tickets.php");
             exit();
             
         } catch (PDOException $e) {
-            $_SESSION['error'] = "Erreur de base de données : " . $e->getMessage();
+            $_SESSION['error'] = __("Database error:") . " " . $e->getMessage();
         }
     } else {
         $_SESSION['error'] = implode("<br>", $errors);
@@ -90,15 +91,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Page title
-$page_title = "Ajouter un Ticket";
+$page_title = __("Add Ticket");
 ?>
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo substr($_SESSION['language'] ?? 'en_US', 0, 2); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?> - Community Trust Bank</title>
+    <title><?php echo $page_title; ?> - <?php echo __("Community Trust Bank"); ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
@@ -329,8 +330,8 @@ $page_title = "Ajouter un Ticket";
         <main class="main-content">
             <div class="page-header">
                 <div class="breadcrumb">
-                    <a href="tickets.php">Tickets</a>
-                    <span>Add New Ticket</span>
+                    <a href="tickets.php"><?php echo __("Tickets"); ?></a>
+                    <span><?php echo __("Add Ticket"); ?></span>
                 </div>
             </div>
 
@@ -353,72 +354,62 @@ $page_title = "Ajouter un Ticket";
             <?php endif; ?>
 
             <div class="content-wrapper">
-                <div class="card user-filter-card">
-                    <div class="card-header user-filter-header">
-                        <h3><i class="fas fa-ticket-alt"></i> Ajouter un Nouveau Ticket</h3>
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-plus-circle"></i> <?php echo __("Add New Ticket"); ?></h3>
                     </div>
                     <div class="card-body">
-                        <form action="add-ticket.php" method="POST" class="ticket-form">
-                            <div class="form-grid">
+                        <form action="add-ticket.php" method="post">
+                            <div class="form-section-title">
+                                <i class="fas fa-info-circle"></i> <?php echo __("Ticket Information"); ?>
+                            </div>
+                            
                                 <div class="form-group">
-                                    <label for="user_id">Utilisateur <span class="required">*</span></label>
-                                    <select id="user_id" name="user_id" required>
-                                        <option value="">Sélectionner un utilisateur</option>
+                                <label for="user_id">
+                                    <?php echo __("User"); ?> <span class="required">*</span>
+                                </label>
+                                <select name="user_id" id="user_id" required>
+                                    <option value=""><?php echo __("Select a user"); ?></option>
                                         <?php foreach ($users as $user): ?>
-                                            <option value="<?php echo $user['id']; ?>">
+                                        <option value="<?php echo $user['id']; ?>" <?php if (isset($_POST['user_id']) && $_POST['user_id'] == $user['id']) echo 'selected'; ?>>
                                                 <?php echo htmlspecialchars($user['name']); ?> (<?php echo htmlspecialchars($user['email']); ?>)
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
                                 
-                                <div class="form-row">
                                     <div class="form-group">
-                                        <label for="status">Statut <span class="text-danger">*</span></label>
-                                        <select name="status" id="status" required>
-                                            <option value="">Sélectionner un statut</option>
-                                            <option value="open">Ouvert</option>
-                                            <option value="in_progress">En cours</option>
-                                            <option value="closed">Fermé</option>
-                                            <option value="reopened">Réouvert</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="priority">Priorité <span class="text-danger">*</span></label>
-                                        <select name="priority" id="priority" required>
-                                            <option value="">Sélectionner une priorité</option>
-                                            <option value="low">Basse</option>
-                                            <option value="medium">Moyenne</option>
-                                            <option value="high">Haute</option>
-                                            <option value="urgent">Urgente</option>
-                                        </select>
-                                    </div>
+                                <label for="subject">
+                                    <?php echo __("Subject"); ?> <span class="required">*</span>
+                                </label>
+                                <input type="text" id="subject" name="subject" value="<?php echo isset($_POST['subject']) ? htmlspecialchars($_POST['subject']) : ''; ?>" required>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="subject">Sujet <span class="required">*</span></label>
-                                    <input type="text" id="subject" name="subject" required>
-                                </div>
+                                <label for="description">
+                                    <?php echo __("Description"); ?> <span class="required">*</span>
+                                </label>
+                                <textarea id="description" name="description" rows="6" required><?php echo isset($_POST['description']) ? htmlspecialchars($_POST['description']) : ''; ?></textarea>
                             </div>
                             
-                            <div class="form-section-title">Description du Ticket</div>
-                            
                             <div class="form-group">
-                                <label for="description">Description <span class="required">*</span></label>
-                                <textarea id="description" name="description" rows="6" required></textarea>
+                                <label for="status">
+                                    <?php echo __("Status"); ?> <span class="required">*</span>
+                                </label>
+                                <select name="status" id="status" required>
+                                    <option value="open" <?php if (isset($_POST['status']) && $_POST['status'] == 'open') echo 'selected'; ?>><?php echo __("Open"); ?></option>
+                                    <option value="in_progress" <?php if (isset($_POST['status']) && $_POST['status'] == 'in_progress') echo 'selected'; ?>><?php echo __("In Progress"); ?></option>
+                                    <option value="closed" <?php if (isset($_POST['status']) && $_POST['status'] == 'closed') echo 'selected'; ?>><?php echo __("Closed"); ?></option>
+                                    <option value="reopened" <?php if (isset($_POST['status']) && $_POST['status'] == 'reopened') echo 'selected'; ?>><?php echo __("Reopened"); ?></option>
+                                </select>
                             </div>
                             
                             <div class="form-actions">
                                 <a href="tickets.php" class="btn btn-secondary">
-                                    <i class="fas fa-times"></i>
-                                    Annuler
+                                    <i class="fas fa-times"></i> <?php echo __("Cancel"); ?>
                                 </a>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i>
-                                    Enregistrer
+                                    <i class="fas fa-save"></i> <?php echo __("Create Ticket"); ?>
                                 </button>
                             </div>
                         </form>

@@ -4,6 +4,7 @@ session_start();
 require_once '../includes/config.php';
 require_once '../includes/functions.php';
 require_once '../includes/role_access.php';
+require_once '../includes/translations.php';
 
 // Check if user is logged in and has appropriate role
 requireRole('admin');
@@ -11,7 +12,7 @@ requireRole('admin');
 
 // Check if ID is provided
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-    $_SESSION['error'] = "L'ID de la propriété est requis.";
+    $_SESSION['error'] = __("Property ID is required.");
     header("Location: properties.php");
     exit();
 }
@@ -32,11 +33,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validate required fields - only validate type and identifier existence, not their values
     if (empty($type) || !in_array($type, $types)) {
-        $errors[] = "Le type de propriété est invalide.";
+        $errors[] = __("Invalid property type.");
     }
     
     if (empty($identifier)) {
-        $errors[] = "L'identifiant est requis.";
+        $errors[] = __("Identifier is required.");
     }
     
     // If no errors, update property
@@ -52,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $existing_property = $check_stmt->fetch(PDO::FETCH_ASSOC);
             
             if (!$existing_property) {
-                $_SESSION['error'] = "Propriété non trouvée.";
+                $_SESSION['error'] = __("Property not found.");
             } else {
                 // Update only the user_id, keeping the original type and identifier
                 $update_stmt = $db->prepare("UPDATE properties SET 
@@ -71,21 +72,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                        VALUES (:admin_id, 'update', :description)");
                 
                 if ($user_id) {
-                    $description = "Assigned resident (ID: $user_id) to property ID: $property_id";
+                    $description = __("Assigned resident (ID:") . " $user_id) " . __("to property ID:") . " $property_id";
                 } else {
-                    $description = "Removed resident assignment from property ID: $property_id";
+                    $description = __("Removed resident assignment from property ID:") . " $property_id";
                 }
                 $log_stmt->bindParam(':admin_id', $admin_id);
                 $log_stmt->bindParam(':description', $description);
                 $log_stmt->execute();
                 
-                $_SESSION['success'] = "Attribution de la propriété mise à jour avec succès.";
+                $_SESSION['success'] = __("Property assignment updated successfully.");
                 header("Location: view-property.php?id=$property_id");
                 exit();
             }
             
         } catch (PDOException $e) {
-            $_SESSION['error'] = "Database error: " . $e->getMessage();
+            $_SESSION['error'] = __("Database error:") . " " . $e->getMessage();
         }
     } else {
         $_SESSION['error'] = implode("<br>", $errors);
@@ -103,7 +104,7 @@ try {
     $stmt->execute();
     
     if ($stmt->rowCount() === 0) {
-        $_SESSION['error'] = "Property not found.";
+        $_SESSION['error'] = __("Property not found.");
         header("Location: properties.php");
         exit();
     }
@@ -116,21 +117,21 @@ try {
     $residents = $user_stmt->fetchAll(PDO::FETCH_ASSOC);
     
 } catch (PDOException $e) {
-    $_SESSION['error'] = "Database error: " . $e->getMessage();
+    $_SESSION['error'] = __("Database error:") . " " . $e->getMessage();
     header("Location: properties.php");
     exit();
 }
 
 // Page title
-$page_title = "Assigner un Résident à la Propriété";
+$page_title = __("Assign Resident to Property");
 ?>
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo substr($_SESSION['language'] ?? 'en_US', 0, 2); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?> - Community Trust Bank</title>
+    <title><?php echo $page_title; ?> - <?php echo __("Community Trust Bank"); ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
@@ -251,80 +252,189 @@ $page_title = "Assigner un Résident à la Propriété";
         }
         
         .btn-secondary {
-            background-color: var(--secondary-bg);
+            background-color: var(--light-gray);
             color: var(--text-primary);
+            border: 1px solid var(--border-color);
         }
         
         .btn-secondary:hover {
-            background-color: var(--border-color);
+            background-color: var(--light-color);
             transform: translateY(-1px);
         }
         
-        .help-text {
+        select[multiple] {
+            height: auto;
+            min-height: 120px;
+        }
+        
+        .property-type-icon {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-right: 10px;
+        }
+        
+        .input-with-icon {
+            position: relative;
+        }
+        
+        .input-with-icon i {
+            position: absolute;
+            left: 15px;
+            top: 14px;
             color: var(--text-secondary);
-            font-size: 0.8rem;
-            margin-top: 5px;
+            pointer-events: none;
+        }
+        
+        .input-with-icon input {
+            padding-left: 40px;
+        }
+        
+        .form-group-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .form-group-header h4 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+        
+        .resident-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background-color: var(--light-color);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+        
+        .resident-item:hover {
+            border-color: var(--primary-color-light);
+            background-color: rgba(var(--primary-rgb), 0.05);
+        }
+        
+        .resident-item-info {
+            flex: 1;
+        }
+        
+        .resident-item-name {
+            font-weight: 600;
             display: block;
+            margin-bottom: 3px;
+        }
+        
+        .resident-item-email {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .resident-select-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            background: var(--bg-color);
+        }
+        
+        .no-residents-message {
+            padding: 15px;
+            text-align: center;
+            color: var(--text-secondary);
+            background-color: var(--light-color);
+            border-radius: 8px;
+            border: 1px dashed var(--border-color);
         }
         
         /* Dark mode specific styles */
-        [data-theme="dark"] .card-header {
-            background: linear-gradient(to right, var(--primary-color), var(--primary-color-dark));
-        }
-        
-        [data-theme="dark"] .card-header h3 {
-            color: #fff;
-        }
-        
-        [data-theme="dark"] .form-group label {
-            color: #ffffff;
-            font-weight: 600;
-        }
-        
+        .dark-mode .card,
         [data-theme="dark"] .card {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
             background-color: var(--card-bg);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
         
-        [data-theme="dark"] input, 
-        [data-theme="dark"] select {
-            background-color: #2a2e35 !important;
-            color: #ffffff !important;
-            border-color: #3f4756;
+        .dark-mode .card-header,
+        [data-theme="dark"] .card-header {
+            border-bottom-color: #3f4756;
         }
         
-        [data-theme="dark"] input:hover, 
-        [data-theme="dark"] select:hover {
-            border-color: var(--primary-color-light);
+        .dark-mode .card-header h3,
+        [data-theme="dark"] .card-header h3 {
+            color: #ffffff;
         }
         
-        [data-theme="dark"] input:focus, 
-        [data-theme="dark"] select:focus {
-            border-color: var(--primary-color);
-            background-color: #2d3239 !important;
-        }
-        
-        [data-theme="dark"] input::placeholder {
-            color: #8e99ad;
-        }
-        
+        .dark-mode .form-section-title,
         [data-theme="dark"] .form-section-title {
             color: #ffffff;
+            border-bottom-color: #3f4756;
+        }
+        
+        .dark-mode .form-group label,
+        [data-theme="dark"] .form-group label {
+            color: #e0e0e0;
+        }
+        
+        .dark-mode input, 
+        .dark-mode select,
+        [data-theme="dark"] input, 
+        [data-theme="dark"] select {
+            background-color: #2c3241;
+            color: #ffffff;
             border-color: #3f4756;
         }
         
-        [data-theme="dark"] .required {
-            color: #ff7a8e;
+        .dark-mode input:hover, 
+        .dark-mode select:hover,
+        [data-theme="dark"] input:hover, 
+        [data-theme="dark"] select:hover {
+            border-color: var(--primary-color);
         }
         
-        [data-theme="dark"] .help-text {
+        .dark-mode .property-type,
+        .dark-mode .property-identifier,
+        [data-theme="dark"] .property-type,
+        [data-theme="dark"] .property-identifier {
+            color: #e0e0e0;
+            background-color: #2c3241;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid #3f4756;
+        }
+        
+        .dark-mode .text-muted,
+        [data-theme="dark"] .text-muted {
+            color: #b0b0b0 !important;
+        }
+        
+        .dark-mode .btn-secondary,
+        [data-theme="dark"] .btn-secondary {
+            background-color: #3a4155;
+            color: #ffffff;
+            border-color: #4f5a75;
+        }
+        
+        .dark-mode .btn-secondary:hover,
+        [data-theme="dark"] .btn-secondary:hover {
+            background-color: #4a526b;
+        }
+        
+        .dark-mode .no-residents-message,
+        [data-theme="dark"] .no-residents-message {
+            background-color: #2c3241;
+            border-color: #3f4756;
             color: #b0b0b0;
         }
         
+        .dark-mode .breadcrumb,
         [data-theme="dark"] .breadcrumb {
             color: #b0b0b0;
         }
         
+        .dark-mode .breadcrumb a,
         [data-theme="dark"] .breadcrumb a {
             color: #ffffff;
         }
@@ -338,9 +448,9 @@ $page_title = "Assigner un Résident à la Propriété";
         <main class="main-content">
             <div class="page-header">
                 <div class="breadcrumb">
-                    <a href="properties.php">Propriétés</a>
-                    <a href="view-property.php?id=<?php echo $property_id; ?>">Voir la Propriété</a>
-                    <span>Assigner un Résident</span>
+                    <a href="properties.php"><?php echo __("Properties"); ?></a>
+                    <a href="view-property.php?id=<?php echo $property_id; ?>"><?php echo __("View Property"); ?></a>
+                    <span><?php echo __("Assign Resident"); ?></span>
                 </div>
             </div>
 
@@ -365,45 +475,95 @@ $page_title = "Assigner un Résident à la Propriété";
             <div class="content-wrapper">
                 <div class="card">
                     <div class="card-header">
-                        <h3><i class="fas fa-user-edit"></i> Assigner un Résident à la Propriété</h3>
+                        <h3>
+                            <i class="fas fa-building"></i> 
+                            <?php echo __("Assign Resident to Property"); ?>: <?php echo ucfirst(htmlspecialchars(__($property['type']))); ?> <?php echo htmlspecialchars($property['identifier']); ?>
+                        </h3>
                     </div>
                     <div class="card-body">
-                        <form action="edit-property.php?id=<?php echo $property_id; ?>" method="POST" class="form">
+                        <form action="edit-property.php?id=<?php echo $property_id; ?>" method="post">
+                            <input type="hidden" name="type" value="<?php echo htmlspecialchars($property['type']); ?>">
+                            <input type="hidden" name="identifier" value="<?php echo htmlspecialchars($property['identifier']); ?>">
+                            
+                            <div class="form-section-title">
+                                <i class="fas fa-info-circle"></i> <?php echo __("Property Details"); ?>
+                            </div>
+                            
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="type">Type de Propriété</label>
-                                    <input type="text" id="type" value="<?php echo ucfirst($property['type']); ?>" readonly>
-                                    <input type="hidden" name="type" value="<?php echo htmlspecialchars($property['type']); ?>">
+                                    <label for="type">
+                                        <i class="fas fa-tag"></i> <?php echo __("Type"); ?>
+                                    </label>
+                                    <div class="property-type">
+                                        <?php if ($property['type'] === 'apartment'): ?>
+                                            <div class="property-type-icon">
+                                                <i class="fas fa-home"></i>
+                                            </div>
+                                            <div class="property-type-label">
+                                                <?php echo __("Apartment"); ?>
+                                            </div>
+                                        <?php elseif ($property['type'] === 'parking'): ?>
+                                            <div class="property-type-icon">
+                                                <i class="fas fa-car"></i>
+                                            </div>
+                                            <div class="property-type-label">
+                                                <?php echo __("Parking"); ?>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="property-type-icon">
+                                                <i class="fas fa-building"></i>
+                                            </div>
+                                            <div class="property-type-label">
+                                                <?php echo ucfirst(htmlspecialchars(__($property['type']))); ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="identifier">Identifiant</label>
-                                    <input type="text" id="identifier" value="<?php echo htmlspecialchars($property['identifier']); ?>" readonly>
-                                    <input type="hidden" name="identifier" value="<?php echo htmlspecialchars($property['identifier']); ?>">
-                                    <div class="help-text">L'identifiant de la propriété est défini lors de sa création et ne peut pas être modifié ici</div>
+                                    <label for="identifier">
+                                        <i class="fas fa-id-card"></i> <?php echo __("Identifier"); ?>
+                                    </label>
+                                    <div class="property-identifier">
+                                        <?php echo htmlspecialchars($property['identifier']); ?>
+                                    </div>
                                 </div>
-                                
+                            </div>
+                            
+                            <div class="form-section-title">
+                                <i class="fas fa-user"></i> <?php echo __("Resident Assignment"); ?>
+                            </div>
+                            
                                 <div class="form-group">
-                                    <label for="user_id">Résident Assigné</label>
-                                    <select id="user_id" name="user_id">
-                                        <option value="">Non assigné</option>
+                                <label for="user_id">
+                                    <?php echo __("Assigned Resident"); ?> <span class="text-muted">(<?php echo __("optional"); ?>)</span>
+                                </label>
+                                
+                                <?php if (count($residents) > 0): ?>
+                                    <div class="form-resident-selection">
+                                        <select name="user_id" id="user_id" class="form-control">
+                                            <option value=""><?php echo __("No resident assigned"); ?></option>
                                         <?php foreach ($residents as $resident): ?>
-                                            <option value="<?php echo $resident['id']; ?>" <?php echo (isset($property['user_id']) && $property['user_id'] == $resident['id']) ? 'selected' : ''; ?>>
+                                                <option value="<?php echo $resident['id']; ?>" <?php echo ($property['user_id'] == $resident['id']) ? 'selected' : ''; ?>>
                                                 <?php echo htmlspecialchars($resident['name']); ?> (<?php echo htmlspecialchars($resident['email']); ?>)
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
-                                    <div class="help-text">Sélectionnez un résident à assigner à cette propriété, ou laissez non assigné</div>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="no-residents-message">
+                                        <i class="fas fa-user-slash"></i> <?php echo __("No resident users available. Create resident users first."); ?>
                                 </div>
+                                <?php endif; ?>
                             </div>
                         
                             <div class="form-actions">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-user-plus"></i> Assigner le Résident
-                                </button>
                                 <a href="view-property.php?id=<?php echo $property_id; ?>" class="btn btn-secondary">
-                                    <i class="fas fa-times"></i> Annuler
+                                    <i class="fas fa-times"></i> <?php echo __("Cancel"); ?>
                                 </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> <?php echo __("Save Changes"); ?>
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -412,6 +572,35 @@ $page_title = "Assigner un Résident à la Propriété";
         </main>
     </div>
 
-    <script src="js/dark-mode.js"></script>
+    <script>
+        // Enable dark/light mode toggle
+        const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
+        const storedTheme = localStorage.getItem("theme");
+        
+        if (storedTheme === "dark" || (!storedTheme && prefersDarkScheme.matches)) {
+            document.body.classList.add("dark-mode");
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+            document.body.classList.remove("dark-mode");
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', function() {
+                    if (document.body.classList.contains("dark-mode")) {
+                        document.body.classList.remove("dark-mode");
+                        document.documentElement.setAttribute('data-theme', 'light');
+                        localStorage.setItem("theme", "light");
+                    } else {
+                        document.body.classList.add("dark-mode");
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                        localStorage.setItem("theme", "dark");
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html> 

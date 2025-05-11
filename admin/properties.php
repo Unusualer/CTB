@@ -8,6 +8,24 @@ require_once '../includes/role_access.php';
 // Check if user is logged in and has appropriate role
 requireRole('admin');
 
+// Include translation function if not already included
+if (!function_exists('__')) {
+    $translations_file = dirname(__DIR__) . '/includes/translations.php';
+    if (file_exists($translations_file)) {
+        require_once $translations_file;
+    } else {
+        // Fallback to alternate locations
+        $alt_translations_file = $_SERVER['DOCUMENT_ROOT'] . '/CTB/includes/translations.php';
+        if (file_exists($alt_translations_file)) {
+            require_once $alt_translations_file;
+        } else {
+            // Define a minimal translation function as last resort
+            function __($text) {
+                return $text;
+            }
+        }
+    }
+}
 
 // Initialize variables
 $search = $_GET['search'] ?? '';
@@ -95,7 +113,7 @@ try {
     $unassigned_count = $unassigned_stmt->fetch(PDO::FETCH_ASSOC)['count'];
     
 } catch (PDOException $e) {
-    $_SESSION['error'] = "Database error: " . $e->getMessage();
+    $_SESSION['error'] = __("Database error") . ": " . $e->getMessage();
     $properties = [];
     $total = 0;
     $total_pages = 0;
@@ -105,11 +123,11 @@ try {
 }
 
 // Page title
-$page_title = "Gestion des Propriétés";
+$page_title = __("Property Management");
 ?>
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo isset($_SESSION['language']) ? substr($_SESSION['language'], 0, 2) : 'en'; ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -125,7 +143,7 @@ $page_title = "Gestion des Propriétés";
         <!-- Main Content -->
         <main class="main-content">
             <div class="page-header">
-                <h1>Gestion des Propriétés</h1>
+                <h1><?php echo __("Property Management"); ?></h1>
             </div>
 
             <?php if (isset($_SESSION['success'])): ?>
@@ -154,7 +172,7 @@ $page_title = "Gestion des Propriétés";
                             <i class="fas fa-home"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Appartements</h3>
+                            <h3><?php echo __("Apartments"); ?></h3>
                             <div class="stat-number"><?php echo isset($type_counts['apartment']) ? $type_counts['apartment'] : 0; ?></div>
                         </div>
                     </div>
@@ -164,7 +182,7 @@ $page_title = "Gestion des Propriétés";
                             <i class="fas fa-car"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Places de Parking</h3>
+                            <h3><?php echo __("Parking"); ?></h3>
                             <div class="stat-number"><?php echo isset($type_counts['parking']) ? $type_counts['parking'] : 0; ?></div>
                         </div>
                     </div>
@@ -174,7 +192,7 @@ $page_title = "Gestion des Propriétés";
                             <i class="fas fa-check-circle"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Assignées</h3>
+                            <h3><?php echo __("Assigned"); ?></h3>
                             <div class="stat-number"><?php echo $assigned_count; ?></div>
                         </div>
                     </div>
@@ -184,11 +202,11 @@ $page_title = "Gestion des Propriétés";
                             <i class="fas fa-building"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Total Propriétés</h3>
+                            <h3><?php echo __("Total Properties"); ?></h3>
                             <div class="stat-number"><?php echo $total; ?></div>
                             <div class="stat-breakdown">
-                                <span><i class="fas fa-circle" style="color: #28a745;"></i> Assignées: <?php echo $assigned_count; ?></span>
-                                <span><i class="fas fa-circle" style="color: #dc3545;"></i> Non Assignées: <?php echo $unassigned_count; ?></span>
+                                <span><i class="fas fa-circle" style="color: #28a745;"></i> <?php echo __("Assigned"); ?>: <?php echo $assigned_count; ?></span>
+                                <span><i class="fas fa-circle" style="color: #dc3545;"></i> <?php echo __("Unassigned"); ?>: <?php echo $unassigned_count; ?></span>
                             </div>
                         </div>
                     </div>
@@ -197,32 +215,32 @@ $page_title = "Gestion des Propriétés";
                 <!-- Filters -->
                 <div class="card user-filter-card">
                     <div class="card-header user-filter-header">
-                        <h3><i class="fas fa-filter"></i> Liste des Propriétés</h3>
+                        <h3><i class="fas fa-filter"></i> <?php echo __("Property List"); ?></h3>
                         <form id="filter-form" action="properties.php" method="GET" class="filter-form">
                             <div class="filter-wrapper">
                                 <div class="search-filter">
                                     <div class="search-bar">
                                         <i class="fas fa-search"></i>
-                                        <input type="text" placeholder="Rechercher..." name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
+                                        <input type="text" placeholder="<?php echo __("Search..."); ?>" name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
                                     </div>
                                 </div>
                                 <div class="filter-group">
-                                    <label for="type">Type:</label>
+                                    <label for="type"><?php echo __("Type"); ?>:</label>
                                     <select name="type" id="type" onchange="this.form.submit()">
-                                        <option value="">Tous les Types</option>
-                                        <option value="apartment" <?php echo $type_filter === 'apartment' ? 'selected' : ''; ?>>Appartement</option>
-                                        <option value="parking" <?php echo $type_filter === 'parking' ? 'selected' : ''; ?>>Parking</option>
+                                        <option value=""><?php echo __("All Types"); ?></option>
+                                        <option value="apartment" <?php echo $type_filter === 'apartment' ? 'selected' : ''; ?>><?php echo __("Apartment"); ?></option>
+                                        <option value="parking" <?php echo $type_filter === 'parking' ? 'selected' : ''; ?>><?php echo __("Parking"); ?></option>
                                     </select>
                                 </div>
                                 <div class="filter-group">
-                                    <label for="status">Statut:</label>
+                                    <label for="status"><?php echo __("Status"); ?>:</label>
                                     <select name="status" id="status" onchange="this.form.submit()">
-                                        <option value="">Tous les Statuts</option>
-                                        <option value="assigned" <?php echo $status_filter === 'assigned' ? 'selected' : ''; ?>>Assignée</option>
-                                        <option value="unassigned" <?php echo $status_filter === 'unassigned' ? 'selected' : ''; ?>>Non Assignée</option>
+                                        <option value=""><?php echo __("All Statuses"); ?></option>
+                                        <option value="assigned" <?php echo $status_filter === 'assigned' ? 'selected' : ''; ?>><?php echo __("Assigned"); ?></option>
+                                        <option value="unassigned" <?php echo $status_filter === 'unassigned' ? 'selected' : ''; ?>><?php echo __("Unassigned"); ?></option>
                                     </select>
                                 </div>
-                                <a href="properties.php" class="reset-link">Réinitialiser</a>
+                                <a href="properties.php" class="reset-link"><?php echo __("Reset"); ?></a>
                             </div>
                         </form>
                     </div>
@@ -230,19 +248,19 @@ $page_title = "Gestion des Propriétés";
                         <?php if (empty($properties)): ?>
                             <div class="no-data">
                                 <i class="fas fa-building"></i>
-                                <p>Aucune propriété trouvée. Essayez d'ajuster vos filtres.</p>
+                                <p><?php echo __("No properties found. Try adjusting your filters."); ?></p>
                             </div>
                         <?php else: ?>
                             <div class="table-responsive">
                                 <table class="table">
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
-                                            <th>Identifiant</th>
-                                            <th>Type</th>
-                                            <th>Assignée à</th>
-                                            <th>Créée le</th>
-                                            <th>Actions</th>
+                                            <th><?php echo __("ID"); ?></th>
+                                            <th><?php echo __("Identifier"); ?></th>
+                                            <th><?php echo __("Type"); ?></th>
+                                            <th><?php echo __("Assigned to"); ?></th>
+                                            <th><?php echo __("Created on"); ?></th>
+                                            <th><?php echo __("Actions"); ?></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -259,7 +277,15 @@ $page_title = "Gestion des Propriétés";
                                                 </td>
                                                 <td>
                                                     <span class="property-type-badge">
-                                                        <?php echo ucfirst(htmlspecialchars($property['type'])); ?>
+                                                        <?php 
+                                                            if ($property['type'] === 'apartment') {
+                                                                echo __("Apartment");
+                                                            } else if ($property['type'] === 'parking') {
+                                                                echo __("Parking");
+                                                            } else {
+                                                                echo ucfirst(htmlspecialchars($property['type']));
+                                                            }
+                                                        ?>
                                                     </span>
                                                 </td>
                                                 <td>
@@ -269,16 +295,16 @@ $page_title = "Gestion des Propriétés";
                                                         </span>
                                                     <?php else: ?>
                                                         <span class="unassigned-tag">
-                                                            <i class="fas fa-times-circle"></i> Unassigned
+                                                            <i class="fas fa-times-circle"></i> <?php echo __("Unassigned"); ?>
                                                         </span>
                                                     <?php endif; ?>
                                                 </td>
                                                 <td><?php echo date('M d, Y', strtotime($property['created_at'])); ?></td>
                                                 <td class="actions">
-                                                    <a href="view-property.php?id=<?php echo $property['id']; ?>" class="btn-icon" title="View Property">
+                                                    <a href="view-property.php?id=<?php echo $property['id']; ?>" class="btn-icon" title="<?php echo __("View Property"); ?>">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    <a href="edit-property.php?id=<?php echo $property['id']; ?>" class="btn-icon" title="Edit Property">
+                                                    <a href="edit-property.php?id=<?php echo $property['id']; ?>" class="btn-icon" title="<?php echo __("Edit Property"); ?>">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                 </td>
@@ -351,7 +377,7 @@ $page_title = "Gestion des Propriétés";
                 if (visibleCount === 0 && !existingNoResults && tableContainer) {
                     const noResults = document.createElement('div');
                     noResults.className = 'no-data search-no-results';
-                    noResults.innerHTML = '<i class="fas fa-search"></i><p>No properties match your search criteria.</p>';
+                    noResults.innerHTML = '<i class="fas fa-search"></i><p><?php echo __("No properties match your search criteria."); ?></p>';
                     
                     tableContainer.style.display = 'none';
                     tableContainer.parentNode.insertBefore(noResults, tableContainer.nextSibling);

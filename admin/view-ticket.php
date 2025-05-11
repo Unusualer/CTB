@@ -4,6 +4,7 @@ session_start();
 require_once '../includes/config.php';
 require_once '../includes/functions.php';
 require_once '../includes/role_access.php';
+require_once '../includes/translations.php';
 
 // Check if user is logged in and has appropriate role
 requireRole('admin');
@@ -11,7 +12,7 @@ requireRole('admin');
 
 // Check if ticket ID is provided
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    $_SESSION['error'] = "ID de ticket invalide.";
+    $_SESSION['error'] = __("Invalid ticket ID.");
     header("Location: tickets.php");
     exit();
 }
@@ -31,13 +32,13 @@ try {
     $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if (!$ticket) {
-        $_SESSION['error'] = "Ticket introuvable.";
+        $_SESSION['error'] = __("Ticket not found.");
         header("Location: tickets.php");
         exit();
     }
     
 } catch (PDOException $e) {
-    $error_message = "Database error: " . $e->getMessage();
+    $error_message = __("Database error:") . " " . $e->getMessage();
 }
 
 // Function to get status class for styling
@@ -73,14 +74,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_ticket'])) {
         if ($delete_stmt->execute()) {
             // Log the activity
             $admin_id = $_SESSION['user_id'];
-            log_activity($db, $admin_id, 'delete', 'ticket', $delete_ticket_id, "Ticket #$delete_ticket_id supprimé");
+            log_activity($db, $admin_id, 'delete', 'ticket', $delete_ticket_id, __("Ticket #") . $delete_ticket_id . " " . __("deleted"));
             
-            $_SESSION['success'] = "Le ticket a été supprimé avec succès.";
+            $_SESSION['success'] = __("The ticket has been successfully deleted.");
             header("Location: tickets.php");
             exit();
         }
     } catch (PDOException $e) {
-        $error_message = "Failed to delete ticket: " . $e->getMessage();
+        $error_message = __("Failed to delete ticket:") . " " . $e->getMessage();
     }
 }
 
@@ -105,14 +106,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
         
         // Log the activity
         $admin_id = $_SESSION['user_id'];
-        log_activity($db, $admin_id, 'update', 'ticket', $ticket_id, "Ticket #$ticket_id mis à jour : Statut (" . ucfirst($new_status) . "), Priorité (" . ucfirst($priority) . ")");
+        log_activity($db, $admin_id, 'update', 'ticket', $ticket_id, __("Ticket #") . $ticket_id . " " . __("updated:") . " " . __("Status") . " (" . ucfirst($new_status) . "), " . __("Priority") . " (" . ucfirst($priority) . ")");
         
-        $_SESSION['success'] = "Le ticket a été mis à jour avec succès.";
+        $_SESSION['success'] = __("Ticket updated successfully.");
         header("Location: view-ticket.php?id=$ticket_id");
         exit();
         
     } catch (PDOException $e) {
-        $error_message = "Database error: " . $e->getMessage();
+        $error_message = __("Database error:") . " " . $e->getMessage();
     }
 }
 
@@ -133,15 +134,15 @@ function getPriorityClass($priority) {
 }
 
 // Page title
-$page_title = "Détails du Ticket #$ticket_id | Système de Gestion Immobilière";
+$page_title = __("Ticket Details") . " #$ticket_id";
 ?>
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo substr($_SESSION['language'] ?? 'en_US', 0, 2); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?> - Community Trust Bank</title>
+    <title><?php echo $page_title; ?> - <?php echo __("Community Trust Bank"); ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
@@ -1026,15 +1027,15 @@ $page_title = "Détails du Ticket #$ticket_id | Système de Gestion Immobilière
         <main class="main-content">
             <div class="page-header">
                 <div class="breadcrumb">
-                    <a href="tickets.php">Tickets</a>
-                    <span>Voir le Ticket</span>
+                    <a href="tickets.php"><?php echo __("Tickets"); ?></a>
+                    <span><?php echo __("View Ticket"); ?></span>
                 </div>
                 <div class="actions">
                     <a href="edit-ticket.php?id=<?php echo $ticket['id']; ?>" class="btn btn-primary">
-                        <i class="fas fa-edit"></i> Modifier le Ticket
+                        <i class="fas fa-edit"></i> <?php echo __("Edit Ticket"); ?>
                     </a>
                     <a href="javascript:void(0);" class="btn btn-danger delete-ticket" data-id="<?php echo $ticket['id']; ?>">
-                        <i class="fas fa-trash-alt"></i> Supprimer le Ticket
+                        <i class="fas fa-trash-alt"></i> <?php echo __("Delete Ticket"); ?>
                     </a>
                 </div>
             </div>
@@ -1073,53 +1074,16 @@ $page_title = "Détails du Ticket #$ticket_id | Système de Gestion Immobilière
                             <div class="profile-details">
                                 <div class="profile-name-wrapper">
                                     <h2><?php echo htmlspecialchars($ticket['subject']); ?></h2>
-                                    <div class="user-id-badge">ID: <?php echo $ticket['id']; ?></div>
+                                    <div class="user-id-badge"><?php echo __("ID"); ?>: <?php echo $ticket['id']; ?></div>
                                 </div>
                                 <div class="profile-meta">
                                     <span class="user-status <?php echo $ticket['status']; ?>">
                                         <i class="fas fa-circle"></i> <?php 
-                                        $status_text = '';
-                                        switch($ticket['status']) {
-                                            case 'open':
-                                                $status_text = 'Ouvert';
-                                                break;
-                                            case 'in_progress':
-                                                $status_text = 'En cours';
-                                                break;
-                                            case 'closed':
-                                                $status_text = 'Fermé';
-                                                break;
-                                            case 'reopened':
-                                                $status_text = 'Réouvert';
-                                                break;
-                                            default:
-                                                $status_text = ucfirst(str_replace('_', ' ', $ticket['status']));
-                                        }
-                                        echo $status_text;
-                                        ?>
+                                        echo __($ticket['status']); ?>
                                     </span>
                                     <?php if (isset($ticket['priority']) && !empty($ticket['priority'])): ?>
                                     <span class="status-badge <?php echo getPriorityClass($ticket['priority']); ?>">
-                                        <?php 
-                                        $priority_text = '';
-                                        switch($ticket['priority']) {
-                                            case 'low':
-                                                $priority_text = 'Basse';
-                                                break;
-                                            case 'medium':
-                                                $priority_text = 'Moyenne';
-                                                break;
-                                            case 'high':
-                                                $priority_text = 'Haute';
-                                                break;
-                                            case 'urgent':
-                                                $priority_text = 'Urgente';
-                                                break;
-                                            default:
-                                                $priority_text = ucfirst($ticket['priority']);
-                                        }
-                                        echo $priority_text;
-                                        ?>
+                                        <?php echo __($ticket['priority']); ?>
                                     </span>
                                     <?php endif; ?>
                                     <?php if (isset($ticket['category']) && !empty($ticket['category'])): ?>
@@ -1127,7 +1091,7 @@ $page_title = "Détails du Ticket #$ticket_id | Système de Gestion Immobilière
                                         <?php echo ucfirst($ticket['category']); ?>
                                     </span>
                                     <?php endif; ?>
-                                    <span class="user-joined"><i class="far fa-calendar-alt"></i> Créé <?php echo date('d M Y', strtotime($ticket['created_at'])); ?></span>
+                                    <span class="user-joined"><i class="far fa-calendar-alt"></i> <?php echo __("Created"); ?> <?php echo date('d M Y', strtotime($ticket['created_at'])); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -1137,11 +1101,11 @@ $page_title = "Détails du Ticket #$ticket_id | Système de Gestion Immobilière
                         <!-- Ticket Information Card -->
                         <div class="card user-info-card">
                             <div class="card-header">
-                                <h3><i class="fas fa-info-circle"></i> Informations du Ticket</h3>
+                                <h3><i class="fas fa-info-circle"></i> <?php echo __("Ticket Information"); ?></h3>
                             </div>
                             <div class="card-body">
                                 <div class="detail-group">
-                                    <div class="label">Description</div>
+                                    <div class="label"><?php echo __("Description"); ?></div>
                                     <div class="description-box">
                                         <?php echo nl2br(htmlspecialchars($ticket['description'])); ?>
                                     </div>
@@ -1149,7 +1113,7 @@ $page_title = "Détails du Ticket #$ticket_id | Système de Gestion Immobilière
                                 
                                 <?php if (!empty($ticket['response'])): ?>
                                 <div class="detail-group">
-                                    <div class="label">Réponse</div>
+                                    <div class="label"><?php echo __("Response"); ?></div>
                                     <div class="description-box">
                                         <?php echo nl2br(htmlspecialchars($ticket['response'])); ?>
                                     </div>
@@ -1158,83 +1122,45 @@ $page_title = "Détails du Ticket #$ticket_id | Système de Gestion Immobilière
                                 
                                 <div class="info-grid">
                                     <div class="info-group">
-                                        <label><i class="fas fa-user"></i> Soumis par:</label>
+                                        <label><i class="fas fa-user"></i> <?php echo __("Submitted by"); ?>:</label>
                                         <div class="user-info-display">
                                             <div class="user-avatar">
                                                 <i class="fas fa-user"></i>
                                             </div>
                                             <div class="user-details">
                                                 <a href="view-user.php?id=<?php echo $ticket['user_id']; ?>" class="user-name">
-                                                    <?php echo htmlspecialchars($ticket['username'] ?? 'Utilisateur inconnu'); ?>
+                                                    <?php echo htmlspecialchars($ticket['username'] ?? __("Unknown User")); ?>
                                                 </a>
-                                                <span class="user-email"><?php echo htmlspecialchars($ticket['email'] ?? 'Email inconnu'); ?></span>
+                                                <span class="user-email"><?php echo htmlspecialchars($ticket['email'] ?? __("Unknown Email")); ?></span>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="info-group">
-                                        <label><i class="fas fa-check-circle"></i> Statut:</label>
+                                        <label><i class="fas fa-check-circle"></i> <?php echo __("Status"); ?>:</label>
                                         <span class="status-badge <?php echo $ticket['status']; ?>">
-                                            <?php 
-                                            $status_text = '';
-                                            switch($ticket['status']) {
-                                                case 'open':
-                                                    $status_text = 'Ouvert';
-                                                    break;
-                                                case 'in_progress':
-                                                    $status_text = 'En cours';
-                                                    break;
-                                                case 'closed':
-                                                    $status_text = 'Fermé';
-                                                    break;
-                                                case 'reopened':
-                                                    $status_text = 'Réouvert';
-                                                    break;
-                                                default:
-                                                    $status_text = ucfirst(str_replace('_', ' ', $ticket['status']));
-                                            }
-                                            echo $status_text;
-                                            ?>
+                                            <?php echo __($ticket['status']); ?>
                                         </span>
                                     </div>
                                     <?php if (isset($ticket['priority']) && !empty($ticket['priority'])): ?>
                                     <div class="info-group">
-                                        <label><i class="fas fa-exclamation-triangle"></i> Priorité:</label>
+                                        <label><i class="fas fa-exclamation-triangle"></i> <?php echo __("Priority"); ?>:</label>
                                         <span class="status-badge <?php echo getPriorityClass($ticket['priority']); ?>">
-                                            <?php 
-                                            $priority_text = '';
-                                            switch($ticket['priority']) {
-                                                case 'low':
-                                                    $priority_text = 'Basse';
-                                                    break;
-                                                case 'medium':
-                                                    $priority_text = 'Moyenne';
-                                                    break;
-                                                case 'high':
-                                                    $priority_text = 'Haute';
-                                                    break;
-                                                case 'urgent':
-                                                    $priority_text = 'Urgente';
-                                                    break;
-                                                default:
-                                                    $priority_text = ucfirst($ticket['priority']);
-                                            }
-                                            echo $priority_text;
-                                            ?>
+                                            <?php echo __($ticket['priority']); ?>
                                         </span>
                                     </div>
                                     <?php endif; ?>
                                     <?php if (isset($ticket['category']) && !empty($ticket['category'])): ?>
                                     <div class="info-group">
-                                        <label><i class="fas fa-tag"></i> Catégorie:</label>
+                                        <label><i class="fas fa-tag"></i> <?php echo __("Category"); ?>:</label>
                                         <span class="info-value"><?php echo htmlspecialchars($ticket['category']); ?></span>
                                     </div>
                                     <?php endif; ?>
                                     <div class="info-group">
-                                        <label><i class="fas fa-calendar-plus"></i> Créé le:</label>
+                                        <label><i class="fas fa-calendar-plus"></i> <?php echo __("Created on"); ?>:</label>
                                         <span class="info-value"><?php echo date('d F Y', strtotime($ticket['created_at'])); ?></span>
                                     </div>
                                     <div class="info-group">
-                                        <label><i class="fas fa-edit"></i> Dernière mise à jour:</label>
+                                        <label><i class="fas fa-edit"></i> <?php echo __("Last updated"); ?>:</label>
                                         <span class="info-value"><?php echo date('d F Y', strtotime($ticket['updated_at'])); ?></span>
                                     </div>
                                 </div>
@@ -1245,7 +1171,7 @@ $page_title = "Détails du Ticket #$ticket_id | Système de Gestion Immobilière
                             <!-- User Information Card - Compact version -->
                             <div class="card compact-user-card">
                                 <div class="card-header">
-                                    <h3><i class="fas fa-user"></i> Informations Utilisateur</h3>
+                                    <h3><i class="fas fa-user"></i> <?php echo __("User Information"); ?></h3>
                                 </div>
                                 <div class="card-body">
                                     <div class="compact-user-info">
@@ -1254,9 +1180,9 @@ $page_title = "Détails du Ticket #$ticket_id | Système de Gestion Immobilière
                                                 <i class="fas fa-user"></i>
                                             </div>
                                             <div>
-                                                <h4><?php echo htmlspecialchars($ticket['username'] ?? 'Utilisateur inconnu'); ?></h4>
+                                                <h4><?php echo htmlspecialchars($ticket['username'] ?? __("Unknown User")); ?></h4>
                                                 <div class="user-meta">
-                                                    <span><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($ticket['email'] ?? 'Email inconnu'); ?></span>
+                                                    <span><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($ticket['email'] ?? __("Unknown Email")); ?></span>
                                                     <?php if (!empty($ticket['phone'])): ?>
                                                     <span><i class="fas fa-phone"></i> <?php echo htmlspecialchars($ticket['phone']); ?></span>
                                                     <?php endif; ?>
@@ -1264,7 +1190,7 @@ $page_title = "Détails du Ticket #$ticket_id | Système de Gestion Immobilière
                                             </div>
                                         </div>
                                         <a href="view-user.php?id=<?php echo $ticket['user_id']; ?>" class="btn btn-sm btn-primary mt-2">
-                                            <i class="fas fa-eye"></i> Voir l'Utilisateur
+                                            <i class="fas fa-eye"></i> <?php echo __("View User"); ?>
                                         </a>
                                     </div>
                                 </div>
@@ -1273,41 +1199,39 @@ $page_title = "Détails du Ticket #$ticket_id | Système de Gestion Immobilière
                             <!-- Update Status Card - Now placed below User Info -->
                             <div class="card mt-3">
                                 <div class="card-header">
-                                    <h3><i class="fas fa-edit"></i> Mettre à Jour le Statut</h3>
+                                    <h3><i class="fas fa-reply"></i> <?php echo __("Update Ticket"); ?></h3>
                                 </div>
                                 <div class="card-body">
-                                    <form action="view-ticket.php?id=<?php echo $ticket_id; ?>" method="POST" class="form">
-                                        <input type="hidden" name="update_status" value="1">
-                                        
+                                    <form action="view-ticket.php?id=<?php echo $ticket_id; ?>" method="post">
                                         <div class="form-group">
-                                            <label for="status">Statut:</label>
+                                            <label for="status"><?php echo __("Update Status"); ?></label>
                                             <select id="status" name="status" class="form-control">
-                                                <option value="open" <?php echo $ticket['status'] === 'open' ? 'selected' : ''; ?>>Ouvert</option>
-                                                <option value="in_progress" <?php echo $ticket['status'] === 'in_progress' ? 'selected' : ''; ?>>En Cours</option>
-                                                <option value="closed" <?php echo $ticket['status'] === 'closed' ? 'selected' : ''; ?>>Fermé</option>
-                                                <option value="reopened" <?php echo $ticket['status'] === 'reopened' ? 'selected' : ''; ?>>Réouvert</option>
+                                                <option value="open" <?php echo $ticket['status'] === 'open' ? 'selected' : ''; ?>><?php echo __("Open"); ?></option>
+                                                <option value="in_progress" <?php echo $ticket['status'] === 'in_progress' ? 'selected' : ''; ?>><?php echo __("In Progress"); ?></option>
+                                                <option value="closed" <?php echo $ticket['status'] === 'closed' ? 'selected' : ''; ?>><?php echo __("Closed"); ?></option>
+                                                <option value="reopened" <?php echo $ticket['status'] === 'reopened' ? 'selected' : ''; ?>><?php echo __("Reopened"); ?></option>
                                             </select>
                                         </div>
                                         
                                         <div class="form-group">
-                                            <label for="priority">Priorité:</label>
+                                            <label for="priority"><?php echo __("Priority"); ?></label>
                                             <select id="priority" name="priority" class="form-control">
-                                                <option value="low" <?php echo isset($ticket['priority']) && $ticket['priority'] === 'low' ? 'selected' : ''; ?>>Basse</option>
-                                                <option value="medium" <?php echo isset($ticket['priority']) && $ticket['priority'] === 'medium' ? 'selected' : ''; ?>>Moyenne</option>
-                                                <option value="high" <?php echo isset($ticket['priority']) && $ticket['priority'] === 'high' ? 'selected' : ''; ?>>Haute</option>
-                                                <option value="urgent" <?php echo isset($ticket['priority']) && $ticket['priority'] === 'urgent' ? 'selected' : ''; ?>>Urgente</option>
+                                                <option value="low" <?php echo $ticket['priority'] === 'low' ? 'selected' : ''; ?>><?php echo __("Low"); ?></option>
+                                                <option value="medium" <?php echo $ticket['priority'] === 'medium' ? 'selected' : ''; ?>><?php echo __("Medium"); ?></option>
+                                                <option value="high" <?php echo $ticket['priority'] === 'high' ? 'selected' : ''; ?>><?php echo __("High"); ?></option>
+                                                <option value="urgent" <?php echo $ticket['priority'] === 'urgent' ? 'selected' : ''; ?>><?php echo __("Urgent"); ?></option>
                                             </select>
                                         </div>
                                         
                                         <div class="form-group">
-                                            <label for="response">Réponse:</label>
-                                            <textarea id="response" name="response" class="form-control" rows="4"><?php echo isset($ticket['response']) ? htmlspecialchars($ticket['response']) : ''; ?></textarea>
-                                            <small>Réponse au ticket (visible par l'utilisateur)</small>
+                                            <label for="response"><?php echo __("Response"); ?></label>
+                                            <textarea id="response" name="response" class="form-control" rows="5"><?php echo htmlspecialchars($ticket['response'] ?? ''); ?></textarea>
+                                            <small><?php echo __("Your response will be visible to the ticket submitter."); ?></small>
                                         </div>
                                         
-                                        <div class="form-actions">
-                                            <button type="submit" class="btn btn-primary">Mettre à Jour le Statut</button>
-                                        </div>
+                                        <button type="submit" name="update_status" class="btn btn-primary">
+                                            <i class="fas fa-save"></i> <?php echo __("Save Changes"); ?>
+                                        </button>
                                     </form>
                                 </div>
                             </div>
@@ -1322,29 +1246,30 @@ $page_title = "Détails du Ticket #$ticket_id | Système de Gestion Immobilière
     <div id="deleteModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Confirmer la Suppression</h3>
+                <h3><?php echo __("Confirm Deletion"); ?></h3>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
-                <p>Êtes-vous sûr de vouloir supprimer ce ticket ? Cette action est irréversible.</p>
+                <p><?php echo __("Are you sure you want to delete this ticket? This action cannot be undone."); ?></p>
             </div>
             <div class="modal-footer">
-                <form id="deleteForm" action="view-ticket.php?id=<?php echo $ticket_id; ?>" method="POST">
+                <form action="view-ticket.php?id=<?php echo $ticket_id; ?>" method="POST">
                     <input type="hidden" name="delete_ticket" value="1">
-                    <button type="button" class="btn btn-secondary close-modal">Annuler</button>
-                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                    <input type="hidden" name="ticket_id" id="deleteTicketId" value="<?php echo $ticket_id; ?>">
+                    <button type="button" class="btn btn-secondary close-modal"><?php echo __("Cancel"); ?></button>
+                    <button type="submit" class="btn btn-danger"><?php echo __("Delete"); ?></button>
                 </form>
             </div>
         </div>
     </div>
 
     <script src="js/dark-mode.js"></script>
+    <!-- Script for delete modal -->
     <script>
-        // Delete ticket modal functionality
+        // Delete modal functionality
         const modal = document.getElementById('deleteModal');
         const deleteButtons = document.querySelectorAll('.delete-ticket');
         const closeButtons = document.querySelectorAll('.close, .close-modal');
-        const deleteForm = document.getElementById('deleteForm');
         const deleteTicketIdInput = document.getElementById('deleteTicketId');
         
         deleteButtons.forEach(button => {

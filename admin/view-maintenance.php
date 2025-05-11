@@ -4,6 +4,7 @@ session_start();
 require_once '../includes/config.php';
 require_once '../includes/functions.php';
 require_once '../includes/role_access.php';
+require_once '../includes/translations.php';
 
 // Check if user is logged in and has appropriate role
 requireRole('admin');
@@ -11,7 +12,7 @@ requireRole('admin');
 
 // Check if maintenance ID is provided
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    $_SESSION['error'] = "L'ID de la maintenance est invalide.";
+    $_SESSION['error'] = __("Maintenance ID is invalid.");
     header("Location: maintenance.php");
     exit();
 }
@@ -37,7 +38,7 @@ try {
     $maintenance = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if (!$maintenance) {
-        $_SESSION['error'] = "Mise à jour de maintenance non trouvée.";
+        $_SESSION['error'] = __("Maintenance update not found.");
         header("Location: maintenance.php");
         exit();
     }
@@ -62,7 +63,7 @@ try {
     }
     
 } catch (PDOException $e) {
-    $error_message = "Database error: " . $e->getMessage();
+    $error_message = __("Database error:") . " " . $e->getMessage();
 }
 
 // Helper function to format date
@@ -104,14 +105,14 @@ function getPriorityBadgeClass($priority) {
     }
 }
 
-$page_title = "Voir la Maintenance";
+$page_title = __("View Maintenance");
 ?>
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo isset($_SESSION['language']) ? substr($_SESSION['language'], 0, 2) : 'en'; ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?> - Community Trust Bank</title>
+    <title><?php echo $page_title; ?> - <?php echo __("Community Trust Bank"); ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
@@ -197,250 +198,185 @@ $page_title = "Voir la Maintenance";
             display: flex;
             align-items: center;
             font-size: 0.875rem;
+            margin-bottom: 1.5rem;
             color: var(--text-secondary);
         }
         
         .breadcrumb a {
-            color: var(--text-primary);
+            color: var(--primary-color);
             text-decoration: none;
-            margin-right: 0.5rem;
-            position: relative;
-            padding-right: 1rem;
-        }
-        
-        .breadcrumb a:after {
-            content: '/';
-            position: absolute;
-            right: 0;
-            color: var(--text-secondary);
+            transition: color 0.2s ease;
         }
         
         .breadcrumb a:hover {
+            color: var(--primary-color-dark);
             text-decoration: underline;
         }
         
-        .breadcrumb span {
-            color: var(--text-primary);
-        }
-        
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-        
-        .actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        /* Profile header design */
-        .profile-header {
-            margin-bottom: 1.5rem;
-        }
-        
-        .profile-header-content {
-            display: flex;
-            align-items: center;
-            padding: 1.5rem;
-        }
-        
-        .profile-avatar {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(135deg, #4a80f0, #2c57b5);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 1.5rem;
-            color: #ffffff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        
-        .profile-avatar i {
-            font-size: 36px;
-        }
-        
-        .profile-details {
-            flex: 1;
-        }
-        
-        .profile-name-wrapper {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-        
-        .profile-name-wrapper h2 {
-            margin: 0;
-            margin-right: 1rem;
-            font-size: 1.5rem;
-            color: var(--text-primary);
-        }
-        
-        .user-id-badge {
-            background-color: var(--secondary-bg);
+        .breadcrumb span:not(:last-child)::after {
+            content: '/';
+            margin: 0 0.5rem;
             color: var(--text-secondary);
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        
-        .profile-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-        }
-        
-        .user-role, .user-status, .user-joined {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-        
-        .card-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-        }
-        
-        @media (min-width: 992px) {
-            .card-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-        }
-        
-        @media (min-width: 576px) {
-            .info-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        
-        .info-group {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .info-group label {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.25rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .info-value {
-            font-weight: 500;
-            color: var(--text-primary);
         }
         
         /* Status badge styling */
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
+        .badge {
+            display: inline-block;
             padding: 0.25rem 0.75rem;
             border-radius: 1rem;
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             font-weight: 600;
-            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
-        .status-badge.success {
-            background-color: rgba(25, 135, 84, 0.15);
-            color: #198754;
-            border: 1px solid rgba(25, 135, 84, 0.3);
+        .badge-success {
+            background-color: var(--success-light);
+            color: var(--success-color);
         }
         
-        .status-badge.primary {
-            background-color: rgba(var(--primary-rgb), 0.15);
+        .badge-info {
+            background-color: var(--info-light);
+            color: var(--info-color);
+        }
+        
+        .badge-warning {
+            background-color: var(--warning-light);
+            color: var(--warning-color);
+        }
+        
+        .badge-danger {
+            background-color: var(--danger-light);
+            color: var(--danger-color);
+        }
+        
+        .badge-primary {
+            background-color: var(--primary-light);
             color: var(--primary-color);
-            border: 1px solid rgba(var(--primary-rgb), 0.3);
         }
         
-        .status-badge.warning {
-            background-color: rgba(255, 193, 7, 0.15);
-            color: #ffc107;
-            border: 1px solid rgba(255, 193, 7, 0.3);
+        .badge-secondary {
+            background-color: var(--secondary-light);
+            color: var(--secondary-color);
         }
         
-        .status-badge.danger {
-            background-color: rgba(220, 53, 69, 0.15);
-            color: #dc3545;
-            border: 1px solid rgba(220, 53, 69, 0.3);
+        /* Card and metadata styling */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: box-shadow 0.3s ease;
         }
         
-        .status-badge.info {
-            background-color: rgba(13, 202, 240, 0.15);
-            color: #0dcaf0;
-            border: 1px solid rgba(13, 202, 240, 0.3);
+        .card:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         }
         
-        .status-badge.secondary {
-            background-color: rgba(108, 117, 125, 0.15);
-            color: #6c757d;
-            border: 1px solid rgba(108, 117, 125, 0.3);
+        .card-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--card-header-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
-        /* Dark mode styling */
-        [data-theme="dark"] .breadcrumb {
-            color: #b0b0b0;
+        .card-body {
+            padding: 1.25rem;
         }
         
-        [data-theme="dark"] .breadcrumb a {
+        /* Dark mode enhancements */
+        [data-theme="dark"] .description-box {
+            background-color: rgba(32, 35, 42, 0.7);
+            border-color: #3f4756;
+            color: #e6e6e6;
+        }
+        
+        [data-theme="dark"] .card {
+            background-color: #282c34;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            }
+        
+        [data-theme="dark"] .card-header {
+            background: linear-gradient(to right, var(--primary-color), var(--primary-color-dark));
+            border-bottom-color: #3f4756;
+        }
+        
+        [data-theme="dark"] .card-header h3 {
             color: #ffffff;
         }
         
-        [data-theme="dark"] .description-box {
+        [data-theme="dark"] .comment {
             background-color: #2a2e35;
             border-color: #3f4756;
         }
         
-        [data-theme="dark"] .status-badge.success {
-            background-color: rgba(25, 135, 84, 0.25);
-            color: #25c274;
-            border-color: rgba(25, 135, 84, 0.5);
+        [data-theme="dark"] .meta-info {
+            border-color: #3f4756;
         }
         
-        [data-theme="dark"] .status-badge.primary {
-            background-color: rgba(var(--primary-rgb), 0.25);
-            color: var(--primary-color-light);
-            border-color: rgba(var(--primary-rgb), 0.5);
+        [data-theme="dark"] .badge-success {
+            background-color: rgba(40, 167, 69, 0.2);
+            color: #5bea8d;
         }
         
-        [data-theme="dark"] .status-badge.warning {
-            background-color: rgba(255, 193, 7, 0.25);
-            color: #ffda6a;
-            border-color: rgba(255, 193, 7, 0.5);
+        [data-theme="dark"] .badge-info {
+            background-color: rgba(23, 162, 184, 0.2);
+            color: #5bdcf0;
         }
         
-        [data-theme="dark"] .status-badge.danger {
-            background-color: rgba(220, 53, 69, 0.25);
-            color: #ff8085;
-            border-color: rgba(220, 53, 69, 0.5);
+        [data-theme="dark"] .badge-warning {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #ffdf5e;
         }
         
-        [data-theme="dark"] .status-badge.info {
-            background-color: rgba(13, 202, 240, 0.25);
-            color: #6edbf7;
-            border-color: rgba(13, 202, 240, 0.5);
+        [data-theme="dark"] .badge-danger {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #ff7a8e;
         }
         
-        [data-theme="dark"] .status-badge.secondary {
-            background-color: rgba(108, 117, 125, 0.25);
-            color: #a1a8ae;
-            border-color: rgba(108, 117, 125, 0.5);
+        [data-theme="dark"] .badge-primary {
+            background-color: rgba(var(--primary-rgb), 0.2);
+            color: #93c5fd;
+        }
+        
+        [data-theme="dark"] .badge-secondary {
+            background-color: rgba(108, 117, 125, 0.2);
+            color: #adb5bd;
+        }
+        
+        [data-theme="dark"] input, 
+        [data-theme="dark"] select,
+        [data-theme="dark"] textarea {
+            background-color: #2a2e35;
+            border-color: #3f4756;
+            color: #e6e6e6;
+        }
+        
+        [data-theme="dark"] .detail-group .label {
+            color: #93c5fd;
+        }
+        
+        [data-theme="dark"] .breadcrumb {
+            color: #8e99ad;
+        }
+        
+        [data-theme="dark"] .breadcrumb a {
+            color: #93c5fd;
+        }
+        
+        [data-theme="dark"] .alert-danger {
+            background-color: rgba(220, 53, 69, 0.15);
+            color: #ff6b6b;
+            border-color: rgba(220, 53, 69, 0.3);
+        }
+        
+        [data-theme="dark"] .alert-success {
+            background-color: rgba(40, 167, 69, 0.15);
+            color: #2ecc71;
+            border-color: rgba(40, 167, 69, 0.3);
         }
     </style>
 </head>
@@ -450,251 +386,114 @@ $page_title = "Voir la Maintenance";
 
         <!-- Main Content -->
         <main class="main-content">
-            <div class="page-header">
-                <div class="breadcrumb">
-                    <a href="maintenance.php">Maintenance</a>
-                    <span>Voir la Maintenance</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div class="breadcrumb" style="margin-bottom: 0;">
+                    <a href="maintenance.php"><?php echo __("Maintenance"); ?></a>
+                    <span><?php echo __("View Maintenance"); ?></span>
                 </div>
-                <div class="actions">
-                    <a href="edit-maintenance.php?id=<?php echo $maintenance['id']; ?>" class="btn btn-primary">
-                        <i class="fas fa-edit"></i> Modifier la Maintenance
+                
+                <a href="edit-maintenance.php?id=<?php echo $maintenance_id; ?>" class="btn btn-secondary">
+                    <i class="fas fa-edit"></i>
+                    <?php echo __("Edit Maintenance"); ?>
                     </a>
-                </div>
             </div>
 
             <?php if (!empty($error_message)): ?>
                 <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle"></i> <?php echo $error_message; ?>
+                    <?php echo $error_message; ?>
                 </div>
             <?php endif; ?>
             
-            <?php if (isset($_SESSION['success'])): ?>
-                <div class="alert alert-success">
-                    <?php 
-                        echo $_SESSION['success']; 
-                        unset($_SESSION['success']);
-                    ?>
-                </div>
-            <?php endif; ?>
-
-            <?php if (isset($_SESSION['error'])): ?>
-                <div class="alert alert-danger">
-                    <?php 
-                        echo $_SESSION['error']; 
-                        unset($_SESSION['error']);
-                    ?>
-                </div>
-            <?php endif; ?>
-
-            <?php if ($maintenance): ?>
-                <div class="content-wrapper">
-                    <div class="profile-header card">
+            <div class="card profile-header">
                         <div class="profile-header-content">
                             <div class="profile-avatar">
                                 <i class="fas fa-tools"></i>
                             </div>
-                            <div class="profile-details">
-                                <div class="profile-name-wrapper">
-                                    <h2><?php echo htmlspecialchars($maintenance['title']); ?></h2>
-                                    <div class="user-id-badge">ID: <?php echo $maintenance['id']; ?></div>
-                                </div>
+                    <div class="profile-info">
+                        <h1><?php echo htmlspecialchars($maintenance['title']); ?></h1>
                                 <div class="profile-meta">
-                                    <span class="user-status">
-                                        <i class="fas fa-circle"></i> 
-                                        <?php 
-                                            switch($maintenance['status']) {
-                                                case 'scheduled':
-                                                    echo 'Planifié';
-                                                    break;
-                                                case 'in_progress':
-                                                    echo 'En Cours';
-                                                    break;
-                                                case 'completed':
-                                                    echo 'Terminé';
-                                                    break;
-                                                case 'delayed':
-                                                    echo 'Retardé';
-                                                    break;
-                                                case 'cancelled':
-                                                    echo 'Annulé';
-                                                    break;
-                                                default:
-                                                    echo ucfirst(str_replace('_', ' ', $maintenance['status']));
-                                            }
-                                        ?>
+                            <span>
+                                <i class="fas fa-map-marker-alt"></i>
+                                <?php echo htmlspecialchars($maintenance['location']); ?>
+                            </span>
+                            <span>
+                                <i class="fas fa-calendar"></i>
+                                <?php echo formatDate($maintenance['start_date']); ?> - <?php echo formatDate($maintenance['end_date']); ?>
+                            </span>
+                            <span>
+                                <i class="fas fa-tag"></i>
+                                <span class="status-indicator status-<?php echo getStatusBadgeClass($maintenance['status']); ?>">
+                                    <?php echo __(ucfirst(str_replace('_', ' ', $maintenance['status']))); ?>
+                                </span>
+                            </span>
+                            <span>
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span class="status-indicator status-<?php echo getPriorityBadgeClass($maintenance['priority']); ?>">
+                                    <?php echo __(ucfirst($maintenance['priority'])); ?>
                                     </span>
-                                    <span class="status-badge <?php echo getPriorityBadgeClass($maintenance['priority']); ?>">
-                                        <?php 
-                                            switch($maintenance['priority']) {
-                                                case 'low':
-                                                    echo 'Basse';
-                                                    break;
-                                                case 'medium':
-                                                    echo 'Moyenne';
-                                                    break;
-                                                case 'high':
-                                                    echo 'Haute';
-                                                    break;
-                                                case 'emergency':
-                                                    echo 'Urgence';
-                                                    break;
-                                                default:
-                                                    echo ucfirst($maintenance['priority']);
-                                            }
-                                        ?>
                                     </span>
-                                    <span class="user-joined"><i class="far fa-calendar-alt"></i> Créé le <?php echo date('d M Y', strtotime($maintenance['created_at'])); ?></span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="card-grid">
-                        <!-- Maintenance Information Card -->
-                        <div class="card user-info-card">
+            <div class="maintenance-details">
+                <div class="card">
                             <div class="card-header">
-                                <h3><i class="fas fa-info-circle"></i> Informations de la Maintenance</h3>
+                        <h3><i class="fas fa-info-circle"></i> <?php echo __("Maintenance Information"); ?></h3>
                             </div>
                             <div class="card-body">
                                 <div class="detail-group">
-                                    <div class="label">Emplacement</div>
-                                    <div class="value"><?php echo htmlspecialchars($maintenance['location']); ?></div>
+                            <div class="label"><?php echo __("Description"); ?></div>
+                            <div class="description-box"><?php echo nl2br(htmlspecialchars($maintenance['description'])); ?></div>
                                 </div>
                                 
-                                <div class="detail-group">
-                                    <div class="label">Description</div>
-                                    <div class="description-box">
-                                        <?php echo nl2br(htmlspecialchars($maintenance['description'])); ?>
-                                    </div>
-                                </div>
-                                
-                                <div class="info-grid">
-                                    <div class="info-group">
-                                        <label><i class="fas fa-user"></i> Créé par:</label>
-                                        <span class="info-value"><?php echo htmlspecialchars($maintenance['created_by_name']); ?></span>
-                                    </div>
-                                    <div class="info-group">
-                                        <label><i class="fas fa-check-circle"></i> Statut:</label>
-                                        <span class="status-badge <?php echo getStatusBadgeClass($maintenance['status']); ?>">
-                                            <?php 
-                                                switch($maintenance['status']) {
-                                                    case 'scheduled':
-                                                        echo 'Planifié';
-                                                        break;
-                                                    case 'in_progress':
-                                                        echo 'En Cours';
-                                                        break;
-                                                    case 'completed':
-                                                        echo 'Terminé';
-                                                        break;
-                                                    case 'delayed':
-                                                        echo 'Retardé';
-                                                        break;
-                                                    case 'cancelled':
-                                                        echo 'Annulé';
-                                                        break;
-                                                    default:
-                                                        echo ucfirst(str_replace('_', ' ', $maintenance['status']));
-                                                }
-                                            ?>
-                                        </span>
-                                    </div>
-                                    <div class="info-group">
-                                        <label><i class="fas fa-exclamation-triangle"></i> Priorité:</label>
-                                        <span class="status-badge <?php echo getPriorityBadgeClass($maintenance['priority']); ?>">
-                                            <?php 
-                                                switch($maintenance['priority']) {
-                                                    case 'low':
-                                                        echo 'Basse';
-                                                        break;
-                                                    case 'medium':
-                                                        echo 'Moyenne';
-                                                        break;
-                                                    case 'high':
-                                                        echo 'Haute';
-                                                        break;
-                                                    case 'emergency':
-                                                        echo 'Urgence';
-                                                        break;
-                                                    default:
-                                                        echo ucfirst($maintenance['priority']);
-                                                }
-                                            ?>
-                                        </span>
-                                    </div>
-                                    <div class="info-group">
-                                        <label><i class="fas fa-calendar-plus"></i> Créé le:</label>
-                                        <span class="info-value"><?php echo date('d F Y', strtotime($maintenance['created_at'])); ?></span>
-                                    </div>
-                                    <?php if (isset($maintenance['updated_at']) && !empty($maintenance['updated_at'])): ?>
-                                    <div class="info-group">
-                                        <label><i class="fas fa-edit"></i> Dernière mise à jour:</label>
-                                        <span class="info-value"><?php echo date('d F Y', strtotime($maintenance['updated_at'])); ?></span>
-                                    </div>
-                                    <?php endif; ?>
-                                </div>
+                        <div class="meta-info">
+                            <div>
+                                <i class="fas fa-user-edit"></i>
+                                <?php echo __("Created by"); ?>: <?php echo htmlspecialchars($maintenance['created_by_name'] ?? 'N/A'); ?>
                             </div>
-                        </div>
-
-                        <!-- Maintenance Details Card -->
-                        <div class="card">
-                            <div class="card-header">
-                                <h3><i class="fas fa-calendar-alt"></i> Calendrier de Maintenance</h3>
+                            <div>
+                                <i class="fas fa-calendar-plus"></i>
+                                <?php echo __("Created on"); ?>: <?php echo formatDate($maintenance['created_at']); ?>
                             </div>
-                            <div class="card-body">
-                                <div class="info-grid">
-                                    <div class="info-group">
-                                        <label><i class="fas fa-play"></i> Date de Début:</label>
-                                        <span class="info-value"><?php echo formatDate($maintenance['start_date']); ?></span>
+                            <?php if (!empty($maintenance['updated_at']) && $maintenance['updated_at'] !== $maintenance['created_at']): ?>
+                                <div>
+                                    <i class="fas fa-user-edit"></i>
+                                    <?php echo __("Updated by"); ?>: <?php echo htmlspecialchars(getUserNameById($maintenance['updated_by'] ?? 0) ?? 'N/A'); ?>
                                     </div>
-                                    
-                                    <div class="info-group">
-                                        <label><i class="fas fa-flag-checkered"></i> Date de Fin:</label>
-                                        <span class="info-value"><?php echo formatDate($maintenance['end_date']); ?></span>
-                                    </div>
-                                    
-                                    <div class="info-group">
-                                        <label><i class="fas fa-hourglass-half"></i> Durée:</label>
-                                        <span class="info-value">
-                                            <?php 
-                                            $start = new DateTime($maintenance['start_date']);
-                                            $end = new DateTime($maintenance['end_date']);
-                                            $interval = $start->diff($end);
-                                            echo $interval->days + 1; ?> jours
-                                        </span>
-                                    </div>
+                                <div>
+                                    <i class="fas fa-calendar-check"></i>
+                                    <?php echo __("Last updated"); ?>: <?php echo formatDate($maintenance['updated_at']); ?>
                                 </div>
-                            </div>
+                            <?php endif; ?>
                         </div>
                     </div>
-                    
-                    <?php if (!empty($comments)): ?>
-                    <div class="card mt-4">
-                        <div class="card-header">
-                            <h3><i class="fas fa-comments"></i> Commentaires</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="comment-list">
-                                <?php foreach ($comments as $comment): ?>
-                                    <div class="comment">
-                                        <div class="comment-header">
-                                            <div class="comment-author"><?php echo htmlspecialchars($comment['user_name']); ?></div>
-                                            <div class="comment-time"><?php echo date('d M Y G:i', strtotime($comment['created_at'])); ?></div>
-                                        </div>
-                                        <div class="comment-content">
-                                            <?php echo nl2br(htmlspecialchars($comment['comment'])); ?>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                    </div>
-                    <?php endif; ?>
                 </div>
-            <?php endif; ?>
+            </div>
         </main>
     </div>
 
     <script src="js/dark-mode.js"></script>
 </body>
 </html>
+
+<?php
+// Helper function to get user name by ID (if needed)
+function getUserNameById($user_id) {
+    if (empty($user_id)) return null;
+    
+    try {
+        $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        $stmt = $db->prepare("SELECT name FROM users WHERE id = :id LIMIT 1");
+        $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? $result['name'] : null;
+    } catch (PDOException $e) {
+        return null;
+    }
+}

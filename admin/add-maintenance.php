@@ -4,6 +4,7 @@ session_start();
 require_once '../includes/config.php';
 require_once '../includes/functions.php';
 require_once '../includes/role_access.php';
+require_once '../includes/translations.php';
 
 // Check if user is logged in and has appropriate role
 requireRole('admin');
@@ -39,11 +40,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Validation
         if (empty($title) || empty($description) || empty($location)) {
-            throw new Exception("Please fill in all required fields: title, description, and location.");
+            throw new Exception(__("Please fill in all required fields: title, description, and location."));
         }
         
         if (strtotime($end_date) < strtotime($start_date)) {
-            throw new Exception("End date cannot be earlier than start date.");
+            throw new Exception(__("End date cannot be earlier than start date."));
         }
         
         // Insert maintenance update
@@ -85,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Log activity
             logActivity($db, $_SESSION['user_id'], 'create', 'maintenance', $maintenance_id, "Added new maintenance update: $title");
             
-            $success_message = "Maintenance update added successfully!";
+            $success_message = __("Maintenance update added successfully!");
             
             // Clear form data
             $maintenance = [
@@ -98,11 +99,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'priority' => 'medium'
             ];
         } else {
-            throw new Exception("Failed to add maintenance update. Please try again.");
+            throw new Exception(__("Failed to add maintenance update. Please try again."));
         }
         
     } catch (PDOException $e) {
-        $_SESSION['error'] = "Erreur de base de données : " . $e->getMessage();
+        $_SESSION['error'] = __("Database error:") . " " . $e->getMessage();
         
         // Preserve form data
         $maintenance = [
@@ -130,14 +131,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$page_title = "Ajouter une Mise à Jour de Maintenance";
+$page_title = __("Add Maintenance");
 ?>
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo isset($_SESSION['language']) ? substr($_SESSION['language'], 0, 2) : 'en'; ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?> - Community Trust Bank</title>
+    <title><?php echo $page_title; ?> - <?php echo __("Community Trust Bank"); ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
@@ -254,17 +255,18 @@ $page_title = "Ajouter une Mise à Jour de Maintenance";
             transform: translateY(-1px);
         }
         
-        .btn-secondary {
-            background-color: var(--secondary-bg);
-            color: var(--text-primary);
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
         }
         
-        .btn-secondary:hover {
-            background-color: var(--border-color);
+        .btn-outline:hover {
+            background-color: rgba(var(--primary-rgb), 0.08);
             transform: translateY(-1px);
         }
         
-        small {
+        small.form-text {
             color: var(--text-secondary);
             font-size: 0.8rem;
             margin-top: 5px;
@@ -324,26 +326,16 @@ $page_title = "Ajouter une Mise à Jour de Maintenance";
             color: #ff7a8e;
         }
         
-        [data-theme="dark"] small {
+        [data-theme="dark"] small.form-text {
             color: #b0b0b0;
         }
         
-        .alert {
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1.5rem;
+        [data-theme="dark"] .breadcrumb {
+            color: #b0b0b0;
         }
         
-        .alert-danger {
-            background-color: rgba(220, 53, 69, 0.1);
-            color: #dc3545;
-            border: 1px solid rgba(220, 53, 69, 0.2);
-        }
-        
-        .alert-success {
-            background-color: rgba(40, 167, 69, 0.1);
-            color: #28a745;
-            border: 1px solid rgba(40, 167, 69, 0.2);
+        [data-theme="dark"] .breadcrumb a {
+            color: #ffffff;
         }
         
         [data-theme="dark"] .alert-danger {
@@ -355,10 +347,6 @@ $page_title = "Ajouter une Mise à Jour de Maintenance";
             background-color: rgba(40, 167, 69, 0.15);
             color: #2ecc71;
         }
-        
-        textarea.form-control {
-            min-height: 150px;
-        }
     </style>
 </head>
 <body>
@@ -367,98 +355,113 @@ $page_title = "Ajouter une Mise à Jour de Maintenance";
 
         <!-- Main Content -->
         <main class="main-content">
-            <div class="page-header">
                 <div class="breadcrumb">
-                    <a href="maintenance.php">Maintenance</a>
-                    <span>Ajouter une Mise à Jour de Maintenance</span>
-                </div>
+                <a href="maintenance.php"><?php echo __("Maintenance"); ?></a>
+                <span><?php echo __("Add Maintenance Update"); ?></span>
             </div>
 
             <?php if (!empty($success_message)): ?>
                 <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i> <?php echo $success_message; ?>
+                    <?php echo $success_message; ?>
                 </div>
             <?php endif; ?>
             
             <?php if (!empty($error_message)): ?>
                 <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle"></i> <?php echo $error_message; ?>
+                    <?php echo $error_message; ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if (isset($_SESSION['error'])): ?>
+                <div class="alert alert-danger">
+                    <?php 
+                        echo $_SESSION['error']; 
+                        unset($_SESSION['error']);
+                    ?>
                 </div>
             <?php endif; ?>
 
             <div class="content-wrapper">
             <div class="card">
                 <div class="card-header">
-                        <h3><i class="fas fa-tools"></i> Ajouter une Mise à Jour de Maintenance</h3>
+                        <h3><i class="fas fa-plus-circle"></i> <?php echo __("Add Maintenance Update"); ?></h3>
                 </div>
                 <div class="card-body">
-                    <form action="add-maintenance.php" method="POST">
+                        <form action="add-maintenance.php" method="POST" class="form">
+                            <div class="form-section-title"><?php echo __("General Information"); ?></div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="title">Titre <span class="text-danger">*</span></label>
-                                    <input type="text" name="title" id="title" value="<?php echo htmlspecialchars($maintenance['title']); ?>" required>
+                                    <label for="title"><?php echo __("Title"); ?> <span class="text-danger">*</span></label>
+                                    <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($maintenance['title']); ?>" placeholder="e.g. Elevator Maintenance" required>
+                                    <small class="form-text"><?php echo __("Required field"); ?></small>
                                 </div>
                         </div>
                         
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="location">Emplacement <span class="text-danger">*</span></label>
-                                    <input type="text" name="location" id="location" value="<?php echo htmlspecialchars($maintenance['location']); ?>" required>
-                                <small class="form-text text-muted">Spécifiez où dans le complexe résidentiel la maintenance aura lieu.</small>
+                                    <label for="location"><?php echo __("Location"); ?> <span class="text-danger">*</span></label>
+                                    <input type="text" id="location" name="location" value="<?php echo htmlspecialchars($maintenance['location']); ?>" placeholder="e.g. Building A, Floor 3" required>
+                                    <small class="form-text"><?php echo __("Required field"); ?></small>
                             </div>
                         </div>
                         
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="description">Description <span class="text-danger">*</span></label>
-                                    <textarea name="description" id="description" required><?php echo htmlspecialchars($maintenance['description']); ?></textarea>
-                                <small class="form-text text-muted">Fournissez des informations détaillées sur les travaux de maintenance à effectuer.</small>
+                                    <label for="description"><?php echo __("Description"); ?> <span class="text-danger">*</span></label>
+                                    <textarea id="description" name="description" rows="6" placeholder="Provide detailed information about the maintenance update..." required><?php echo htmlspecialchars($maintenance['description']); ?></textarea>
+                                    <small class="form-text"><?php echo __("Required field"); ?></small>
                             </div>
                         </div>
                         
+                            <div class="form-section-title"><?php echo __("Schedule Information"); ?></div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="start_date">Date de Début <span class="text-danger">*</span></label>
-                                    <input type="date" name="start_date" id="start_date" value="<?php echo htmlspecialchars($maintenance['start_date']); ?>" required>
+                                    <label for="start_date"><?php echo __("Start Date"); ?> <span class="text-danger">*</span></label>
+                                    <input type="date" id="start_date" name="start_date" value="<?php echo htmlspecialchars($maintenance['start_date']); ?>" required>
                                 </div>
                         </div>
                         
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="end_date">Date de Fin <span class="text-danger">*</span></label>
-                                    <input type="date" name="end_date" id="end_date" value="<?php echo htmlspecialchars($maintenance['end_date']); ?>" required>
+                                    <label for="end_date"><?php echo __("End Date"); ?> <span class="text-danger">*</span></label>
+                                    <input type="date" id="end_date" name="end_date" value="<?php echo htmlspecialchars($maintenance['end_date']); ?>" required>
                                 </div>
                         </div>
                         
+                            <div class="form-section-title"><?php echo __("Details"); ?></div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="status">Statut <span class="text-danger">*</span></label>
-                                    <select name="status" id="status" required>
-                                    <option value="scheduled" <?php echo $maintenance['status'] === 'scheduled' ? 'selected' : ''; ?>>Planifié</option>
-                                    <option value="in_progress" <?php echo $maintenance['status'] === 'in_progress' ? 'selected' : ''; ?>>En Cours</option>
-                                    <option value="completed" <?php echo $maintenance['status'] === 'completed' ? 'selected' : ''; ?>>Terminé</option>
-                                    <option value="delayed" <?php echo $maintenance['status'] === 'delayed' ? 'selected' : ''; ?>>Retardé</option>
-                                    <option value="cancelled" <?php echo $maintenance['status'] === 'cancelled' ? 'selected' : ''; ?>>Annulé</option>
+                                    <label for="status"><?php echo __("Status"); ?> <span class="text-danger">*</span></label>
+                                    <select id="status" name="status" required>
+                                        <option value="scheduled" <?php echo $maintenance['status'] === 'scheduled' ? 'selected' : ''; ?>><?php echo __("Scheduled"); ?></option>
+                                        <option value="in_progress" <?php echo $maintenance['status'] === 'in_progress' ? 'selected' : ''; ?>><?php echo __("In Progress"); ?></option>
+                                        <option value="completed" <?php echo $maintenance['status'] === 'completed' ? 'selected' : ''; ?>><?php echo __("Completed"); ?></option>
+                                        <option value="delayed" <?php echo $maintenance['status'] === 'delayed' ? 'selected' : ''; ?>><?php echo __("Delayed"); ?></option>
+                                        <option value="cancelled" <?php echo $maintenance['status'] === 'cancelled' ? 'selected' : ''; ?>><?php echo __("Cancelled"); ?></option>
                                 </select>
                             </div>
                         </div>
                         
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="priority">Priorité <span class="text-danger">*</span></label>
-                                    <select name="priority" id="priority" required>
-                                    <option value="low" <?php echo $maintenance['priority'] === 'low' ? 'selected' : ''; ?>>Basse</option>
-                                    <option value="medium" <?php echo $maintenance['priority'] === 'medium' ? 'selected' : ''; ?>>Moyenne</option>
-                                    <option value="high" <?php echo $maintenance['priority'] === 'high' ? 'selected' : ''; ?>>Haute</option>
-                                    <option value="emergency" <?php echo $maintenance['priority'] === 'emergency' ? 'selected' : ''; ?>>Urgence</option>
+                                    <label for="priority"><?php echo __("Priority"); ?> <span class="text-danger">*</span></label>
+                                    <select id="priority" name="priority" required>
+                                        <option value="low" <?php echo $maintenance['priority'] === 'low' ? 'selected' : ''; ?>><?php echo __("Low"); ?></option>
+                                        <option value="medium" <?php echo $maintenance['priority'] === 'medium' ? 'selected' : ''; ?>><?php echo __("Medium"); ?></option>
+                                        <option value="high" <?php echo $maintenance['priority'] === 'high' ? 'selected' : ''; ?>><?php echo __("High"); ?></option>
+                                        <option value="emergency" <?php echo $maintenance['priority'] === 'emergency' ? 'selected' : ''; ?>><?php echo __("Emergency"); ?></option>
                                 </select>
                             </div>
                         </div>
                         
                         <div class="form-actions">
-                            <a href="maintenance.php" class="btn btn-secondary">Annuler</a>
+                                <a href="maintenance.php" class="btn btn-outline">
+                                    <i class="fas fa-times"></i>
+                                    <?php echo __("Cancel"); ?>
+                                </a>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-plus-circle"></i> Ajouter la Mise à Jour de Maintenance
+                                    <i class="fas fa-plus"></i>
+                                    <?php echo __("Create Maintenance"); ?>
                                 </button>
                         </div>
                     </form>
@@ -471,33 +474,20 @@ $page_title = "Ajouter une Mise à Jour de Maintenance";
     <script src="js/dark-mode.js"></script>
     <script>
         // Date validation
-        const startDateInput = document.getElementById('start_date');
-        const endDateInput = document.getElementById('end_date');
-        
-        startDateInput.addEventListener('change', function() {
-            if (endDateInput.value && new Date(this.value) > new Date(endDateInput.value)) {
-                endDateInput.value = this.value;
+        document.getElementById('end_date').addEventListener('change', function() {
+            const startDate = document.getElementById('start_date').value;
+            if (startDate && this.value && new Date(this.value) < new Date(startDate)) {
+                alert('End date cannot be before start date.');
+                this.value = startDate;
             }
         });
         
-        endDateInput.addEventListener('change', function() {
-            if (new Date(this.value) < new Date(startDateInput.value)) {
-                this.setCustomValidity('End date cannot be earlier than start date');
-            } else {
-                this.setCustomValidity('');
+        document.getElementById('start_date').addEventListener('change', function() {
+            const endDate = document.getElementById('end_date').value;
+            if (endDate && this.value && new Date(endDate) < new Date(this.value)) {
+                document.getElementById('end_date').value = this.value;
             }
         });
     </script>
-    
-    <style>
-        /* Breadcrumb styling for dark mode */
-        [data-theme="dark"] .breadcrumb {
-            color: #b0b0b0;
-        }
-        
-        [data-theme="dark"] .breadcrumb a {
-            color: #ffffff;
-        }
-    </style>
 </body>
 </html> 

@@ -491,6 +491,14 @@ input:checked+.slider:before {
     justify-content: center;
     font-size: 1.5rem;
     color: white;
+    position: relative;
+}
+
+.stat-icon i {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .stat-icon.users {

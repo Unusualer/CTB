@@ -12,11 +12,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo isset($_SESSION['language']) ? substr($_SESSION['language'], 0, 2) : 'en'; ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo isset($pageTitle) ? $pageTitle : 'Tableau de Bord Admin'; ?> - CTB Gestion Immobilière</title>
+    <title><?php echo isset($pageTitle) ? __($pageTitle) : __('Admin Dashboard'); ?> - <?php echo __("CTB Property Management"); ?></title>
     
     <!-- Favicon -->
     <link rel="shortcut icon" href="../assets/images/favicon.ico" type="image/x-icon">
@@ -42,7 +42,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             </div>
             <div class="topbar-search">
                 <i class="fas fa-search"></i>
-                <input type="text" placeholder="Rechercher...">
+                <input type="text" placeholder="<?php echo __('Search...'); ?>">
             </div>
             <div class="topbar-right">
                 <div class="notification-item">
@@ -50,15 +50,15 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
                     <span class="badge">3</span>
                 </div>
                 <div class="admin-profile">
-                    <img src="../assets/images/admin-avatar.jpg" alt="Admin">
+                    <img src="../assets/images/admin-avatar.jpg" alt="<?php echo __('Admin'); ?>">
                     <div class="admin-info">
                         <span class="admin-name"><?php echo $_SESSION['username']; ?></span>
-                        <span class="admin-role">Administrateur</span>
+                        <span class="admin-role"><?php echo __('Administrator'); ?></span>
                     </div>
                     <div class="profile-dropdown">
-                        <a href="profile.php"><i class="fas fa-user"></i> Profil</a>
-                        <a href="settings.php"><i class="fas fa-cog"></i> Paramètres</a>
-                        <a href="../logout.php"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+                        <a href="profile.php"><i class="fas fa-user"></i> <?php echo __('Profile'); ?></a>
+                        <a href="settings.php"><i class="fas fa-cog"></i> <?php echo __('Settings'); ?></a>
+                        <a href="../logout.php"><i class="fas fa-sign-out-alt"></i> <?php echo __('Logout'); ?></a>
                     </div>
                 </div>
             </div>
@@ -68,51 +68,51 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             <!-- Admin Sidebar -->
             <div class="admin-sidebar">
                 <div class="sidebar-brand">
-                    <img src="../assets/images/logo.png" alt="Logo">
-                    <h2>CTB Admin</h2>
+                    <img src="../assets/images/logo.png" alt="<?php echo __('Logo'); ?>">
+                    <h2><?php echo __('CTB Admin'); ?></h2>
                 </div>
                 <div class="sidebar-menu">
                     <ul>
                         <li class="<?php echo ($currentPage == 'dashboard') ? 'active' : ''; ?>">
                             <a href="index.php">
                                 <i class="fas fa-tachometer-alt"></i>
-                                <span>Tableau de Bord</span>
+                                <span><?php echo __('Dashboard'); ?></span>
                             </a>
                         </li>
                         <li class="<?php echo ($currentPage == 'properties') ? 'active' : ''; ?>">
                             <a href="properties.php">
                                 <i class="fas fa-building"></i>
-                                <span>Propriétés</span>
+                                <span><?php echo __('Properties'); ?></span>
                             </a>
                         </li>
                         <li class="<?php echo ($currentPage == 'residents') ? 'active' : ''; ?>">
                             <a href="residents.php">
                                 <i class="fas fa-users"></i>
-                                <span>Résidents</span>
+                                <span><?php echo __('Residents'); ?></span>
                             </a>
                         </li>
                         <li class="<?php echo ($currentPage == 'payments') ? 'active' : ''; ?>">
                             <a href="payments.php">
                                 <i class="fas fa-credit-card"></i>
-                                <span>Paiements</span>
+                                <span><?php echo __('Payments'); ?></span>
                             </a>
                         </li>
                         <li class="<?php echo ($currentPage == 'tickets') ? 'active' : ''; ?>">
                             <a href="tickets.php">
                                 <i class="fas fa-ticket-alt"></i>
-                                <span>Tickets</span>
+                                <span><?php echo __('Tickets'); ?></span>
                             </a>
                         </li>
                         <li class="<?php echo ($currentPage == 'reports') ? 'active' : ''; ?>">
                             <a href="reports.php">
                                 <i class="fas fa-chart-bar"></i>
-                                <span>Rapports</span>
+                                <span><?php echo __('Reports'); ?></span>
                             </a>
                         </li>
                         <li class="<?php echo ($currentPage == 'settings') ? 'active' : ''; ?>">
                             <a href="settings.php">
                                 <i class="fas fa-cog"></i>
-                                <span>Paramètres</span>
+                                <span><?php echo __('Settings'); ?></span>
                             </a>
                         </li>
                     </ul>
@@ -123,7 +123,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             <div class="admin-content">
                 <?php if (isset($pageHeader)): ?>
                 <div class="content-header">
-                    <h1><?php echo $pageHeader; ?></h1>
+                    <h1><?php echo __($pageHeader); ?></h1>
                     <?php if (isset($headerActions)): ?>
                     <div class="header-actions">
                         <?php echo $headerActions; ?>
@@ -135,7 +135,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
                 <!-- Page Content -->
                 <?php if (isset($alertMessage) && isset($alertType)): ?>
                 <div class="alert alert-<?php echo $alertType; ?>">
-                    <?php echo $alertMessage; ?>
+                    <?php echo __($alertMessage); ?>
                 </div>
                 <?php endif; ?>
                 

@@ -4,6 +4,56 @@ session_start();
 require_once '../includes/config.php';
 require_once '../includes/functions.php';
 require_once '../includes/role_access.php';
+require_once '../includes/language.php';
+
+// Define translation function directly to prevent errors
+if (!function_exists('__')) {
+    function __($text) {
+        // Get current language from session
+        $lang = isset($_SESSION['language']) ? $_SESSION['language'] : 'en_US';
+        
+        // Load translations from JSON file
+        static $translations = [];
+        
+        if (empty($translations[$lang])) {
+            $json_file = __DIR__ . '/locale/' . $lang . '/translations.json';
+            
+            if (file_exists($json_file)) {
+                $json_content = file_get_contents($json_file);
+                $translations[$lang] = json_decode($json_content, true) ?: [];
+            } else {
+                $translations[$lang] = [];
+            }
+        }
+        
+        // Return translation or original text
+        return isset($translations[$lang][$text]) ? $translations[$lang][$text] : $text;
+    }
+}
+
+// Simple language helper function
+if (!function_exists('get_current_language')) {
+    function get_current_language() {
+        return isset($_SESSION['language']) ? $_SESSION['language'] : 'en_US';
+    }
+}
+
+// Handle language change
+if (isset($_GET['lang']) && in_array($_GET['lang'], ['en_US', 'fr_FR', 'es_ES'])) {
+    $_SESSION['language'] = $_GET['lang'];
+    
+    // Redirect to remove lang parameter
+    $redirect_url = strtok($_SERVER['REQUEST_URI'], '?');
+    $query_params = $_GET;
+    unset($query_params['lang']);
+    
+    if (!empty($query_params)) {
+        $redirect_url .= '?' . http_build_query($query_params);
+    }
+    
+    header("Location: $redirect_url");
+    exit;
+}
 
 // Check if user is logged in and is an admin
 requireRole('admin');
@@ -174,11 +224,22 @@ try {
 }
 
 // Page title
-$page_title = "Tableau de Bord Admin";
+$page_title = __("Admin Dashboard");
+
+// Available languages
+$available_languages = [
+    'en_US' => 'English',
+    'fr_FR' => 'Français',
+    'es_ES' => 'Español',
+];
+
+// Current language
+$current_language = get_current_language();
+$current_language_name = $available_languages[$current_language] ?? $available_languages['en_US'];
 ?>
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo substr(get_current_language(), 0, 2); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -187,6 +248,121 @@ $page_title = "Tableau de Bord Admin";
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
     <link rel="stylesheet" href="css/dashboard-style.css">
+    <style>
+    /* Language Switcher Styles */
+    .language-switcher {
+        position: relative;
+        display: inline-block;
+        margin-left: 15px;
+    }
+    .language-switcher .dropdown-toggle {
+        background-color: var(--success-color);
+        color: white;
+        border: 1px solid var(--success-color);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        padding: 10px 16px;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .language-switcher .dropdown-toggle:hover {
+        background-color: #19b777;
+        border-color: #19b777;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .language-switcher .dropdown-toggle:active {
+        transform: translateY(1px);
+    }
+    .language-switcher .dropdown-toggle i {
+        font-size: 14px;
+    }
+    .language-switcher .dropdown-menu {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 10px);
+        min-width: 150px;
+        background: white;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        padding: 8px 0;
+        display: none;
+        z-index: 1000;
+        animation: fadeIn 0.2s ease;
+        transform-origin: top right;
+    }
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    .language-switcher .dropdown-menu:before {
+        content: '';
+        position: absolute;
+        top: -6px;
+        right: 20px;
+        width: 12px;
+        height: 12px;
+        background: white;
+        transform: rotate(45deg);
+        border-left: 1px solid rgba(0,0,0,0.05);
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
+    .language-switcher .dropdown-menu.show {
+        display: block;
+    }
+    .language-switcher .dropdown-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: all 0.2s;
+        position: relative;
+    }
+    .language-switcher .dropdown-item:after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 0;
+        background-color: var(--success-color);
+        transition: width 0.2s ease;
+    }
+    .language-switcher .dropdown-item:hover {
+        background-color: rgba(28, 200, 138, 0.05);
+        padding-left: 20px;
+    }
+    .language-switcher .dropdown-item:hover:after {
+        width: 4px;
+    }
+    /* Dark mode styles */
+    [data-theme="dark"] .language-switcher .dropdown-menu {
+        background: #2d3748;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    [data-theme="dark"] .language-switcher .dropdown-menu:before {
+        background: #2d3748;
+        border-color: rgba(255,255,255,0.05);
+    }
+    [data-theme="dark"] .language-switcher .dropdown-item {
+        color: #e2e8f0;
+    }
+    [data-theme="dark"] .language-switcher .dropdown-item:hover {
+        background-color: rgba(28, 200, 138, 0.1);
+    }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -197,12 +373,29 @@ $page_title = "Tableau de Bord Admin";
         <main class="main-content">
             <div class="dashboard-content">
                 <div class="page-header">
-                    <h1>Aperçu du Tableau de Bord</h1>
-                    <div class="header-actions">
+                    <h1><?php echo __("Dashboard Overview"); ?></h1>
+                    <div class="header-actions" style="display: flex; align-items: center;">
                         <button class="btn btn-primary">
                             <i class="fas fa-download"></i>
-                            Générer un Rapport
+                            <?php echo __("Generate Report"); ?>
                         </button>
+                        
+                        <!-- Language Switcher -->
+                        <div class="language-switcher">
+                            <button class="dropdown-toggle" type="button" id="languageDropdown" onclick="toggleLanguageDropdown()">
+                                <i class="fas fa-globe"></i>
+                                <?php echo $current_language_name; ?>
+                            </button>
+                            <div class="dropdown-menu" id="languageDropdownMenu">
+                                <?php foreach ($available_languages as $lang_code => $lang_name): ?>
+                                    <?php if ($lang_code !== $current_language): ?>
+                                        <a class="dropdown-item" href="?lang=<?php echo $lang_code; ?>">
+                                            <?php echo $lang_name; ?>
+                                        </a>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -213,12 +406,12 @@ $page_title = "Tableau de Bord Admin";
                             <i class="fas fa-users"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Utilisateurs Totaux</h3>
+                            <h3><?php echo __("Total Users"); ?></h3>
                             <p class="stat-number"><?php echo number_format($total_users); ?></p>
                             <div class="stat-breakdown">
-                                <span><i class="fas fa-user-shield"></i> Administrateurs: <?php echo number_format($total_admins ?? 0); ?></span>
-                                <span><i class="fas fa-user-tie"></i> Gestionnaires: <?php echo number_format($total_managers); ?></span>
-                                <span><i class="fas fa-user"></i> Résidents: <?php echo number_format($total_residents); ?></span>
+                                <span><i class="fas fa-user-shield"></i> <?php echo __("Administrators"); ?>: <?php echo number_format($total_admins ?? 0); ?></span>
+                                <span><i class="fas fa-user-tie"></i> <?php echo __("Managers"); ?>: <?php echo number_format($total_managers); ?></span>
+                                <span><i class="fas fa-user"></i> <?php echo __("Residents"); ?>: <?php echo number_format($total_residents); ?></span>
                             </div>
                         </div>
                     </div>
@@ -228,12 +421,12 @@ $page_title = "Tableau de Bord Admin";
                             <i class="fas fa-building"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Propriétés</h3>
+                            <h3><?php echo __("Properties"); ?></h3>
                             <p class="stat-number"><?php echo number_format($total_properties); ?></p>
                             <div class="stat-breakdown">
-                                <span><i class="fas fa-home"></i> Appartements: <?php echo number_format($total_apartments); ?></span>
-                                <span><i class="fas fa-car"></i> Parking: <?php echo number_format($total_parking); ?></span>
-                                <span><i class="fas fa-check-circle"></i> Occupées: <?php echo number_format($occupied_properties); ?></span>
+                                <span><i class="fas fa-home"></i> <?php echo __("Apartments"); ?>: <?php echo number_format($total_apartments); ?></span>
+                                <span><i class="fas fa-car"></i> <?php echo __("Parking"); ?>: <?php echo number_format($total_parking); ?></span>
+                                <span><i class="fas fa-check-circle"></i> <?php echo __("Occupied"); ?>: <?php echo number_format($occupied_properties); ?></span>
                             </div>
                         </div>
                     </div>
@@ -243,12 +436,12 @@ $page_title = "Tableau de Bord Admin";
                             <i class="fas fa-ticket-alt"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Tickets</h3>
+                            <h3><?php echo __("Tickets"); ?></h3>
                             <p class="stat-number"><?php echo number_format($total_tickets); ?></p>
                             <div class="stat-breakdown">
-                                <span><i class="fas fa-exclamation-circle"></i> Ouverts: <?php echo number_format($open_tickets); ?></span>
-                                <span><i class="fas fa-clock"></i> En Cours: <?php echo number_format($in_progress_tickets); ?></span>
-                                <span><i class="fas fa-check"></i> Fermés: <?php echo number_format($closed_tickets); ?></span>
+                                <span><i class="fas fa-exclamation-circle"></i> <?php echo __("Open"); ?>: <?php echo number_format($open_tickets); ?></span>
+                                <span><i class="fas fa-clock"></i> <?php echo __("In Progress"); ?>: <?php echo number_format($in_progress_tickets); ?></span>
+                                <span><i class="fas fa-check"></i> <?php echo __("Closed"); ?>: <?php echo number_format($closed_tickets); ?></span>
                             </div>
                         </div>
                     </div>
@@ -258,11 +451,11 @@ $page_title = "Tableau de Bord Admin";
                             <i class="fas fa-dollar-sign"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Paiements Totaux</h3>
+                            <h3><?php echo __("Total Payments"); ?></h3>
                             <p class="stat-number"><?php echo format_currency($total_payments); ?></p>
                             <div class="stat-breakdown">
-                                <span><i class="fas fa-check-circle"></i> Payés: <?php echo format_currency($paid_amount); ?></span>
-                                <span><i class="fas fa-clock"></i> En Attente: <?php echo format_currency($pending_amount); ?></span>
+                                <span><i class="fas fa-check-circle"></i> <?php echo __("Paid"); ?>: <?php echo format_currency($paid_amount); ?></span>
+                                <span><i class="fas fa-clock"></i> <?php echo __("Pending"); ?>: <?php echo format_currency($pending_amount); ?></span>
                             </div>
                         </div>
                     </div>
@@ -272,7 +465,7 @@ $page_title = "Tableau de Bord Admin";
                 <div class="charts-grid">
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3><i class="fas fa-chart-line"></i> Aperçu des Paiements Mensuels</h3>
+                            <h3><i class="fas fa-chart-line"></i> <?php echo __("Monthly Payment Overview"); ?></h3>
                             <div class="chart-actions">
                                 <button class="btn-icon"><i class="fas fa-ellipsis-v"></i></button>
                             </div>
@@ -284,7 +477,7 @@ $page_title = "Tableau de Bord Admin";
 
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3><i class="fas fa-chart-pie"></i> Distribution des Statuts de Tickets</h3>
+                            <h3><i class="fas fa-chart-pie"></i> <?php echo __("Ticket Status Distribution"); ?></h3>
                             <div class="chart-actions">
                                 <button class="btn-icon"><i class="fas fa-ellipsis-v"></i></button>
                             </div>
@@ -299,8 +492,8 @@ $page_title = "Tableau de Bord Admin";
                 <div class="content-grid">
                     <div class="content-card">
                         <div class="card-header">
-                            <h3><i class="fas fa-history"></i> Activité Récente</h3>
-                            <a href="activity-log.php" class="view-all">Voir Tout</a>
+                            <h3><i class="fas fa-history"></i> <?php echo __("Recent Activity"); ?></h3>
+                            <a href="activity-log.php" class="view-all"><?php echo __("View All"); ?></a>
                         </div>
                         <div class="activity-list dashboard-activity">
                             <?php if (!empty($recent_activity)): ?>
@@ -339,28 +532,22 @@ $page_title = "Tableau de Bord Admin";
                                                     $action_verb = $activity['action'];
                                                     switch ($action_verb) {
                                                         case 'payment':
-                                                            echo "a effectué un paiement pour";
+                                                            echo __("made a payment for");
                                                             break;
                                                         case 'login':
-                                                            echo "s'est connecté à";
+                                                            echo __("logged in");
                                                             break;
                                                         case 'create':
-                                                            echo "a créé";
+                                                            echo __("created");
                                                             break;
                                                         case 'update':
-                                                            echo "a mis à jour";
+                                                            echo __("updated");
                                                             break;
                                                         case 'delete':
-                                                            echo "a supprimé";
+                                                            echo __("deleted");
                                                             break;
                                                         default:
-                                                            // Add 'e' to actions that end with 'e' already
-                                                            $last_char = substr($action_verb, -1);
-                                                            if ($last_char === 'e') {
-                                                                echo ucfirst($action_verb) . "d";
-                                                            } else {
-                                                                echo ucfirst($action_verb) . "ed";
-                                                            }
+                                                            echo ucfirst($action_verb);
                                                     }
                                                 ?>
                                                 <?php echo strtolower($activity['entity_type']); ?>
@@ -368,7 +555,7 @@ $page_title = "Tableau de Bord Admin";
                                                     #<?php echo $activity['entity_id']; ?>
                                                 <?php endif; ?>
                                                 <?php if (!empty($activity['details'])): ?>
-                                                    - <?php echo htmlspecialchars($activity['details']); ?>
+                                                    - <?php echo __($activity['details']); ?>
                                                 <?php endif; ?>
                                             </p>
                                             <span class="activity-time">
@@ -380,7 +567,7 @@ $page_title = "Tableau de Bord Admin";
                             <?php else: ?>
                                 <div class="empty-state">
                                     <i class="fas fa-history"></i>
-                                    <p>Aucune activité récente</p>
+                                    <p><?php echo __("No recent activity"); ?></p>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -388,8 +575,8 @@ $page_title = "Tableau de Bord Admin";
 
                     <div class="content-card">
                         <div class="card-header">
-                            <h3><i class="fas fa-ticket-alt"></i> Tickets Récents</h3>
-                            <a href="tickets.php" class="view-all">Voir Tout</a>
+                            <h3><i class="fas fa-ticket-alt"></i> <?php echo __("Recent Tickets"); ?></h3>
+                            <a href="tickets.php" class="view-all"><?php echo __("View All"); ?></a>
                         </div>
                         <div class="tickets-list dashboard-tickets">
                             <?php if (!empty($recent_tickets)): ?>
@@ -400,16 +587,16 @@ $page_title = "Tableau de Bord Admin";
                                                 $status_text = $ticket['status'];
                                                 switch ($status_text) {
                                                     case 'open':
-                                                        echo 'Ouvert';
+                                                        echo __("Open");
                                                         break;
                                                     case 'in_progress':
-                                                        echo 'En Cours';
+                                                        echo __("In Progress");
                                                         break;
                                                     case 'closed':
-                                                        echo 'Fermé';
+                                                        echo __("Closed");
                                                         break;
                                                     case 'reopened':
-                                                        echo 'Réouvert';
+                                                        echo __("Reopened");
                                                         break;
                                                     default:
                                                         echo ucfirst($status_text);
@@ -433,7 +620,7 @@ $page_title = "Tableau de Bord Admin";
                             <?php else: ?>
                                 <div class="empty-state">
                                     <i class="fas fa-ticket-alt"></i>
-                                    <p>Aucun ticket récent</p>
+                                    <p><?php echo __("No recent tickets"); ?></p>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -443,8 +630,8 @@ $page_title = "Tableau de Bord Admin";
                 <!-- Maintenance Section -->
                 <div class="content-card maintenance-card">
                     <div class="card-header">
-                        <h3><i class="fas fa-tools"></i> Aperçu des Maintenances</h3>
-                        <a href="maintenance.php" class="view-all">Voir Tout</a>
+                        <h3><i class="fas fa-tools"></i> <?php echo __("Maintenance Overview"); ?></h3>
+                        <a href="maintenance.php" class="view-all"><?php echo __("View All"); ?></a>
                     </div>
                     <div class="maintenance-stats">
                         <div class="maintenance-stat">
@@ -452,28 +639,28 @@ $page_title = "Tableau de Bord Admin";
                                 <i class="fas fa-calendar"></i>
                                 <span class="count"><?php echo $scheduled_maintenance; ?></span>
                             </div>
-                            <p>Programmées</p>
+                            <p><?php echo __("Scheduled"); ?></p>
                         </div>
                         <div class="maintenance-stat">
                             <div class="stat-circle in-progress">
                                 <i class="fas fa-tools"></i>
                                 <span class="count"><?php echo $in_progress_maintenance; ?></span>
                             </div>
-                            <p>En Cours</p>
+                            <p><?php echo __("In Progress"); ?></p>
                         </div>
                         <div class="maintenance-stat">
                             <div class="stat-circle completed">
                                 <i class="fas fa-check"></i>
                                 <span class="count"><?php echo $completed_maintenance; ?></span>
                             </div>
-                            <p>Complétées</p>
+                            <p><?php echo __("Completed"); ?></p>
                         </div>
                         <div class="maintenance-stat">
                             <div class="stat-circle total">
                                 <i class="fas fa-clipboard-list"></i>
                                 <span class="count"><?php echo $total_maintenance; ?></span>
                             </div>
-                            <p>Total</p>
+                            <p><?php echo __("Total"); ?></p>
                         </div>
                     </div>
                 </div>
@@ -517,7 +704,7 @@ $page_title = "Tableau de Bord Admin";
                 data: {
                     labels: paymentLabels,
                     datasets: [{
-                        label: "Montant du Paiement",
+                        label: "<?php echo __('Monthly Payment Overview'); ?>",
                         lineTension: 0.3,
                         backgroundColor: "rgba(78, 115, 223, 0.05)",
                         borderColor: "rgba(78, 115, 223, 1)",
@@ -593,7 +780,7 @@ $page_title = "Tableau de Bord Admin";
 
         // Ticket Status Chart
         var ticketStatusChart = document.getElementById("ticketStatusChart");
-        var ticketStatuses = ["Ouvert", "En Cours", "Fermé"];
+        var ticketStatuses = ["<?php echo __('Open'); ?>", "<?php echo __('In Progress'); ?>", "<?php echo __('Closed'); ?>"];
         var ticketData = [
             <?php echo $open_tickets; ?>,
             <?php echo $in_progress_tickets; ?>,
@@ -673,5 +860,25 @@ $page_title = "Tableau de Bord Admin";
     </script>
     <script src="js/dark-mode.js"></script>
     <script src="js/dashboard.js"></script>
+    
+    <!-- Language Switcher Script -->
+    <script>
+    function toggleLanguageDropdown() {
+        document.getElementById('languageDropdownMenu').classList.toggle('show');
+    }
+    
+    // Close the dropdown if clicked outside
+    window.onclick = function(event) {
+        if (!event.target.matches('.dropdown-toggle')) {
+            var dropdowns = document.getElementsByClassName("dropdown-menu");
+            for (var i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+    </script>
 </body>
 </html> 

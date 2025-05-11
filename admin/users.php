@@ -8,6 +8,25 @@ require_once '../includes/role_access.php';
 // Check if user is logged in and is an admin
 requireRole('admin');
 
+// Include translation function if not already included
+if (!function_exists('__')) {
+    $translations_file = dirname(__DIR__) . '/includes/translations.php';
+    if (file_exists($translations_file)) {
+        require_once $translations_file;
+    } else {
+        // Fallback to alternate locations
+        $alt_translations_file = $_SERVER['DOCUMENT_ROOT'] . '/CTB/includes/translations.php';
+        if (file_exists($alt_translations_file)) {
+            require_once $alt_translations_file;
+        } else {
+            // Define a minimal translation function as last resort
+            function __($text) {
+                return $text;
+            }
+        }
+    }
+}
+
 // Initialize variables
 $search = $_GET['search'] ?? '';
 $role_filter = $_GET['role'] ?? '';
@@ -88,7 +107,7 @@ try {
     }
     
 } catch (PDOException $e) {
-    $_SESSION['error'] = "Database error: " . $e->getMessage();
+    $_SESSION['error'] = __("Database error") . ": " . $e->getMessage();
     $users = [];
     $total = 0;
     $total_pages = 0;
@@ -97,11 +116,11 @@ try {
 }
 
 // Page title
-$page_title = "Gestion des Utilisateurs";
+$page_title = __("User Management");
 ?>
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo isset($_SESSION['language']) ? substr($_SESSION['language'], 0, 2) : 'en'; ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -117,10 +136,10 @@ $page_title = "Gestion des Utilisateurs";
         <!-- Main Content -->
         <main class="main-content">
             <div class="page-header">
-                <h1>Gestion des Utilisateurs</h1>
+                <h1><?php echo __("User Management"); ?></h1>
                 <a href="add-user.php" class="btn btn-primary">
                     <i class="fas fa-plus"></i>
-                    Ajouter un Utilisateur
+                    <?php echo __("Add User"); ?>
                 </a>
             </div>
 
@@ -150,7 +169,7 @@ $page_title = "Gestion des Utilisateurs";
                             <i class="fas fa-user-tie"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Administrateurs</h3>
+                            <h3><?php echo __("Administrators"); ?></h3>
                             <div class="stat-number"><?php echo isset($role_counts['admin']) ? $role_counts['admin'] : 0; ?></div>
                         </div>
                     </div>
@@ -160,7 +179,7 @@ $page_title = "Gestion des Utilisateurs";
                             <i class="fas fa-user-cog"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Gestionnaires</h3>
+                            <h3><?php echo __("Managers"); ?></h3>
                             <div class="stat-number"><?php echo isset($role_counts['manager']) ? $role_counts['manager'] : 0; ?></div>
                         </div>
                     </div>
@@ -170,7 +189,7 @@ $page_title = "Gestion des Utilisateurs";
                             <i class="fas fa-user"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Résidents</h3>
+                            <h3><?php echo __("Residents"); ?></h3>
                             <div class="stat-number"><?php echo isset($role_counts['resident']) ? $role_counts['resident'] : 0; ?></div>
                         </div>
                     </div>
@@ -180,11 +199,11 @@ $page_title = "Gestion des Utilisateurs";
                             <i class="fas fa-users"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>Total Utilisateurs</h3>
+                            <h3><?php echo __("Total Users"); ?></h3>
                             <div class="stat-number"><?php echo $total; ?></div>
                             <div class="stat-breakdown">
-                                <span><i class="fas fa-circle" style="color: #28a745;"></i> Actifs: <?php echo isset($status_counts['active']) ? $status_counts['active'] : 0; ?></span>
-                                <span><i class="fas fa-circle" style="color: #dc3545;"></i> Inactifs: <?php echo isset($status_counts['inactive']) ? $status_counts['inactive'] : 0; ?></span>
+                                <span><i class="fas fa-circle" style="color: #28a745;"></i> <?php echo __("Active"); ?>: <?php echo isset($status_counts['active']) ? $status_counts['active'] : 0; ?></span>
+                                <span><i class="fas fa-circle" style="color: #dc3545;"></i> <?php echo __("Inactive"); ?>: <?php echo isset($status_counts['inactive']) ? $status_counts['inactive'] : 0; ?></span>
                             </div>
                         </div>
                     </div>
@@ -193,33 +212,33 @@ $page_title = "Gestion des Utilisateurs";
                 <!-- Filters -->
                 <div class="card user-filter-card">
                     <div class="card-header user-filter-header">
-                        <h3><i class="fas fa-filter"></i> Liste des Utilisateurs</h3>
+                        <h3><i class="fas fa-filter"></i> <?php echo __("User List"); ?></h3>
                         <form id="filter-form" action="users.php" method="GET" class="filter-form">
                             <div class="filter-wrapper">
                                 <div class="search-filter">
                                     <div class="search-bar">
                                         <i class="fas fa-search"></i>
-                                        <input type="text" placeholder="Rechercher..." name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
+                                        <input type="text" placeholder="<?php echo __("Search..."); ?>" name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
                                     </div>
                                 </div>
                                 <div class="filter-group">
-                                    <label for="role">Rôle:</label>
+                                    <label for="role"><?php echo __("Role"); ?>:</label>
                                     <select name="role" id="role" onchange="this.form.submit()">
-                                        <option value="">Tous les Rôles</option>
-                                        <option value="admin" <?php echo $role_filter === 'admin' ? 'selected' : ''; ?>>Administrateur</option>
-                                        <option value="manager" <?php echo $role_filter === 'manager' ? 'selected' : ''; ?>>Gestionnaire</option>
-                                        <option value="resident" <?php echo $role_filter === 'resident' ? 'selected' : ''; ?>>Résident</option>
+                                        <option value=""><?php echo __("All Roles"); ?></option>
+                                        <option value="admin" <?php echo $role_filter === 'admin' ? 'selected' : ''; ?>><?php echo __("Administrator"); ?></option>
+                                        <option value="manager" <?php echo $role_filter === 'manager' ? 'selected' : ''; ?>><?php echo __("Manager"); ?></option>
+                                        <option value="resident" <?php echo $role_filter === 'resident' ? 'selected' : ''; ?>><?php echo __("Resident"); ?></option>
                                     </select>
                                 </div>
                                 <div class="filter-group">
-                                    <label for="status">Statut:</label>
+                                    <label for="status"><?php echo __("Status"); ?>:</label>
                                     <select name="status" id="status" onchange="this.form.submit()">
-                                        <option value="">Tous les Statuts</option>
-                                        <option value="active" <?php echo $status_filter === 'active' ? 'selected' : ''; ?>>Actif</option>
-                                        <option value="inactive" <?php echo $status_filter === 'inactive' ? 'selected' : ''; ?>>Inactif</option>
+                                        <option value=""><?php echo __("All Statuses"); ?></option>
+                                        <option value="active" <?php echo $status_filter === 'active' ? 'selected' : ''; ?>><?php echo __("Active"); ?></option>
+                                        <option value="inactive" <?php echo $status_filter === 'inactive' ? 'selected' : ''; ?>><?php echo __("Inactive"); ?></option>
                                     </select>
                                 </div>
-                                <a href="users.php" class="reset-link">Réinitialiser</a>
+                                <a href="users.php" class="reset-link"><?php echo __("Reset"); ?></a>
                             </div>
                         </form>
                     </div>
@@ -227,21 +246,21 @@ $page_title = "Gestion des Utilisateurs";
                         <?php if (empty($users)): ?>
                             <div class="no-data">
                                 <i class="fas fa-users"></i>
-                                <p>Aucun utilisateur trouvé. Essayez d'ajuster vos filtres ou d'ajouter un nouvel utilisateur.</p>
-                                <a href="add-user.php" class="btn btn-primary">Ajouter un Utilisateur</a>
+                                <p><?php echo __("No users found. Try adjusting your filters or add a new user."); ?></p>
+                                <a href="add-user.php" class="btn btn-primary"><?php echo __("Add User"); ?></a>
                             </div>
                         <?php else: ?>
                             <div class="table-responsive">
                                 <table class="table">
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
-                                            <th>Nom</th>
-                                            <th>Email</th>
-                                            <th>Rôle</th>
-                                            <th>Statut</th>
-                                            <th>Créé le</th>
-                                            <th>Actions</th>
+                                            <th><?php echo __("ID"); ?></th>
+                                            <th><?php echo __("Name"); ?></th>
+                                            <th><?php echo __("Email"); ?></th>
+                                            <th><?php echo __("Role"); ?></th>
+                                            <th><?php echo __("Status"); ?></th>
+                                            <th><?php echo __("Created"); ?></th>
+                                            <th><?php echo __("Actions"); ?></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -278,25 +297,25 @@ $page_title = "Gestion des Utilisateurs";
                                                                 $roleIcon = '<i class="fas fa-user"></i>';
                                                                 break;
                                                         }
-                                                        echo $roleIcon . ' ' . ucfirst(htmlspecialchars($user['role']));
+                                                        echo $roleIcon . ' ' . __(ucfirst(htmlspecialchars($user['role'])));
                                                         ?>
                                                     </span>
                                                 </td>
                                                 <td>
                                                     <span class="status-badge <?php echo $user['status']; ?>">
                                                         <i class="fas fa-circle"></i>
-                                                        <?php echo ucfirst(htmlspecialchars($user['status'])); ?>
+                                                        <?php echo __(ucfirst(htmlspecialchars($user['status']))); ?>
                                                     </span>
                                                 </td>
-                                                <td><?php echo date('M d, Y', strtotime($user['created_at'])); ?></td>
+                                                <td><?php echo format_date($user['created_at']); ?></td>
                                                 <td class="actions">
-                                                    <a href="view-user.php?id=<?php echo $user['id']; ?>" class="btn-icon" title="View User">
+                                                    <a href="view-user.php?id=<?php echo $user['id']; ?>" class="btn-icon" title="<?php echo __("View User"); ?>">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    <a href="edit-user.php?id=<?php echo $user['id']; ?>" class="btn-icon" title="Edit User">
+                                                    <a href="edit-user.php?id=<?php echo $user['id']; ?>" class="btn-icon" title="<?php echo __("Edit User"); ?>">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                    <a href="javascript:void(0);" class="btn-icon delete-user" data-id="<?php echo $user['id']; ?>" title="Delete User">
+                                                    <a href="javascript:void(0);" class="btn-icon delete-user" data-id="<?php echo $user['id']; ?>" title="<?php echo __("Delete User"); ?>">
                                                         <i class="fas fa-trash-alt"></i>
                                                     </a>
                                                 </td>
@@ -340,17 +359,17 @@ $page_title = "Gestion des Utilisateurs";
     <div id="deleteModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Confirmer la Suppression</h3>
+                <h3><?php echo __("Confirm Deletion"); ?></h3>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
-                <p>Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.</p>
+                <p><?php echo __("Are you sure you want to delete this user? This action cannot be undone."); ?></p>
             </div>
             <div class="modal-footer">
                 <form id="deleteForm" action="delete-user.php" method="POST">
                     <input type="hidden" name="user_id" id="deleteUserId">
-                    <button type="button" class="btn btn-secondary close-modal">Annuler</button>
-                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                    <button type="button" class="btn btn-secondary close-modal"><?php echo __("Cancel"); ?></button>
+                    <button type="submit" class="btn btn-danger"><?php echo __("Delete"); ?></button>
                 </form>
             </div>
         </div>
@@ -416,7 +435,7 @@ $page_title = "Gestion des Utilisateurs";
                 if (visibleCount === 0 && !existingNoResults && tableContainer) {
                     const noResults = document.createElement('div');
                     noResults.className = 'no-data search-no-results';
-                    noResults.innerHTML = '<i class="fas fa-search"></i><p>No users match your search criteria.</p>';
+                    noResults.innerHTML = '<i class="fas fa-search"></i><p><?php echo __("No users match your search criteria."); ?></p>';
                     
                     tableContainer.style.display = 'none';
                     tableContainer.parentNode.insertBefore(noResults, tableContainer.nextSibling);

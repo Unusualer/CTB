@@ -4,6 +4,7 @@ session_start();
 require_once '../includes/config.php';
 require_once '../includes/functions.php';
 require_once '../includes/role_access.php';
+require_once '../includes/translations.php';
 
 // Check if user is logged in and has appropriate role
 requireRole('admin');
@@ -135,15 +136,15 @@ try {
 }
 
 // Page title
-$page_title = "Gestion des Paiements";
+$page_title = __("Payment Management");
 ?>
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo substr($_SESSION['language'] ?? 'en_US', 0, 2); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?> - Community Trust Bank</title>
+    <title><?php echo $page_title; ?> - <?php echo __("Community Trust Bank"); ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
@@ -155,10 +156,10 @@ $page_title = "Gestion des Paiements";
         <!-- Main Content -->
         <main class="main-content">
             <div class="page-header">
-                <h1>Gestion des Paiements</h1>
+                <h1><?php echo __("Payment Management"); ?></h1>
                 <a href="add-payment.php" class="btn btn-primary">
                     <i class="fas fa-plus"></i>
-                    Enregistrer un Nouveau Paiement
+                    <?php echo __("Add Payment"); ?>
                 </a>
             </div>
 
@@ -169,10 +170,10 @@ $page_title = "Gestion des Paiements";
                         <i class="fas fa-dollar-sign"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Total des Paiements</h3>
+                        <h3><?php echo __("Total Payments"); ?></h3>
                         <div class="stat-number"><?php echo isset($payment_stats['total_count']) ? $payment_stats['total_count'] : 0; ?></div>
                         <div class="stat-breakdown">
-                            <span><?php echo isset($payment_stats['total_amount']) ? number_format($payment_stats['total_amount'], 2) : '0.00'; ?> € Total</span>
+                            <span><?php echo isset($payment_stats['total_amount']) ? number_format($payment_stats['total_amount'], 2) : '0.00'; ?> € <?php echo __("Total"); ?></span>
                         </div>
                     </div>
                 </div>
@@ -182,7 +183,7 @@ $page_title = "Gestion des Paiements";
                         <i class="fas fa-check-circle"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Terminés</h3>
+                        <h3><?php echo __("Completed"); ?></h3>
                         <div class="stat-number"><?php echo isset($status_stats['completed']['count']) ? $status_stats['completed']['count'] : 0; ?></div>
                         <div class="stat-breakdown">
                             <span><?php echo isset($status_stats['completed']['total']) ? number_format($status_stats['completed']['total'], 2) : '0.00'; ?> €</span>
@@ -195,7 +196,7 @@ $page_title = "Gestion des Paiements";
                         <i class="fas fa-hourglass-half"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>En Attente</h3>
+                        <h3><?php echo __("Pending"); ?></h3>
                         <div class="stat-number"><?php echo isset($status_stats['pending']['count']) ? $status_stats['pending']['count'] : 0; ?></div>
                         <div class="stat-breakdown">
                             <span><?php echo isset($status_stats['pending']['total']) ? number_format($status_stats['pending']['total'], 2) : '0.00'; ?> €</span>
@@ -208,12 +209,12 @@ $page_title = "Gestion des Paiements";
                         <i class="fas fa-credit-card"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Méthodes de Paiement</h3>
-                        <div class="stat-number"><?php echo $total; ?> Total</div>
+                        <h3><?php echo __("Payment Methods"); ?></h3>
+                        <div class="stat-number"><?php echo $total; ?> <?php echo __("Total"); ?></div>
                         <div class="stat-breakdown">
-                            <span><i class="fas fa-circle" style="color: #28a745;"></i> Carte Bancaire: <?php echo isset($method_stats['credit_card']) ? $method_stats['credit_card'] : 0; ?></span>
-                            <span><i class="fas fa-circle" style="color: #ffc107;"></i> Virement: <?php echo isset($method_stats['bank_transfer']) ? $method_stats['bank_transfer'] : 0; ?></span>
-                            <span><i class="fas fa-circle" style="color: #dc3545;"></i> Autre: <?php echo isset($method_stats['other']) ? $method_stats['other'] : 0; ?></span>
+                            <span><i class="fas fa-circle" style="color: #28a745;"></i> <?php echo __("Credit Card"); ?>: <?php echo isset($method_stats['credit_card']) ? $method_stats['credit_card'] : 0; ?></span>
+                            <span><i class="fas fa-circle" style="color: #ffc107;"></i> <?php echo __("Bank Transfer"); ?>: <?php echo isset($method_stats['bank_transfer']) ? $method_stats['bank_transfer'] : 0; ?></span>
+                            <span><i class="fas fa-circle" style="color: #dc3545;"></i> <?php echo __("Other"); ?>: <?php echo isset($method_stats['other']) ? $method_stats['other'] : 0; ?></span>
                         </div>
                     </div>
                 </div>
@@ -222,43 +223,43 @@ $page_title = "Gestion des Paiements";
             <!-- Filters -->
             <div class="card user-filter-card">
                 <div class="card-header user-filter-header">
-                    <h3><i class="fas fa-filter"></i> Liste des Paiements</h3>
+                    <h3><i class="fas fa-filter"></i> <?php echo __("Payment List"); ?></h3>
                     <form id="filter-form" action="payments.php" method="GET" class="filter-form">
                         <div class="filter-wrapper">
                             <div class="search-filter">
                                 <div class="search-bar">
                                     <i class="fas fa-search"></i>
-                                    <input type="text" placeholder="Rechercher des paiements..." name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
+                                    <input type="text" placeholder="<?php echo __("Search for payments..."); ?>" name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
                                 </div>
                             </div>
                             <div class="filter-group">
-                                <label for="status">Statut:</label>
+                                <label for="status"><?php echo __("Status"); ?>:</label>
                                 <select name="status" id="status" onchange="this.form.submit()">
-                                    <option value="">Tous les Statuts</option>
-                                    <option value="paid" <?php echo $status_filter === 'paid' ? 'selected' : ''; ?>>Payé</option>
-                                    <option value="pending" <?php echo $status_filter === 'pending' ? 'selected' : ''; ?>>En Attente</option>
-                                    <option value="cancelled" <?php echo $status_filter === 'cancelled' ? 'selected' : ''; ?>>Annulé</option>
-                                    <option value="failed" <?php echo $status_filter === 'failed' ? 'selected' : ''; ?>>Échoué</option>
-                                    <option value="refunded" <?php echo $status_filter === 'refunded' ? 'selected' : ''; ?>>Remboursé</option>
+                                    <option value=""><?php echo __("All Statuses"); ?></option>
+                                    <option value="paid" <?php echo $status_filter === 'paid' ? 'selected' : ''; ?>><?php echo __("Paid"); ?></option>
+                                    <option value="pending" <?php echo $status_filter === 'pending' ? 'selected' : ''; ?>><?php echo __("Pending"); ?></option>
+                                    <option value="cancelled" <?php echo $status_filter === 'cancelled' ? 'selected' : ''; ?>><?php echo __("Cancelled"); ?></option>
+                                    <option value="failed" <?php echo $status_filter === 'failed' ? 'selected' : ''; ?>><?php echo __("Failed"); ?></option>
+                                    <option value="refunded" <?php echo $status_filter === 'refunded' ? 'selected' : ''; ?>><?php echo __("Refunded"); ?></option>
                                 </select>
                             </div>
                             <div class="filter-group">
-                                <label for="payment_method">Méthode:</label>
+                                <label for="payment_method"><?php echo __("Method"); ?>:</label>
                                 <select name="payment_method" id="payment_method" onchange="this.form.submit()">
-                                    <option value="">Toutes les Méthodes</option>
-                                    <option value="transfer" <?php echo $payment_method_filter === 'transfer' ? 'selected' : ''; ?>>Virement</option>
-                                    <option value="cheque" <?php echo $payment_method_filter === 'cheque' ? 'selected' : ''; ?>>Chèque</option>
+                                    <option value=""><?php echo __("All Methods"); ?></option>
+                                    <option value="transfer" <?php echo $payment_method_filter === 'transfer' ? 'selected' : ''; ?>><?php echo __("Transfer"); ?></option>
+                                    <option value="cheque" <?php echo $payment_method_filter === 'cheque' ? 'selected' : ''; ?>><?php echo __("Check"); ?></option>
                                 </select>
                             </div>
                             <div class="filter-group">
-                                <label for="date_from">De:</label>
+                                <label for="date_from"><?php echo __("Date From"); ?>:</label>
                                 <input type="date" id="date_from" name="date_from" value="<?php echo $date_from; ?>" onchange="this.form.submit()">
                             </div>
                             <div class="filter-group">
-                                <label for="date_to">À:</label>
+                                <label for="date_to"><?php echo __("Date To"); ?>:</label>
                                 <input type="date" id="date_to" name="date_to" value="<?php echo $date_to; ?>" onchange="this.form.submit()">
                             </div>
-                            <a href="payments.php" class="reset-link">Réinitialiser</a>
+                            <a href="payments.php" class="reset-link"><?php echo __("Reset Filters"); ?></a>
                         </div>
                     </form>
                 </div>
@@ -266,22 +267,22 @@ $page_title = "Gestion des Paiements";
                     <?php if (empty($payments)): ?>
                         <div class="empty-state">
                             <i class="fas fa-credit-card"></i>
-                            <p>Aucun paiement trouvé. Essayez d'ajuster vos filtres ou d'ajouter un nouveau paiement.</p>
-                            <a href="add-payment.php" class="btn btn-primary">Ajouter un Paiement</a>
+                            <p><?php echo __("No payments found. Try adjusting your filters or add a new payment."); ?></p>
+                            <a href="add-payment.php" class="btn btn-primary"><?php echo __("Add Payment"); ?></a>
                         </div>
                     <?php else: ?>
                         <div class="table-responsive">
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Résident</th>
-                                        <th>Propriété</th>
-                                        <th>Montant</th>
-                                        <th>Méthode</th>
-                                        <th>Statut</th>
-                                        <th>Date</th>
-                                        <th>Actions</th>
+                                        <th><?php echo __("ID"); ?></th>
+                                        <th><?php echo __("Resident"); ?></th>
+                                        <th><?php echo __("Property"); ?></th>
+                                        <th><?php echo __("Amount"); ?></th>
+                                        <th><?php echo __("Method"); ?></th>
+                                        <th><?php echo __("Status"); ?></th>
+                                        <th><?php echo __("Date"); ?></th>
+                                        <th><?php echo __("Actions"); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -327,7 +328,7 @@ $page_title = "Gestion des Paiements";
                                                     }
                                                     
                                                     // Only replace if payment_method exists
-                                                    $paymentMethodDisplay = $payment_method ? ucfirst(str_replace('_', ' ', $payment_method)) : 'Other';
+                                                    $paymentMethodDisplay = $payment_method ? __(ucfirst(str_replace('_', ' ', $payment_method))) : __("Other");
                                                     echo $methodIcon . $paymentMethodDisplay;
                                                 ?>
                                             </td>
@@ -342,28 +343,18 @@ $page_title = "Gestion des Paiements";
                                                     }
                                                 ?>
                                                 <span class="status-indicator status-<?php echo $statusClass; ?>">
-                                                    <?php 
-                                                    $statusLabel = '';
-                                                    switch ($payment['status']) {
-                                                        case 'completed': $statusLabel = 'Terminé'; break;
-                                                        case 'pending': $statusLabel = 'En attente'; break;
-                                                        case 'failed': $statusLabel = 'Échoué'; break;
-                                                        case 'refunded': $statusLabel = 'Remboursé'; break;
-                                                        default: $statusLabel = ucfirst($payment['status']); break;
-                                                    }
-                                                    echo $statusLabel; 
-                                                    ?>
+                                                    <?php echo __($payment['status']); ?>
                                                 </span>
                                             </td>
                                             <td><?php echo date('d M Y', strtotime($payment['month'])); ?></td>
                                             <td class="actions">
-                                                <a href="view-payment.php?id=<?php echo $payment['id']; ?>" class="btn-icon" title="Voir le Paiement">
+                                                <a href="view-payment.php?id=<?php echo $payment['id']; ?>" class="btn-icon" title="<?php echo __("View Payment"); ?>">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="edit-payment.php?id=<?php echo $payment['id']; ?>" class="btn-icon" title="Modifier le Paiement">
+                                                <a href="edit-payment.php?id=<?php echo $payment['id']; ?>" class="btn-icon" title="<?php echo __("Edit Payment"); ?>">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <a href="javascript:void(0);" class="btn-icon delete-payment" data-id="<?php echo $payment['id']; ?>" title="Supprimer le Paiement">
+                                                <a href="javascript:void(0);" class="btn-icon delete-payment" data-id="<?php echo $payment['id']; ?>" title="<?php echo __("Delete Payment"); ?>">
                                                     <i class="fas fa-trash-alt"></i>
                                                 </a>
                                             </td>
@@ -406,17 +397,17 @@ $page_title = "Gestion des Paiements";
     <div id="deleteModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Confirmer la Suppression</h3>
+                <h3><?php echo __("Confirm Deletion"); ?></h3>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
-                <p>Êtes-vous sûr de vouloir supprimer ce paiement ? Cette action est irréversible.</p>
+                <p><?php echo __("Are you sure you want to delete this payment? This action cannot be undone."); ?></p>
             </div>
             <div class="modal-footer">
                 <form id="deleteForm" action="delete-payment.php" method="POST">
                     <input type="hidden" name="payment_id" id="deletePaymentId">
-                    <button type="button" class="btn btn-secondary close-modal">Annuler</button>
-                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                    <button type="button" class="btn btn-secondary close-modal"><?php echo __("Cancel"); ?></button>
+                    <button type="submit" class="btn btn-danger"><?php echo __("Delete"); ?></button>
                 </form>
             </div>
         </div>

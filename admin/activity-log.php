@@ -4,6 +4,7 @@ session_start();
 require_once '../includes/config.php';
 require_once '../includes/functions.php';
 require_once '../includes/role_access.php';
+require_once '../includes/translations.php';
 
 // Check if user is logged in and has appropriate role
 requireRole('admin');
@@ -101,10 +102,15 @@ try {
     $actions = $action_stmt->fetchAll(PDO::FETCH_COLUMN);
     
     // Get unique entity types for filter
-    $entity_query = "SELECT DISTINCT entity_type FROM activity_log ORDER BY entity_type";
+    $entity_query = "SELECT DISTINCT entity_type FROM activity_log WHERE entity_type IS NOT NULL ORDER BY entity_type";
     $entity_stmt = $db->prepare($entity_query);
     $entity_stmt->execute();
     $entity_types = $entity_stmt->fetchAll(PDO::FETCH_COLUMN);
+    
+    // Remove any empty strings or null values from entity_types
+    $entity_types = array_filter($entity_types, function($value) {
+        return !is_null($value) && $value !== '';
+    });
     
     // Get users for filter
     $users_query = "SELECT id, name FROM users ORDER BY name";
@@ -144,7 +150,7 @@ try {
     $recent_stats = $recent_stmt->fetch(PDO::FETCH_ASSOC);
     
 } catch (PDOException $e) {
-    $_SESSION['error'] = "Erreur de base de données : " . $e->getMessage();
+    $_SESSION['error'] = __("Database error:") . " " . $e->getMessage();
     $activity_logs = [];
     $total = 0;
     $total_pages = 0;
@@ -179,6 +185,11 @@ function getActionBadgeClass($action) {
 
 // Helper function to get appropriate entity type class for badge
 function getEntityTypeBadgeClass($entity_type) {
+    // Handle null values
+    if ($entity_type === null || $entity_type === '') {
+        return 'secondary';
+    }
+    
     switch(strtolower($entity_type)) {
         case 'user':
             return 'info';
@@ -195,16 +206,43 @@ function getEntityTypeBadgeClass($entity_type) {
     }
 }
 
+// Helper function to format date based on user's language
+function formatDate($date, $format = '') {
+    // Get current language
+    $language = $_SESSION['language'] ?? 'en_US';
+    
+    if (empty($date)) {
+        return __("Unknown date");
+    }
+    
+    $timestamp = strtotime($date);
+    
+    // If format is provided, use it
+    if (!empty($format)) {
+        return date($format, $timestamp);
+    }
+    
+    // Default datetime format based on language
+    switch ($language) {
+        case 'fr_FR':
+            return date('d/m/Y H:i', $timestamp);
+        case 'es_ES':
+            return date('d/m/Y H:i', $timestamp);
+        default:
+            return date('M d, Y g:i A', $timestamp);
+    }
+}
+
 // Page title
-$page_title = "Journal d'Activité";
+$page_title = __("Activity Log");
 ?>
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo substr($_SESSION['language'] ?? 'en_US', 0, 2); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?> - Community Trust Bank</title>
+    <title><?php echo $page_title; ?> - <?php echo __("Community Trust Bank"); ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
@@ -216,11 +254,11 @@ $page_title = "Journal d'Activité";
         <!-- Main Content -->
         <main class="main-content">
             <div class="page-header">
-                <h1>Journal d'Activité</h1>
+                <h1><?php echo __("Activity Log"); ?></h1>
                 <div class="page-header-actions">
                     <button class="btn btn-secondary" onclick="exportActivityLog()">
                         <i class="fas fa-download"></i>
-                        Exporter le Journal
+                        <?php echo __("Export Log"); ?>
                     </button>
                 </div>
             </div>
@@ -232,10 +270,10 @@ $page_title = "Journal d'Activité";
                         <i class="fas fa-list-ul"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Total des Activités</h3>
+                        <h3><?php echo __("Total Activities"); ?></h3>
                         <div class="stat-number"><?php echo isset($activity_stats['total_count']) ? number_format($activity_stats['total_count']) : 0; ?></div>
                         <div class="stat-breakdown">
-                            <span>Tout le temps</span>
+                            <span><?php echo __("All time"); ?></span>
                         </div>
                     </div>
                 </div>
@@ -245,10 +283,10 @@ $page_title = "Journal d'Activité";
                         <i class="fas fa-clock"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Activité Récente</h3>
+                        <h3><?php echo __("Recent Activity"); ?></h3>
                         <div class="stat-number"><?php echo isset($recent_stats['count']) ? number_format($recent_stats['count']) : 0; ?></div>
                         <div class="stat-breakdown">
-                            <span>Dernières 24 heures</span>
+                            <span><?php echo __("Last 24 hours"); ?></span>
                         </div>
                     </div>
                 </div>
@@ -258,13 +296,13 @@ $page_title = "Journal d'Activité";
                         <i class="fas fa-edit"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Actions Principales</h3>
+                        <h3><?php echo __("Top Actions"); ?></h3>
                         <div class="stat-breakdown">
                             <?php
                             $top_actions = array_slice($action_stats, 0, 3, true);
                             foreach ($top_actions as $action => $count) {
                                 $class = getActionBadgeClass($action);
-                                echo "<span><i class='fas fa-circle' style='color: var(--status-$class);'></i> " . ucfirst($action) . ": $count</span>";
+                                echo "<span><i class='fas fa-circle' style='color: var(--$class-color);'></i> " . __(ucfirst($action ?? '')) . ": $count</span>";
                             }
                             ?>
                         </div>
@@ -276,12 +314,12 @@ $page_title = "Journal d'Activité";
                         <i class="fas fa-database"></i>
                     </div>
                     <div class="stat-details">
-                        <h3>Types d'Entités</h3>
+                        <h3><?php echo __("Entity Types"); ?></h3>
                         <div class="stat-breakdown">
                             <?php
                             $top_entities = array_slice($entity_stats, 0, 3, true);
                             foreach ($top_entities as $entity => $count) {
-                                echo "<span><i class='fas fa-circle'></i> " . ucfirst($entity) . ": $count</span>";
+                                echo "<span><i class='fas fa-circle'></i> " . __(ucfirst($entity ?? '')) . ": $count</span>";
                             }
                             ?>
                         </div>
@@ -292,19 +330,19 @@ $page_title = "Journal d'Activité";
             <!-- Filters -->
             <div class="card user-filter-card">
                 <div class="card-header user-filter-header">
-                    <h3><i class="fas fa-filter"></i> Journal d'Activité</h3>
+                    <h3><i class="fas fa-filter"></i> <?php echo __("Activity Log"); ?></h3>
                     <form id="filter-form" action="activity-log.php" method="GET" class="filter-form">
                         <div class="filter-wrapper">
                             <div class="search-filter">
                                 <div class="search-bar">
                                     <i class="fas fa-search"></i>
-                                    <input type="text" placeholder="Rechercher dans les journaux..." name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
+                                    <input type="text" placeholder="<?php echo __("Search logs..."); ?>" name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
                                 </div>
                             </div>
                             <div class="filter-group">
-                                <label for="user_id">Utilisateur:</label>
+                                <label for="user_id"><?php echo __("User"); ?>:</label>
                                 <select name="user_id" id="user_id" onchange="this.form.submit()">
-                                    <option value="0">Tous les Utilisateurs</option>
+                                    <option value="0"><?php echo __("All Users"); ?></option>
                                     <?php foreach ($users as $user): ?>
                                         <option value="<?php echo $user['id']; ?>" <?php echo $user_filter === $user['id'] ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($user['name']); ?>
@@ -313,36 +351,36 @@ $page_title = "Journal d'Activité";
                                 </select>
                             </div>
                             <div class="filter-group">
-                                <label for="action">Action:</label>
+                                <label for="action"><?php echo __("Action"); ?>:</label>
                                 <select name="action" id="action" onchange="this.form.submit()">
-                                    <option value="">Toutes les Actions</option>
+                                    <option value=""><?php echo __("All Actions"); ?></option>
                                     <?php foreach ($actions as $action): ?>
                                         <option value="<?php echo $action; ?>" <?php echo $action_filter === $action ? 'selected' : ''; ?>>
-                                            <?php echo ucfirst($action); ?>
+                                            <?php echo __(ucfirst($action ?? '')); ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
                             <div class="filter-group">
-                                <label for="entity_type">Type d'Entité:</label>
+                                <label for="entity_type"><?php echo __("Entity Type"); ?>:</label>
                                 <select name="entity_type" id="entity_type" onchange="this.form.submit()">
-                                    <option value="">Tous les Types</option>
+                                    <option value=""><?php echo __("All Types"); ?></option>
                                     <?php foreach ($entity_types as $type): ?>
-                                        <option value="<?php echo $type; ?>" <?php echo $entity_type_filter === $type ? 'selected' : ''; ?>>
-                                            <?php echo ucfirst($type); ?>
+                                        <option value="<?php echo htmlspecialchars($type); ?>" <?php echo $entity_type_filter === $type ? 'selected' : ''; ?>>
+                                            <?php echo __(ucfirst($type)); ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
                             <div class="filter-group">
-                                <label for="date_from">De:</label>
+                                <label for="date_from"><?php echo __("From"); ?>:</label>
                                 <input type="date" id="date_from" name="date_from" value="<?php echo $date_from; ?>" onchange="this.form.submit()">
                             </div>
                             <div class="filter-group">
-                                <label for="date_to">À:</label>
+                                <label for="date_to"><?php echo __("To"); ?>:</label>
                                 <input type="date" id="date_to" name="date_to" value="<?php echo $date_to; ?>" onchange="this.form.submit()">
                             </div>
-                            <a href="activity-log.php" class="reset-link">Réinitialiser</a>
+                            <a href="activity-log.php" class="reset-link"><?php echo __("Reset"); ?></a>
                         </div>
                     </form>
                 </div>
@@ -350,20 +388,20 @@ $page_title = "Journal d'Activité";
                     <?php if (empty($activity_logs)): ?>
                         <div class="empty-state">
                             <i class="fas fa-history"></i>
-                            <p>Aucun journal d'activité trouvé. Essayez d'ajuster vos filtres.</p>
+                            <p><?php echo __("No activity logs found. Try adjusting your filters."); ?></p>
                         </div>
                     <?php else: ?>
                         <div class="table-responsive">
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Utilisateur</th>
-                                        <th>Action</th>
-                                        <th>Type d'Entité</th>
-                                        <th>ID de l'Entité</th>
-                                        <th>Détails</th>
-                                        <th>Date & Heure</th>
+                                        <th><?php echo __("ID"); ?></th>
+                                        <th><?php echo __("User"); ?></th>
+                                        <th><?php echo __("Action"); ?></th>
+                                        <th><?php echo __("Entity Type"); ?></th>
+                                        <th><?php echo __("Entity ID"); ?></th>
+                                        <th><?php echo __("Details"); ?></th>
+                                        <th><?php echo __("Date & Time"); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -377,15 +415,15 @@ $page_title = "Journal d'Activité";
                                                     </a>
                                                     <div class="text-muted small"><?php echo htmlspecialchars($log['user_email'] ?? ''); ?></div>
                                                 <?php else: ?>
-                                                    <span class="text-muted">ID Utilisateur: <?php echo $log['user_id']; ?></span>
+                                                    <span class="text-muted"><?php echo __("User ID"); ?>: <?php echo $log['user_id']; ?></span>
                                                 <?php endif; ?>
                                             </td>
                                             <td>
                                                 <span class="status-indicator status-<?php echo getActionBadgeClass($log['action']); ?>">
-                                                    <?php echo ucfirst($log['action']); ?>
+                                                    <?php echo __(ucfirst($log['action'])); ?>
                                                 </span>
                                             </td>
-                                            <td><?php echo ucfirst($log['entity_type']); ?></td>
+                                            <td><?php echo __(ucfirst($log['entity_type'] ?? '')); ?></td>
                                             <td>
                                                 <?php
                                                     $entity_link = '';
@@ -427,8 +465,8 @@ $page_title = "Journal d'Activité";
                                                     }
                                                 ?>
                                             </td>
-                                            <td class="text-wrap"><?php echo htmlspecialchars($log['details']); ?></td>
-                                            <td><?php echo date('M d, Y g:i A', strtotime($log['created_at'])); ?></td>
+                                            <td class="text-wrap"><?php echo htmlspecialchars($log['details'] ?? ''); ?></td>
+                                            <td><?php echo formatDate($log['created_at']); ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>

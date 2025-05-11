@@ -4,6 +4,7 @@ session_start();
 require_once '../includes/config.php';
 require_once '../includes/functions.php';
 require_once '../includes/role_access.php';
+require_once '../includes/translations.php';
 
 // Check if user is logged in and has appropriate role
 requireRole('admin');
@@ -11,7 +12,7 @@ requireRole('admin');
 
 // Check if ID is provided
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-    $_SESSION['error'] = "L'ID du ticket est requis.";
+    $_SESSION['error'] = __("Ticket ID is required.");
     header("Location: tickets.php");
     exit();
 }
@@ -31,7 +32,7 @@ try {
     $users_stmt->execute();
     $users = $users_stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    $_SESSION['error'] = "Erreur de base de données: " . $e->getMessage();
+    $_SESSION['error'] = __("Database error:") . " " . $e->getMessage();
 }
 
 // Process form submission
@@ -47,22 +48,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validate user_id
     if (empty($user_id)) {
-        $errors[] = "L'utilisateur est requis.";
+        $errors[] = __("User is required.");
     }
     
     // Validate subject
     if (empty($subject)) {
-        $errors[] = "Le sujet est requis.";
+        $errors[] = __("Subject is required.");
     }
     
     // Validate description
     if (empty($description)) {
-        $errors[] = "La description est requise.";
+        $errors[] = __("Description is required.");
     }
     
     // Validate status
     if (empty($status) || !in_array($status, $statuses)) {
-        $errors[] = "Un statut valide est requis.";
+        $errors[] = __("A valid status is required.");
     }
     
     // If no errors, update ticket
@@ -95,20 +96,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Log the activity - include status change in the description if it changed
             $admin_id = $_SESSION['user_id'];
-            $log_description = "Ticket mis à jour #$ticket_id: $subject";
+            $log_description = __("Updated ticket") . " #$ticket_id: $subject";
             
             if ($current_status !== $status) {
-                $log_description .= " (Statut changé de '" . ucfirst($current_status) . "' à '" . ucfirst($status) . "')";
+                $log_description .= " (" . __("Status changed from") . " '" . __($current_status) . "' " . __("to") . " '" . __($status) . "')";
             }
             
             log_activity($db, $admin_id, 'update', 'ticket', $ticket_id, $log_description);
             
-            $_SESSION['success'] = "Ticket mis à jour avec succès.";
+            $_SESSION['success'] = __("Ticket updated successfully.");
             header("Location: view-ticket.php?id=$ticket_id");
             exit();
             
         } catch (PDOException $e) {
-            $_SESSION['error'] = "Erreur de base de données: " . $e->getMessage();
+            $_SESSION['error'] = __("Database error:") . " " . $e->getMessage();
         }
     } else {
         $_SESSION['error'] = implode("<br>", $errors);
@@ -126,7 +127,7 @@ try {
     $stmt->execute();
     
     if ($stmt->rowCount() === 0) {
-        $_SESSION['error'] = "Ticket non trouvé.";
+        $_SESSION['error'] = __("Ticket not found.");
         header("Location: tickets.php");
         exit();
     }
@@ -134,7 +135,7 @@ try {
     $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
     
 } catch (PDOException $e) {
-    $_SESSION['error'] = "Erreur de base de données: " . $e->getMessage();
+    $_SESSION['error'] = __("Database error:") . " " . $e->getMessage();
     header("Location: tickets.php");
     exit();
 }
@@ -164,15 +165,15 @@ function getPriorityLabel($priority) {
 }
 
 // Page title
-$page_title = "Modifier le Ticket";
+$page_title = __("Edit Ticket");
 ?>
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo substr($_SESSION['language'] ?? 'en_US', 0, 2); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?> - Community Trust Bank</title>
+    <title><?php echo $page_title; ?> - <?php echo __("Community Trust Bank"); ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
@@ -416,9 +417,9 @@ $page_title = "Modifier le Ticket";
         <main class="main-content">
             <div class="page-header">
                 <div class="breadcrumb">
-                    <a href="tickets.php">Tickets</a>
-                    <a href="view-ticket.php?id=<?php echo $ticket_id; ?>">Voir le Ticket</a>
-                    <span>Modifier le Ticket</span>
+                    <a href="tickets.php"><?php echo __("Tickets"); ?></a>
+                    <a href="view-ticket.php?id=<?php echo $ticket_id; ?>"><?php echo __("View Ticket"); ?></a>
+                    <span><?php echo __("Edit Ticket"); ?></span>
                 </div>
             </div>
 
@@ -443,65 +444,82 @@ $page_title = "Modifier le Ticket";
             <div class="content-wrapper">
                 <div class="card">
                     <div class="card-header">
-                        <h3><i class="fas fa-edit"></i> Modifier le Ticket #<?php echo $ticket_id; ?></h3>
+                        <h3><i class="fas fa-edit"></i> <?php echo __("Edit Ticket"); ?> #<?php echo $ticket_id; ?></h3>
                     </div>
                     <div class="card-body">
-                        <form action="edit-ticket.php?id=<?php echo $ticket_id; ?>" method="POST" class="form">
-                            <div class="form-grid">
+                        <form action="edit-ticket.php?id=<?php echo $ticket_id; ?>" method="post">
+                            <div class="form-section-title">
+                                <i class="fas fa-info-circle"></i> <?php echo __("Ticket Information"); ?>
+                            </div>
+                            
                                 <div class="form-group">
-                                    <label for="user_id">Utilisateur <span class="required">*</span></label>
-                                    <select id="user_id" name="user_id" required>
-                                        <option value="" disabled>Sélectionner un Utilisateur</option>
+                                <label for="user_id">
+                                    <?php echo __("User"); ?> <span class="required">*</span>
+                                </label>
+                                <select name="user_id" id="user_id" required>
+                                    <option value=""><?php echo __("Select a user"); ?></option>
                                         <?php foreach ($users as $user): ?>
-                                            <option value="<?php echo $user['id']; ?>" <?php echo $ticket['user_id'] == $user['id'] ? 'selected' : ''; ?>>
-                                                <?php echo htmlspecialchars($user['name'] . ' (' . $user['email'] . ')'); ?>
+                                        <option value="<?php echo $user['id']; ?>" <?php echo ($ticket['user_id'] == $user['id']) ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($user['name']); ?> (<?php echo htmlspecialchars($user['email']); ?>)
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="status">Statut <span class="required">*</span></label>
-                                    <select class="form-control" id="status" name="status">
-                                        <option value="open" <?php echo $ticket['status'] == 'open' ? 'selected' : ''; ?>>Ouvert</option>
-                                        <option value="in_progress" <?php echo $ticket['status'] == 'in_progress' ? 'selected' : ''; ?>>En cours</option>
-                                        <option value="closed" <?php echo $ticket['status'] == 'closed' ? 'selected' : ''; ?>>Fermé</option>
-                                        <option value="reopened" <?php echo $ticket['status'] == 'reopened' ? 'selected' : ''; ?>>Réouvert</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="priority">Priorité <span class="required">*</span></label>
-                                    <select id="priority" name="priority" required>
-                                        <?php foreach ($priorities as $priority): ?>
-                                            <option value="<?php echo $priority; ?>" <?php echo $ticket['priority'] === $priority ? 'selected' : ''; ?>>
-                                                <?php echo getPriorityLabel($priority); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="subject">Sujet <span class="required">*</span></label>
+                                <label for="subject">
+                                    <?php echo __("Subject"); ?> <span class="required">*</span>
+                                </label>
                                 <input type="text" id="subject" name="subject" value="<?php echo htmlspecialchars($ticket['subject']); ?>" required>
                             </div>
                             
                             <div class="form-group">
-                                <label for="description">Description <span class="required">*</span></label>
+                                <label for="description">
+                                    <?php echo __("Description"); ?> <span class="required">*</span>
+                                </label>
                                 <textarea id="description" name="description" rows="6" required><?php echo htmlspecialchars($ticket['description']); ?></textarea>
                             </div>
                             
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="status">
+                                        <?php echo __("Status"); ?> <span class="required">*</span>
+                                    </label>
+                                    <select name="status" id="status" required>
+                                        <option value="open" <?php echo $ticket['status'] === 'open' ? 'selected' : ''; ?>><?php echo __("Open"); ?></option>
+                                        <option value="in_progress" <?php echo $ticket['status'] === 'in_progress' ? 'selected' : ''; ?>><?php echo __("In Progress"); ?></option>
+                                        <option value="closed" <?php echo $ticket['status'] === 'closed' ? 'selected' : ''; ?>><?php echo __("Closed"); ?></option>
+                                        <option value="reopened" <?php echo $ticket['status'] === 'reopened' ? 'selected' : ''; ?>><?php echo __("Reopened"); ?></option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="priority">
+                                        <?php echo __("Priority"); ?> <span class="required">*</span>
+                                    </label>
+                                    <select name="priority" id="priority" required>
+                                        <option value="low" <?php echo $ticket['priority'] === 'low' ? 'selected' : ''; ?>><?php echo __("Low"); ?></option>
+                                        <option value="medium" <?php echo $ticket['priority'] === 'medium' ? 'selected' : ''; ?>><?php echo __("Medium"); ?></option>
+                                        <option value="high" <?php echo $ticket['priority'] === 'high' ? 'selected' : ''; ?>><?php echo __("High"); ?></option>
+                                        <option value="urgent" <?php echo $ticket['priority'] === 'urgent' ? 'selected' : ''; ?>><?php echo __("Urgent"); ?></option>
+                                    </select>
+                                </div>
+                            </div>
+                            
                             <div class="form-group">
-                                <label for="response">Réponse</label>
-                                <textarea id="response" name="response" rows="4"><?php echo isset($ticket['response']) ? htmlspecialchars($ticket['response']) : ''; ?></textarea>
-                                <small>Réponse au ticket (visible par l'utilisateur)</small>
+                                <label for="response">
+                                    <?php echo __("Response"); ?>
+                                </label>
+                                <textarea id="response" name="response" rows="4"><?php echo htmlspecialchars($ticket['response'] ?? ''); ?></textarea>
+                                <small><?php echo __("Your response will be visible to the ticket submitter."); ?></small>
                             </div>
                             
                             <div class="form-actions">
-                                <a href="view-ticket.php?id=<?php echo $ticket_id; ?>" class="btn btn-secondary">Annuler</a>
+                                <a href="view-ticket.php?id=<?php echo $ticket_id; ?>" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> <?php echo __("Back"); ?>
+                                </a>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> Mettre à Jour le Ticket
+                                    <i class="fas fa-save"></i> <?php echo __("Save Changes"); ?>
                                 </button>
                             </div>
                         </form>

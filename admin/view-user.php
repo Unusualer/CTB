@@ -8,10 +8,28 @@ require_once '../includes/role_access.php';
 // Check if user is logged in and has appropriate role
 requireRole('admin');
 
+// Include translation function if not already included
+if (!function_exists('__')) {
+    $translations_file = dirname(__DIR__) . '/includes/translations.php';
+    if (file_exists($translations_file)) {
+        require_once $translations_file;
+    } else {
+        // Fallback to alternate locations
+        $alt_translations_file = $_SERVER['DOCUMENT_ROOT'] . '/CTB/includes/translations.php';
+        if (file_exists($alt_translations_file)) {
+            require_once $alt_translations_file;
+        } else {
+            // Define a minimal translation function as last resort
+            function __($text) {
+                return $text;
+            }
+        }
+    }
+}
 
 // Check if ID is provided
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-    $_SESSION['error'] = "L'ID de l'utilisateur est requis.";
+    $_SESSION['error'] = __("User ID is required.");
     header("Location: users.php");
     exit();
 }
@@ -31,7 +49,7 @@ try {
     $stmt->execute();
     
     if ($stmt->rowCount() === 0) {
-        $_SESSION['error'] = "Utilisateur non trouvé.";
+        $_SESSION['error'] = __("User not found.");
         header("Location: users.php");
         exit();
     }
@@ -53,17 +71,17 @@ try {
     $activity_logs = $log_stmt->fetchAll(PDO::FETCH_ASSOC);
     
 } catch (PDOException $e) {
-    $_SESSION['error'] = "Database error: " . $e->getMessage();
+    $_SESSION['error'] = __("Database error") . ": " . $e->getMessage();
     header("Location: users.php");
     exit();
 }
 
 // Page title
-$page_title = "Voir l'Utilisateur";
+$page_title = __("View User");
 ?>
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo isset($_SESSION['language']) ? substr($_SESSION['language'], 0, 2) : 'en'; ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -80,15 +98,15 @@ $page_title = "Voir l'Utilisateur";
         <main class="main-content">
             <div class="page-header">
                 <div class="breadcrumb">
-                    <a href="users.php">Utilisateurs</a>
-                    <span>Voir l'Utilisateur</span>
+                    <a href="users.php"><?php echo __("Users"); ?></a>
+                    <span><?php echo __("View User"); ?></span>
                 </div>
                 <div class="actions">
                     <a href="edit-user.php?id=<?php echo $user['id']; ?>" class="btn btn-primary">
-                        <i class="fas fa-edit"></i> Modifier l'Utilisateur
+                        <i class="fas fa-edit"></i> <?php echo __("Edit User"); ?>
                     </a>
                     <a href="javascript:void(0);" class="btn btn-danger delete-user" data-id="<?php echo $user['id']; ?>">
-                        <i class="fas fa-trash-alt"></i> Supprimer l'Utilisateur
+                        <i class="fas fa-trash-alt"></i> <?php echo __("Delete User"); ?>
                     </a>
                 </div>
             </div>
@@ -127,14 +145,14 @@ $page_title = "Voir l'Utilisateur";
                         <div class="profile-details">
                             <div class="profile-name-wrapper">
                                 <h2><?php echo htmlspecialchars($user['name']); ?></h2>
-                                <div class="user-id-badge">ID: <?php echo $user['id']; ?></div>
+                                <div class="user-id-badge"><?php echo __("ID"); ?>: <?php echo $user['id']; ?></div>
                             </div>
                             <div class="profile-meta">
-                                <span class="user-role"><i class="fas fa-user-tag"></i> <?php echo ucfirst(htmlspecialchars($user['role'])); ?></span>
+                                <span class="user-role"><i class="fas fa-user-tag"></i> <?php echo __(ucfirst(htmlspecialchars($user['role']))); ?></span>
                                 <span class="user-status <?php echo $user['status']; ?>">
-                                    <i class="fas fa-circle"></i> <?php echo ucfirst(htmlspecialchars($user['status'])); ?>
+                                    <i class="fas fa-circle"></i> <?php echo __(ucfirst(htmlspecialchars($user['status']))); ?>
                                 </span>
-                                <span class="user-joined"><i class="far fa-calendar-alt"></i> Joined <?php echo date('M d, Y', strtotime($user['created_at'])); ?></span>
+                                <span class="user-joined"><i class="far fa-calendar-alt"></i> <?php echo __("Joined"); ?> <?php echo format_date($user['created_at']); ?></span>
                             </div>
                         </div>
                     </div>
@@ -144,33 +162,33 @@ $page_title = "Voir l'Utilisateur";
                     <!-- User Information Card -->
                     <div class="card user-info-card">
                         <div class="card-header">
-                            <h3><i class="fas fa-info-circle"></i> Informations Utilisateur</h3>
+                            <h3><i class="fas fa-info-circle"></i> <?php echo __("User Information"); ?></h3>
                         </div>
                         <div class="card-body">
                             <div class="info-grid">
                                 <div class="info-group">
-                                    <label><i class="fas fa-envelope"></i> Email:</label>
+                                    <label><i class="fas fa-envelope"></i> <?php echo __("Email"); ?>:</label>
                                     <span class="info-value"><?php echo htmlspecialchars($user['email']); ?></span>
                                 </div>
                                 <div class="info-group">
-                                    <label><i class="fas fa-phone"></i> Téléphone:</label>
-                                    <span class="info-value"><?php echo !empty($user['phone']) ? htmlspecialchars($user['phone']) : 'Non renseigné'; ?></span>
+                                    <label><i class="fas fa-phone"></i> <?php echo __("Phone"); ?>:</label>
+                                    <span class="info-value"><?php echo !empty($user['phone']) ? htmlspecialchars($user['phone']) : __("Not provided"); ?></span>
                                 </div>
                                 <div class="info-group">
-                                    <label><i class="fas fa-user-shield"></i> Rôle:</label>
-                                    <span class="info-value"><?php echo ucfirst(htmlspecialchars($user['role'])); ?></span>
+                                    <label><i class="fas fa-user-shield"></i> <?php echo __("Role"); ?>:</label>
+                                    <span class="info-value"><?php echo __(ucfirst(htmlspecialchars($user['role']))); ?></span>
                                 </div>
                                 <div class="info-group">
-                                    <label><i class="fas fa-check-circle"></i> Statut:</label>
-                                    <span class="status-badge <?php echo $user['status']; ?>"><?php echo ucfirst(htmlspecialchars($user['status'])); ?></span>
+                                    <label><i class="fas fa-check-circle"></i> <?php echo __("Status"); ?>:</label>
+                                    <span class="status-badge <?php echo $user['status']; ?>"><?php echo __(ucfirst(htmlspecialchars($user['status']))); ?></span>
                                 </div>
                                 <div class="info-group">
-                                    <label><i class="fas fa-calendar-plus"></i> Créé le:</label>
-                                    <span class="info-value"><?php echo date('d F Y', strtotime($user['created_at'])); ?></span>
+                                    <label><i class="fas fa-calendar-plus"></i> <?php echo __("Created on"); ?>:</label>
+                                    <span class="info-value"><?php echo format_date($user['created_at'], 'd F Y'); ?></span>
                                 </div>
                                 <div class="info-group">
-                                    <label><i class="fas fa-edit"></i> Dernière mise à jour:</label>
-                                    <span class="info-value"><?php echo date('d F Y', strtotime($user['updated_at'])); ?></span>
+                                    <label><i class="fas fa-edit"></i> <?php echo __("Last updated"); ?>:</label>
+                                    <span class="info-value"><?php echo format_date($user['updated_at'], 'd F Y'); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -180,13 +198,13 @@ $page_title = "Voir l'Utilisateur";
                     <?php if ($user['role'] === 'resident'): ?>
                         <div class="card property-assignments-card">
                             <div class="card-header">
-                                <h3><i class="fas fa-building"></i> Propriétés Assignées</h3>
+                                <h3><i class="fas fa-building"></i> <?php echo __("Assigned Properties"); ?></h3>
                             </div>
                             <div class="card-body">
                                 <?php if (empty($assigned_properties)): ?>
                                     <div class="empty-state">
                                         <i class="fas fa-building"></i>
-                                        <p>Aucune propriété assignée à ce résident.</p>
+                                        <p><?php echo __("No properties assigned to this resident."); ?></p>
                                     </div>
                                 <?php else: ?>
                                     <div class="property-list">
@@ -196,11 +214,11 @@ $page_title = "Voir l'Utilisateur";
                                                     <i class="<?php echo ($property['type'] === 'apartment') ? 'fas fa-home' : 'fas fa-car'; ?>"></i>
                                                 </div>
                                                 <div class="property-details">
-                                                    <h4><?php echo ucfirst(htmlspecialchars($property['type'])) . ' ' . htmlspecialchars($property['identifier']); ?></h4>
+                                                    <h4><?php echo __(ucfirst(htmlspecialchars($property['type']))) . ' ' . htmlspecialchars($property['identifier']); ?></h4>
                                                     <div class="property-meta">
-                                                        <span class="property-id">ID: <?php echo $property['id']; ?></span>
+                                                        <span class="property-id"><?php echo __("ID"); ?>: <?php echo $property['id']; ?></span>
                                                         <a href="view-property.php?id=<?php echo $property['id']; ?>" class="view-link">
-                                                            Voir la Propriété <i class="fas fa-arrow-right"></i>
+                                                            <?php echo __("View Property"); ?> <i class="fas fa-arrow-right"></i>
                                                         </a>
                                                     </div>
                                                 </div>
@@ -215,13 +233,13 @@ $page_title = "Voir l'Utilisateur";
                     <!-- Activity Log Card -->
                     <div class="card activity-card">
                         <div class="card-header">
-                            <h3><i class="fas fa-history"></i> Activité Récente</h3>
+                            <h3><i class="fas fa-history"></i> <?php echo __("Recent Activity"); ?></h3>
                         </div>
                         <div class="card-body">
                             <?php if (empty($activity_logs)): ?>
                                 <div class="no-data">
                                     <i class="far fa-clock"></i>
-                                    <p>Aucune activité récente trouvée.</p>
+                                    <p><?php echo __("No recent activity found."); ?></p>
                                 </div>
                             <?php else: ?>
                                 <div class="activity-timeline">
@@ -231,8 +249,8 @@ $page_title = "Voir l'Utilisateur";
                                                 <i class="fas fa-circle"></i>
                                             </div>
                                             <div class="activity-content">
-                                                <p class="activity-text"><?php echo isset($log['description']) ? htmlspecialchars($log['description']) : 'Aucune description disponible'; ?></p>
-                                                <p class="activity-time"><?php echo isset($log['created_at']) ? date('d M Y H:i', strtotime($log['created_at'])) : 'Date inconnue'; ?></p>
+                                                <p class="activity-text"><?php echo isset($log['description']) ? htmlspecialchars($log['description']) : __("No description available"); ?></p>
+                                                <p class="activity-time"><?php echo isset($log['created_at']) ? date('d M Y H:i', strtotime($log['created_at'])) : __("Unknown date"); ?></p>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
@@ -249,17 +267,17 @@ $page_title = "Voir l'Utilisateur";
     <div id="deleteModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Confirmer la Suppression</h3>
+                <h3><?php echo __("Confirm Deletion"); ?></h3>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
-                <p>Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.</p>
+                <p><?php echo __("Are you sure you want to delete this user? This action cannot be undone."); ?></p>
             </div>
             <div class="modal-footer">
                 <form id="deleteForm" action="delete-user.php" method="POST">
                     <input type="hidden" name="user_id" id="deleteUserId">
-                    <button type="button" class="btn btn-secondary close-modal">Annuler</button>
-                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                    <button type="button" class="btn btn-secondary close-modal"><?php echo __("Cancel"); ?></button>
+                    <button type="submit" class="btn btn-danger"><?php echo __("Delete"); ?></button>
                 </form>
             </div>
         </div>

@@ -4,6 +4,7 @@ session_start();
 require_once '../includes/config.php';
 require_once '../includes/functions.php';
 require_once '../includes/role_access.php';
+require_once '../includes/translations.php';
 
 // Check if user is logged in and has appropriate role
 requireRole('admin');
@@ -11,7 +12,7 @@ requireRole('admin');
 
 // Check if ID is provided
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-    $_SESSION['error'] = "L'ID de la propriété est requis.";
+    $_SESSION['error'] = __("Property ID is required.");
     header("Location: properties.php");
     exit();
 }
@@ -35,7 +36,7 @@ try {
     $stmt->execute();
     
     if ($stmt->rowCount() === 0) {
-        $_SESSION['error'] = "Propriété non trouvée.";
+        $_SESSION['error'] = __("Property not found.");
         header("Location: properties.php");
         exit();
     }
@@ -75,21 +76,21 @@ try {
     }
     
 } catch (PDOException $e) {
-    $_SESSION['error'] = "Database error: " . $e->getMessage();
+    $_SESSION['error'] = __("Database error:") . " " . $e->getMessage();
     header("Location: properties.php");
     exit();
 }
 
 // Page title
-$page_title = "Voir la Propriété";
+$page_title = __("View Property");
 ?>
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo substr($_SESSION['language'] ?? 'en_US', 0, 2); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?> - Community Trust Bank</title>
+    <title><?php echo $page_title; ?> - <?php echo __("Community Trust Bank"); ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
@@ -102,12 +103,12 @@ $page_title = "Voir la Propriété";
         <main class="main-content">
             <div class="page-header">
                 <div class="breadcrumb">
-                    <a href="properties.php">Propriétés</a>
-                    <span>Voir la Propriété</span>
+                    <a href="properties.php"><?php echo __("Properties"); ?></a>
+                    <span><?php echo __("View Property"); ?></span>
                 </div>
                 <div class="actions">
                     <a href="edit-property.php?id=<?php echo $property['id']; ?>" class="btn btn-primary">
-                        <i class="fas fa-edit"></i> Modifier la Propriété
+                        <i class="fas fa-edit"></i> <?php echo __("Edit Property"); ?>
                     </a>
                 </div>
             </div>
@@ -144,16 +145,16 @@ $page_title = "Voir la Propriété";
                         </div>
                         <div class="profile-details">
                             <div class="profile-name-wrapper">
-                                <h2><?php echo ucfirst(htmlspecialchars($property['type'])); ?> <?php echo htmlspecialchars($property['identifier']); ?></h2>
-                                <div class="user-id-badge">ID: <?php echo $property['id']; ?></div>
+                                <h2><?php echo ucfirst(htmlspecialchars(__($property['type']))); ?> <?php echo htmlspecialchars($property['identifier']); ?></h2>
+                                <div class="user-id-badge"><?php echo __("ID"); ?>: <?php echo $property['id']; ?></div>
                             </div>
                             <div class="profile-meta">
-                                <span class="user-role"><i class="fas fa-tag"></i> <?php echo ucfirst(htmlspecialchars($property['type'])); ?></span>
+                                <span class="user-role"><i class="fas fa-tag"></i> <?php echo ucfirst(htmlspecialchars(__($property['type']))); ?></span>
                                 <span class="user-status">
                                     <i class="fas fa-<?php echo !empty($assigned_resident) ? 'check-circle' : 'times-circle'; ?>"></i> 
-                                    <?php echo !empty($assigned_resident) ? 'Assigned' : 'Unassigned'; ?>
+                                    <?php echo !empty($assigned_resident) ? __('Assigned') : __('Unassigned'); ?>
                                 </span>
-                                <span class="user-joined"><i class="far fa-calendar-alt"></i> Created <?php echo date('M d, Y', strtotime($property['created_at'])); ?></span>
+                                <span class="user-joined"><i class="far fa-calendar-alt"></i> <?php echo __("Created"); ?> <?php echo date('M d, Y', strtotime($property['created_at'])); ?></span>
                             </div>
                         </div>
                     </div>
@@ -163,24 +164,24 @@ $page_title = "Voir la Propriété";
                     <!-- Property Information Card -->
                     <div class="card user-info-card">
                         <div class="card-header">
-                            <h3><i class="fas fa-info-circle"></i> Informations de la Propriété</h3>
+                            <h3><i class="fas fa-info-circle"></i> <?php echo __("Property Information"); ?></h3>
                         </div>
                         <div class="card-body">
                             <div class="info-grid">
                                 <div class="info-group">
-                                    <label><i class="fas fa-id-card"></i> Identifiant:</label>
+                                    <label><i class="fas fa-id-card"></i> <?php echo __("Identifier"); ?>:</label>
                                     <span class="info-value"><?php echo htmlspecialchars($property['identifier']); ?></span>
                                 </div>
                                 <div class="info-group">
-                                    <label><i class="fas fa-tag"></i> Type:</label>
-                                    <span class="info-value"><?php echo ucfirst(htmlspecialchars($property['type'])); ?></span>
+                                    <label><i class="fas fa-tag"></i> <?php echo __("Type"); ?>:</label>
+                                    <span class="info-value"><?php echo ucfirst(htmlspecialchars(__($property['type']))); ?></span>
                                 </div>
                                 <div class="info-group">
-                                    <label><i class="fas fa-calendar"></i> Créée le:</label>
+                                    <label><i class="fas fa-calendar"></i> <?php echo __("Created on"); ?>:</label>
                                     <span class="info-value"><?php echo date('d F Y', strtotime($property['created_at'])); ?></span>
                                 </div>
                                 <div class="info-group">
-                                    <label><i class="fas fa-calendar-alt"></i> Dernière mise à jour:</label>
+                                    <label><i class="fas fa-calendar-alt"></i> <?php echo __("Last updated"); ?>:</label>
                                     <span class="info-value"><?php echo date('d F Y', strtotime($property['updated_at'])); ?></span>
                                 </div>
                             </div>
@@ -190,7 +191,7 @@ $page_title = "Voir la Propriété";
                     <!-- Assigned Resident Card -->
                     <div class="card">
                         <div class="card-header">
-                            <h3><i class="fas fa-user"></i> Résident Assigné</h3>
+                            <h3><i class="fas fa-user"></i> <?php echo __("Assigned Resident"); ?></h3>
                         </div>
                         <div class="card-body">
                             <?php if (!empty($assigned_resident)): ?>
@@ -205,7 +206,7 @@ $page_title = "Voir la Propriété";
                                         <p class="resident-email"><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($assigned_resident['email']); ?></p>
                                         <div class="resident-actions">
                                             <a href="view-user.php?id=<?php echo $assigned_resident['id']; ?>" class="btn btn-primary">
-                                                <i class="fas fa-eye"></i> Voir le Profil
+                                                <i class="fas fa-eye"></i> <?php echo __("View Profile"); ?>
                                             </a>
                                         </div>
                                     </div>
@@ -215,9 +216,9 @@ $page_title = "Voir la Propriété";
                                     <div class="empty-icon">
                                         <i class="fas fa-user-slash"></i>
                                     </div>
-                                    <p>Aucun résident assigné à cette propriété.</p>
+                                    <p><?php echo __("No resident assigned to this property."); ?></p>
                                     <a href="edit-property.php?id=<?php echo $property['id']; ?>" class="btn btn-primary">
-                                        <i class="fas fa-user-plus"></i> Assigner un Résident
+                                        <i class="fas fa-user-plus"></i> <?php echo __("Assign Resident"); ?>
                                     </a>
                                 </div>
                             <?php endif; ?>
@@ -228,7 +229,7 @@ $page_title = "Voir la Propriété";
                     <?php if (!empty($maintenance_items)): ?>
                     <div class="card maintenance-card">
                         <div class="card-header">
-                            <h3><i class="fas fa-tools"></i> Maintenance Récente</h3>
+                            <h3><i class="fas fa-tools"></i> <?php echo __("Recent Maintenance"); ?></h3>
                         </div>
                         <div class="card-body">
                             <div class="maintenance-list">
@@ -241,7 +242,7 @@ $page_title = "Voir la Propriété";
                                             <div class="maintenance-title"><?php echo htmlspecialchars($log['description']); ?></div>
                                             <div class="maintenance-meta">
                                                 <span><i class="fas fa-calendar"></i> <?php echo date('d M Y', strtotime($log['date'])); ?></span>
-                                                <span><i class="fas fa-info-circle"></i> <?php echo ucfirst(htmlspecialchars($log['status'])); ?></span>
+                                                <span><i class="fas fa-info-circle"></i> <?php echo ucfirst(htmlspecialchars(__($log['status']))); ?></span>
                                             </div>
                                         </div>
                                     </div>

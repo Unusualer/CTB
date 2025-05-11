@@ -3,16 +3,15 @@
 session_start();
 require_once '../includes/config.php';
 require_once '../includes/functions.php';
+require_once '../includes/role_access.php';
+require_once '../includes/translations.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['error'] = "Vous devez être connecté en tant qu'administrateur pour accéder à cette page.";
-    header("Location: ../login.php");
-    exit();
-}
+// Check if user is logged in and has appropriate role
+requireRole('admin');
 
 // Check if payment ID is set
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    $_SESSION['error'] = "L'ID du paiement est requis.";
+    $_SESSION['error'] = __("Payment ID is required.");
     header("Location: payments.php");
     exit();
 }
@@ -38,7 +37,7 @@ try {
     $stmt->execute();
     
     if ($stmt->rowCount() === 0) {
-        $_SESSION['error'] = "Paiement non trouvé.";
+        $_SESSION['error'] = __("Payment not found.");
         header("Location: payments.php");
         exit();
     }
@@ -71,24 +70,25 @@ try {
         if ($update_stmt->execute()) {
             // Log the activity
             $admin_id = $_SESSION['user_id'];
-            log_activity($db, $admin_id, 'update', 'payment', $payment_id, "Updated payment #$payment_id status to: " . ucfirst($new_status));
+            log_activity($db, $admin_id, 'update', 'payment', $payment_id, __("Updated payment") . " #$payment_id " . __("status to:") . " " . ucfirst($new_status));
             
-            $_SESSION['success'] = "Payment updated successfully.";
+            $_SESSION['success'] = __("Payment successfully updated.");
             header("Location: view-payment.php?id=$payment_id");
             exit();
         } else {
-            $error_message = "Failed to update payment status.";
+            $error_message = __("Failed to update payment status.");
         }
     }
     
 } catch (PDOException $e) {
-    $error_message = "Database error: " . $e->getMessage();
+    $error_message = __("Database error:") . " " . $e->getMessage();
 }
 
 // Get status class for styling
 function getStatusBadgeClass($status) {
     switch($status) {
         case 'paid':
+        case 'completed':
             return 'success';
         case 'pending':
             return 'warning';
@@ -96,6 +96,8 @@ function getStatusBadgeClass($status) {
             return 'secondary';
         case 'failed':
             return 'danger';
+        case 'refunded':
+            return 'primary';
         default:
             return 'secondary';
     }
@@ -104,25 +106,59 @@ function getStatusBadgeClass($status) {
 // Format payment method for display
 function formatPaymentMethod($method) {
     if (empty($method)) {
-        return 'Unknown';
+        return __("Unknown");
     }
-    return ucfirst(str_replace('_', ' ', $method));
+    return __(ucfirst(str_replace('_', ' ', $method)));
 }
 
 // Format date helper function
 function formatDate($date) {
-    return date('F j, Y', strtotime($date));
+    // Get current language
+    $language = $_SESSION['language'] ?? 'en_US';
+    
+    if (empty($date)) {
+        return __("Unknown date");
+    }
+    
+    $timestamp = strtotime($date);
+    $month_num = date('n', $timestamp) - 1; // 0-based month index
+    $day = date('j', $timestamp);
+    $year = date('Y', $timestamp);
+    
+    // Month names in different languages
+    $months = [
+        'en_US' => ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        'fr_FR' => ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
+        'es_ES' => ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+    ];
+    
+    // Ensure the language is supported, otherwise fallback to English
+    if (!isset($months[$language])) {
+        $language = 'en_US';
+    }
+    
+    $month_name = $months[$language][$month_num];
+    
+    // Format based on language
+    switch ($language) {
+        case 'fr_FR':
+            return $day . ' ' . $month_name . ' ' . $year;
+        case 'es_ES':
+            return $day . ' de ' . $month_name . ' de ' . $year;
+        default:
+            return $month_name . ' ' . $day . ', ' . $year;
+    }
 }
 
 // Page title
-$page_title = "Détails du Paiement";
+$page_title = __("Payment Details");
 ?>
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo substr($_SESSION['language'] ?? 'en_US', 0, 2); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?> - Community Trust Bank</title>
+    <title><?php echo $page_title; ?> - <?php echo __("Community Trust Bank"); ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
@@ -233,6 +269,58 @@ $page_title = "Détails du Paiement";
             color: #8e99ad;
         }
         
+        [data-theme="dark"] .meta-info {
+            color: #a0a0a0;
+            border-color: #3f4756;
+        }
+        
+        [data-theme="dark"] .detail-group .label {
+            color: #a0a0a0;
+        }
+        
+        [data-theme="dark"] .empty-state {
+            color: #a0a0a0;
+        }
+        
+        [data-theme="dark"] .card {
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        [data-theme="dark"] .modal-content {
+            background-color: var(--card-bg);
+            color: #ffffff;
+            border-color: #3f4756;
+        }
+        
+        [data-theme="dark"] .close, 
+        [data-theme="dark"] .close-modal {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .modal-header,
+        [data-theme="dark"] .modal-footer {
+            border-color: #3f4756;
+        }
+        
+        [data-theme="dark"] .btn-secondary {
+            background-color: #3f4756;
+            color: #ffffff;
+            border: none;
+        }
+        
+        [data-theme="dark"] .btn-secondary:hover {
+            background-color: #4a5469;
+        }
+        
+        [data-theme="dark"] .text-muted {
+            color: #a0a0a0 !important;
+        }
+        
+        [data-theme="dark"] small.form-text.text-muted {
+            color: #a0a0a0 !important;
+        }
+        
         /* Status indicator */
         .status-indicator {
             display: inline-block;
@@ -285,6 +373,46 @@ $page_title = "Détails du Paiement";
         .mt-4 {
             margin-top: 1.5rem;
         }
+        
+        [data-theme="dark"] .detail-group .value a {
+            color: var(--primary-color-light);
+            text-decoration: none;
+        }
+        
+        [data-theme="dark"] .detail-group .value a:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+        
+        [data-theme="dark"] select.form-control {
+            background-color: #2a2e35;
+            color: #ffffff;
+            border-color: #3f4756;
+        }
+        
+        [data-theme="dark"] select.form-control:focus {
+            background-color: #2d3239;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.15);
+        }
+        
+        [data-theme="dark"] option {
+            background-color: #2a2e35;
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .card-header {
+            background: linear-gradient(to right, var(--primary-color), var(--primary-color-dark));
+        }
+        
+        [data-theme="dark"] .card-header h3 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .form-group label {
+            color: #ffffff;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -293,20 +421,27 @@ $page_title = "Détails du Paiement";
 
         <!-- Main Content -->
         <main class="main-content">
-            <div class="content-header">
-                <a href="payments.php" class="back-button">
-                    <i class="fas fa-arrow-left"></i> Retour aux Paiements
-                </a>
-                <h1><?php echo $page_title; ?></h1>
+            <div class="page-header">
+                <div class="breadcrumb">
+                    <a href="payments.php"><?php echo __("Payments"); ?></a>
+                    <span><?php echo __("View Payment"); ?></span>
+                </div>
+                <div class="actions">
+                    <a href="edit-payment.php?id=<?php echo $payment_id; ?>" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> <?php echo __("Edit Payment"); ?>
+                    </a>
+                    <a href="javascript:void(0);" class="btn btn-danger delete-payment" data-id="<?php echo $payment_id; ?>">
+                        <i class="fas fa-trash-alt"></i> <?php echo __("Delete Payment"); ?>
+                    </a>
+                </div>
             </div>
 
             <?php if (!empty($error_message)): ?>
                 <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle"></i> <?php echo $error_message; ?>
+                    <?php echo $error_message; ?>
                 </div>
             <?php endif; ?>
 
-            <!-- Success message -->
             <?php if (isset($_SESSION['success'])): ?>
                 <div class="alert alert-success">
                     <?php 
@@ -326,218 +461,200 @@ $page_title = "Détails du Paiement";
             <?php endif; ?>
 
             <?php if ($payment): ?>
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Paiement #<?php echo $payment_id; ?></h3>
-                        <div class="card-actions">
-                            <a href="export-payment.php?id=<?php echo $payment_id; ?>" class="btn btn-secondary">
-                                <i class="fas fa-file-export"></i> Exporter
-                            </a>
+                <div class="payment-details">
+                    <!-- Payment Information Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-info-circle"></i> <?php echo __("Payment Information"); ?></h3>
                         </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="payment-details">
-                            <div class="payment-main">
-                                <div class="detail-group">
-                                    <div class="label">Montant</div>
-                                    <div class="value"><strong>$<?php echo number_format($payment['amount'], 2); ?></strong></div>
-                                </div>
-                                
-                                <div class="detail-group">
-                                    <div class="label">Statut</div>
-                                    <div class="value">
-                                        <span class="status-indicator status-<?php echo getStatusBadgeClass($payment['status']); ?>">
-                                            <?php 
-                                                switch($payment['status']) {
-                                                    case 'pending':
-                                                        echo 'En Attente';
-                                                        break;
-                                                    case 'paid':
-                                                        echo 'Payé';
-                                                        break;
-                                                    case 'cancelled':
-                                                        echo 'Annulé';
-                                                        break;
-                                                    case 'failed':
-                                                        echo 'Échoué';
-                                                        break;
-                                                    default:
-                                                        echo ucfirst($payment['status']);
-                                                }
-                                            ?>
-                                        </span>
-                                    </div>
-                                </div>
-                                
-                                <div class="detail-group">
-                                    <div class="label">Méthode de Paiement</div>
-                                    <div class="value">
-                                        <?php 
-                                            $methodIcon = '';
-                                            $paymentMethod = isset($payment['payment_method']) ? $payment['payment_method'] : 'transfer';
-                                            switch ($paymentMethod) {
-                                                case 'transfer': 
-                                                    $methodIcon = '<i class="fas fa-university"></i> ';
-                                                    echo $methodIcon . 'Virement';
-                                                    break;
-                                                case 'cheque': 
-                                                    $methodIcon = '<i class="fas fa-money-check"></i> ';
-                                                    echo $methodIcon . 'Chèque';
-                                                    break;
-                                                default: 
-                                                    $methodIcon = '<i class="fas fa-money-check"></i> ';
-                                                    echo $methodIcon . ucfirst($paymentMethod);
-                                            }
-                                        ?>
-                                    </div>
-                                </div>
-                                
-                                <div class="detail-group">
-                                    <div class="label">Mois de Paiement</div>
-                                    <div class="value"><?php echo formatDate($payment['month']); ?></div>
-                                </div>
-                                
-                                <div class="detail-group">
-                                    <div class="label">ID de Transaction</div>
-                                    <div class="value"><?php echo htmlspecialchars($payment['transaction_id'] ?? 'N/A'); ?></div>
-                                </div>
-                                
-                                <?php if (!empty($payment['description'])): ?>
-                                <div class="detail-group">
-                                    <div class="label">Description</div>
-                                    <div class="description-box">
-                                        <?php echo nl2br(htmlspecialchars($payment['description'] ?? 'Aucune description disponible')); ?>
-                                    </div>
-                                </div>
-                                <?php endif; ?>
-                                
-                                <?php if (!empty($payment['admin_notes'])): ?>
-                                <div class="detail-group">
-                                    <div class="label">Notes Administrateur</div>
-                                    <div class="description-box">
-                                        <?php echo nl2br(htmlspecialchars($payment['admin_notes'])); ?>
-                                    </div>
-                                </div>
-                                <?php endif; ?>
-                                
-                                <div class="meta-info">
-                                    <p>Créé le <?php echo date('d F Y \à G:i', strtotime($payment['created_at'])); ?></p>
-                                    <?php if (isset($payment['updated_at'])): ?>
-                                        <p>Dernière mise à jour le <?php echo date('d F Y \à G:i', strtotime($payment['updated_at'])); ?></p>
-                                    <?php endif; ?>
-                                </div>
-                                
-                                <div class="card mt-4">
-                                    <div class="card-header">
-                                        <h4>Mettre à Jour le Statut du Paiement</h4>
-                                    </div>
-                                    <div class="card-body">
-                                        <form method="POST" action="">
-                                            <input type="hidden" name="update_status" value="1">
-                                            <div class="form-group">
-                                                <label for="status">Statut:</label>
-                                                <select id="status" name="status" class="form-control">
-                                                    <option value="pending" <?php echo $payment['status'] === 'pending' ? 'selected' : ''; ?>>En Attente</option>
-                                                    <option value="paid" <?php echo $payment['status'] === 'paid' ? 'selected' : ''; ?>>Payé</option>
-                                                    <option value="cancelled" <?php echo $payment['status'] === 'cancelled' ? 'selected' : ''; ?>>Annulé</option>
-                                                    <option value="failed" <?php echo $payment['status'] === 'failed' ? 'selected' : ''; ?>>Échoué</option>
-                                                    <option value="refunded" <?php echo $payment['status'] === 'refunded' ? 'selected' : ''; ?>>Remboursé</option>
-                                                </select>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="admin_notes">Notes Administrateur:</label>
-                                                <textarea name="admin_notes" id="admin_notes" class="form-control" rows="4"><?php echo htmlspecialchars($payment['admin_notes'] ?? ''); ?></textarea>
-                                                <small>Notes internes visibles uniquement par les administrateurs</small>
-                                            </div>
-                                            <div class="form-actions">
-                                                <button type="submit" class="btn btn-primary">
-                                                    <i class="fas fa-save"></i> Mettre à Jour le Paiement
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
+                        <div class="card-body">
+                            <div class="detail-group">
+                                <div class="label"><?php echo __("ID"); ?></div>
+                                <div class="value"><?php echo htmlspecialchars($payment['id']); ?></div>
+                            </div>
+                            
+                            <div class="detail-group">
+                                <div class="label"><?php echo __("Amount"); ?></div>
+                                <div class="value">$<?php echo number_format($payment['amount'], 2); ?></div>
+                            </div>
+                            
+                            <div class="detail-group">
+                                <div class="label"><?php echo __("Status"); ?></div>
+                                <div class="value">
+                                    <span class="status-indicator status-<?php echo getStatusBadgeClass($payment['status']); ?>">
+                                        <?php echo __($payment['status']); ?>
+                                    </span>
                                 </div>
                             </div>
                             
-                            <div class="payment-sidebar">
-                                <div class="card sidebar-card">
-                                    <div class="card-header">
-                                        <h4>Informations Utilisateur</h4>
-                                    </div>
-                                    <div class="card-body">
-                                        <?php if (isset($payment['user_id']) && $payment['user_id']): ?>
-                                            <div class="detail-group">
-                                                <div class="label">Nom</div>
-                                                <div class="value"><?php echo htmlspecialchars($payment['user_name']); ?></div>
-                                            </div>
-                                            
-                                            <div class="detail-group">
-                                                <div class="label">Email</div>
-                                                <div class="value"><?php echo htmlspecialchars($payment['user_email']); ?></div>
-                                            </div>
-                                            
-                                            <div class="detail-group">
-                                                <div class="label">Téléphone</div>
-                                                <div class="value"><?php echo htmlspecialchars($payment['user_phone'] ?? 'N/A'); ?></div>
-                                            </div>
-                                            
-                                            <div class="detail-group">
-                                                <div class="label">ID Utilisateur</div>
-                                                <div class="value">#<?php echo $payment['user_id']; ?></div>
-                                            </div>
-                                            
-                                            <a href="view-user.php?id=<?php echo $payment['user_id']; ?>" class="btn btn-primary btn-block mt-3">
-                                                <i class="fas fa-user"></i> Voir le Profil Utilisateur
-                                            </a>
-                                        <?php else: ?>
-                                            <div class="empty-state">
-                                                <i class="fas fa-user-slash"></i>
-                                                <p>Aucun utilisateur associé à ce paiement.</p>
-                                            </div>
-                                        <?php endif; ?>
+                            <div class="detail-group">
+                                <div class="label"><?php echo __("Payment Method"); ?></div>
+                                <div class="value"><?php echo formatPaymentMethod($payment['payment_method']); ?></div>
+                            </div>
+                            
+                            <div class="detail-group">
+                                <div class="label"><?php echo __("Payment Date"); ?></div>
+                                <div class="value"><?php echo formatDate($payment['month']); ?></div>
+                            </div>
+                            
+                            <div class="detail-group">
+                                <div class="label"><?php echo __("Property"); ?></div>
+                                <div class="value">
+                                    <?php if (!empty($payment['property_identifier'])): ?>
+                                        <a href="view-property.php?id=<?php echo $payment['property_id']; ?>">
+                                            <?php echo htmlspecialchars($payment['property_identifier']); ?> 
+                                            (<?php echo ucfirst($payment['property_type']); ?>)
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="text-muted">N/A</span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            
+                            <?php if (!empty($payment['description'])): ?>
+                            <div class="detail-group">
+                                <div class="label"><?php echo __("Description"); ?></div>
+                                <div class="description-box">
+                                    <?php echo nl2br(htmlspecialchars($payment['description'])); ?>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+                            
+                            <div class="meta-info">
+                                <div><i class="fas fa-calendar-plus"></i> <?php echo __("Created on"); ?>: <?php echo formatDate($payment['created_at']); ?></div>
+                                <?php if (!empty($payment['updated_at']) && $payment['updated_at'] !== $payment['created_at']): ?>
+                                <div><i class="fas fa-edit"></i> <?php echo __("Last updated"); ?>: <?php echo formatDate($payment['updated_at']); ?></div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Information Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-user"></i> <?php echo __("User Information"); ?></h3>
+                        </div>
+                        <div class="card-body">
+                            <?php if (!empty($payment['user_name'])): ?>
+                                <div class="detail-group">
+                                    <div class="label"><?php echo __("Name"); ?></div>
+                                    <div class="value">
+                                        <a href="view-user.php?id=<?php echo $payment['user_id']; ?>">
+                                            <?php echo htmlspecialchars($payment['user_name']); ?>
+                                        </a>
                                     </div>
                                 </div>
                                 
-                                <div class="card sidebar-card mt-4">
-                                    <div class="card-header">
-                                        <h4>Informations Propriété</h4>
-                                    </div>
-                                    <div class="card-body">
-                                        <?php if (isset($payment['property_id']) && $payment['property_id']): ?>
-                                            <div class="detail-group">
-                                                <div class="label">Identifiant</div>
-                                                <div class="value"><?php echo htmlspecialchars($payment['property_identifier'] ?? 'N/A'); ?></div>
-                                            </div>
-                                            
-                                            <div class="detail-group">
-                                                <div class="label">Type</div>
-                                                <div class="value"><?php echo ucfirst(htmlspecialchars($payment['property_type'] ?? 'N/A')); ?></div>
-                                            </div>
-                                            
-                                            <div class="detail-group">
-                                                <div class="label">ID Propriété</div>
-                                                <div class="value">#<?php echo $payment['property_id']; ?></div>
-                                            </div>
-                                            
-                                            <a href="view-property.php?id=<?php echo $payment['property_id']; ?>" class="btn btn-primary btn-block mt-3">
-                                                <i class="fas fa-home"></i> Voir la Propriété
-                                            </a>
-                                        <?php else: ?>
-                                            <div class="empty-state">
-                                                <i class="fas fa-building"></i>
-                                                <p>Aucune propriété associée à ce paiement.</p>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
+                                <div class="detail-group">
+                                    <div class="label"><?php echo __("Email"); ?></div>
+                                    <div class="value"><?php echo htmlspecialchars($payment['user_email'] ?? 'N/A'); ?></div>
                                 </div>
-                            </div>
+                                
+                                <?php if (!empty($payment['user_phone'])): ?>
+                                <div class="detail-group">
+                                    <div class="label"><?php echo __("Phone"); ?></div>
+                                    <div class="value"><?php echo htmlspecialchars($payment['user_phone']); ?></div>
+                                </div>
+                                <?php endif; ?>
+                                
+                                <div class="form-actions" style="margin-top: 2rem;">
+                                    <a href="view-user.php?id=<?php echo $payment['user_id']; ?>" class="btn btn-secondary">
+                                        <i class="fas fa-user"></i> <?php echo __("View User Profile"); ?>
+                                    </a>
+                                </div>
+                            <?php else: ?>
+                                <div class="empty-state">
+                                    <i class="fas fa-user-slash"></i>
+                                    <p><?php echo __("No user associated with this payment."); ?></p>
+                                </div>
+                            <?php endif; ?>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Update Status Card -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h3><i class="fas fa-edit"></i> <?php echo __("Update Payment Status"); ?></h3>
+                    </div>
+                    <div class="card-body">
+                        <form action="view-payment.php?id=<?php echo $payment_id; ?>" method="post">
+                            <div class="form-group">
+                                <label for="status"><?php echo __("Status"); ?></label>
+                                <select id="status" name="status" class="form-control">
+                                    <option value="completed" <?php echo $payment['status'] === 'completed' ? 'selected' : ''; ?>><?php echo __("Completed"); ?></option>
+                                    <option value="pending" <?php echo $payment['status'] === 'pending' ? 'selected' : ''; ?>><?php echo __("Pending"); ?></option>
+                                    <option value="failed" <?php echo $payment['status'] === 'failed' ? 'selected' : ''; ?>><?php echo __("Failed"); ?></option>
+                                    <option value="refunded" <?php echo $payment['status'] === 'refunded' ? 'selected' : ''; ?>><?php echo __("Refunded"); ?></option>
+                                    <option value="cancelled" <?php echo $payment['status'] === 'cancelled' ? 'selected' : ''; ?>><?php echo __("Cancelled"); ?></option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="admin_notes"><?php echo __("Admin Notes"); ?></label>
+                                <textarea id="admin_notes" name="admin_notes" class="form-control" rows="3"><?php echo htmlspecialchars($payment['admin_notes'] ?? ''); ?></textarea>
+                                <small class="form-text text-muted"><?php echo __("These notes are for administrative purposes only."); ?></small>
+                            </div>
+                            
+                            <button type="submit" name="update_status" class="btn btn-primary">
+                                <i class="fas fa-save"></i> <?php echo __("Save Changes"); ?>
+                            </button>
+                        </form>
                     </div>
                 </div>
             <?php endif; ?>
         </main>
     </div>
 
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><?php echo __("Confirm Deletion"); ?></h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p><?php echo __("Are you sure you want to delete this payment? This action cannot be undone."); ?></p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" action="delete-payment.php" method="POST">
+                    <input type="hidden" name="payment_id" id="deletePaymentId" value="<?php echo $payment_id; ?>">
+                    <button type="button" class="btn btn-secondary close-modal"><?php echo __("Cancel"); ?></button>
+                    <button type="submit" class="btn btn-danger"><?php echo __("Delete"); ?></button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="js/dark-mode.js"></script>
+    <!-- Add the modal JavaScript -->
+    <script>
+        // Delete payment modal functionality
+        const modal = document.getElementById('deleteModal');
+        const deleteButtons = document.querySelectorAll('.delete-payment');
+        const closeButtons = document.querySelectorAll('.close, .close-modal');
+        const deleteForm = document.getElementById('deleteForm');
+        const deletePaymentIdInput = document.getElementById('deletePaymentId');
+        
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const paymentId = this.getAttribute('data-id');
+                deletePaymentIdInput.value = paymentId;
+                modal.style.display = 'block';
+            });
+        });
+        
+        closeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+        });
+        
+        window.addEventListener('click', function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html> 

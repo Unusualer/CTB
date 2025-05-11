@@ -209,4 +209,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         debugOutput("<a href='login.php'>Go to login page</a>");
     }
 }
+
+// Include language support if needed
+if (!function_exists('__')) {
+    function __($text) {
+        // Simple fallback if no translation system is available
+        static $translations = [];
+        static $loaded = false;
+        
+        // Get current language from session
+        $lang = isset($_SESSION['language']) ? $_SESSION['language'] : 'en_US';
+        
+        if (!$loaded) {
+            $json_file = __DIR__ . '/admin/locale/' . $lang . '/translations.json';
+            
+            if (file_exists($json_file)) {
+                $json_content = file_get_contents($json_file);
+                $translations = json_decode($json_content, true) ?: [];
+            }
+            $loaded = true;
+        }
+        
+        return isset($translations[$text]) ? $translations[$text] : $text;
+    }
+}
 ?> 

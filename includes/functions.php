@@ -17,6 +17,13 @@ function time_elapsed_string($datetime, $full = false) {
     $ago = new DateTime($datetime);
     $diff = $now->diff($ago);
 
+    // Ensure translation function exists
+    if (!function_exists('__')) {
+        function __($text) {
+            return $text;
+        }
+    }
+
     // Create an array without using dynamic properties
     $string = array();
     
@@ -25,38 +32,53 @@ function time_elapsed_string($datetime, $full = false) {
     $days_remaining = $diff->d % 7;
     
     if ($diff->y > 0) {
-        $string['y'] = $diff->y . ' year' . ($diff->y > 1 ? 's' : '');
+        $year_text = $diff->y > 1 ? __('years') : __('year');
+        $string['y'] = $diff->y . ' ' . $year_text;
     }
     
     if ($diff->m > 0) {
-        $string['m'] = $diff->m . ' month' . ($diff->m > 1 ? 's' : '');
+        $month_text = $diff->m > 1 ? __('months') : __('month');
+        $string['m'] = $diff->m . ' ' . $month_text;
     }
     
     if ($weeks > 0) {
-        $string['w'] = $weeks . ' week' . ($weeks > 1 ? 's' : '');
+        $week_text = $weeks > 1 ? __('weeks') : __('week');
+        $string['w'] = $weeks . ' ' . $week_text;
     }
     
     if ($days_remaining > 0) {
-        $string['d'] = $days_remaining . ' day' . ($days_remaining > 1 ? 's' : '');
+        $day_text = $days_remaining > 1 ? __('days') : __('day');
+        $string['d'] = $days_remaining . ' ' . $day_text;
     }
     
     if ($diff->h > 0) {
-        $string['h'] = $diff->h . ' hour' . ($diff->h > 1 ? 's' : '');
+        $hour_text = $diff->h > 1 ? __('hours') : __('hour');
+        $string['h'] = $diff->h . ' ' . $hour_text;
     }
     
     if ($diff->i > 0) {
-        $string['i'] = $diff->i . ' minute' . ($diff->i > 1 ? 's' : '');
+        $minute_text = $diff->i > 1 ? __('minutes') : __('minute');
+        $string['i'] = $diff->i . ' ' . $minute_text;
     }
     
     if ($diff->s > 0) {
-        $string['s'] = $diff->s . ' second' . ($diff->s > 1 ? 's' : '');
+        $second_text = $diff->s > 1 ? __('seconds') : __('second');
+        $string['s'] = $diff->s . ' ' . $second_text;
     }
 
     if (!$full) {
         $string = array_slice($string, 0, 1);
     }
     
-    return $string ? implode(', ', $string) . ' ago' : 'just now';
+    $time_string = implode(', ', $string);
+    $ago_text = __('ago');
+    
+    // Check if we're using French which puts "il y a" before the time
+    if (isset($_SESSION['language']) && $_SESSION['language'] == 'fr_FR') {
+        return $string ? $ago_text . ' ' . $time_string : __('just now');
+    } else {
+        return $string ? $time_string . ' ' . $ago_text : __('just now');
+    }
 }
 
 /**

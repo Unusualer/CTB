@@ -8,6 +8,24 @@ require_once '../includes/role_access.php';
 // Check if user is logged in and has appropriate role
 requireRole('admin');
 
+// Include translation function if not already included
+if (!function_exists('__')) {
+    $translations_file = dirname(__DIR__) . '/includes/translations.php';
+    if (file_exists($translations_file)) {
+        require_once $translations_file;
+    } else {
+        // Fallback to alternate locations
+        $alt_translations_file = $_SERVER['DOCUMENT_ROOT'] . '/CTB/includes/translations.php';
+        if (file_exists($alt_translations_file)) {
+            require_once $alt_translations_file;
+        } else {
+            // Define a minimal translation function as last resort
+            function __($text) {
+                return $text;
+            }
+        }
+    }
+}
 
 $roles = ['admin', 'manager', 'resident'];
 $statuses = ['active', 'inactive'];
@@ -27,33 +45,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validate name
     if (empty($name)) {
-        $errors[] = "Le nom est requis.";
+        $errors[] = __("Name is required.");
     }
     
     // Validate email
     if (empty($email)) {
-        $errors[] = "L'email est requis.";
+        $errors[] = __("Email is required.");
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = "Format d'email invalide.";
+        $errors[] = __("Invalid email format.");
     }
     
     // Validate role
     if (empty($role) || !in_array($role, $roles)) {
-        $errors[] = "Un rôle valide est requis.";
+        $errors[] = __("A valid role is required.");
     }
     
     // Validate status
     if (empty($status) || !in_array($status, $statuses)) {
-        $errors[] = "Un statut valide est requis.";
+        $errors[] = __("A valid status is required.");
     }
     
     // Validate password
     if (empty($password)) {
-        $errors[] = "Le mot de passe est requis.";
+        $errors[] = __("Password is required.");
     } elseif (strlen($password) < 8) {
-        $errors[] = "Le mot de passe doit contenir au moins 8 caractères.";
+        $errors[] = __("Password must be at least 8 characters.");
     } elseif ($password !== $confirm_password) {
-        $errors[] = "Les mots de passe ne correspondent pas.";
+        $errors[] = __("Passwords do not match.");
     }
     
     // If no errors, add user
@@ -68,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $check_stmt->execute();
             
             if ($check_stmt->rowCount() > 0) {
-                $_SESSION['error'] = "Cette adresse email est déjà utilisée.";
+                $_SESSION['error'] = __("This email address is already in use.");
             } else {
                 // Hash the password
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
@@ -93,18 +111,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $log_stmt = $db->prepare("INSERT INTO activity_log (user_id, action, description) 
                                          VALUES (:admin_id, 'create', :description)");
                 
-                $description = "Création d'un nouvel utilisateur : $name (ID : $user_id, Rôle : $role)";
+                $description = __("Created new user") . ": $name (" . __("ID") . ": $user_id, " . __("Role") . ": $role)";
                 $log_stmt->bindParam(':admin_id', $admin_id);
                 $log_stmt->bindParam(':description', $description);
                 $log_stmt->execute();
                 
-                $_SESSION['success'] = "Utilisateur créé avec succès.";
+                $_SESSION['success'] = __("User created successfully.");
                 header("Location: users.php");
                 exit();
             }
             
         } catch (PDOException $e) {
-            $_SESSION['error'] = "Erreur de base de données : " . $e->getMessage();
+            $_SESSION['error'] = __("Database error") . ": " . $e->getMessage();
         }
     } else {
         $_SESSION['error'] = implode("<br>", $errors);
@@ -112,11 +130,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Page title
-$page_title = "Ajouter un Utilisateur";
+$page_title = __("Add User");
 ?>
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<?php echo isset($_SESSION['language']) ? substr($_SESSION['language'], 0, 2) : 'en'; ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -320,8 +338,8 @@ $page_title = "Ajouter un Utilisateur";
         <main class="main-content">
             <div class="page-header">
                 <div class="breadcrumb">
-                    <a href="users.php">Utilisateurs</a>
-                    <span>Ajouter un Nouvel Utilisateur</span>
+                    <a href="users.php"><?php echo __("Users"); ?></a>
+                    <span><?php echo __("Add New User"); ?></span>
                 </div>
             </div>
 
@@ -346,56 +364,56 @@ $page_title = "Ajouter un Utilisateur";
             <div class="content-wrapper">
                 <div class="card">
                     <div class="card-header">
-                        <h3><i class="fas fa-user-plus"></i> Ajouter un Nouvel Utilisateur</h3>
+                        <h3><i class="fas fa-user-plus"></i> <?php echo __("Add New User"); ?></h3>
                     </div>
                     <div class="card-body">
                         <form action="add-user.php" method="POST" class="user-form">
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="name">Nom <span class="required">*</span></label>
+                                    <label for="name"><?php echo __("Name"); ?> <span class="required">*</span></label>
                                     <input type="text" id="name" name="name" required>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="email">Email <span class="required">*</span></label>
+                                    <label for="email"><?php echo __("Email"); ?> <span class="required">*</span></label>
                                     <input type="email" id="email" name="email" required>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="phone">Téléphone</label>
+                                    <label for="phone"><?php echo __("Phone"); ?></label>
                                     <input type="tel" id="phone" name="phone">
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="role">Rôle <span class="required">*</span></label>
+                                    <label for="role"><?php echo __("Role"); ?> <span class="required">*</span></label>
                                     <select id="role" name="role" required>
-                                        <option value="">Sélectionner un rôle</option>
-                                        <option value="admin">Administrateur</option>
-                                        <option value="manager">Gestionnaire</option>
-                                        <option value="resident">Résident</option>
+                                        <option value=""><?php echo __("Select a role"); ?></option>
+                                        <option value="admin"><?php echo __("Administrator"); ?></option>
+                                        <option value="manager"><?php echo __("Manager"); ?></option>
+                                        <option value="resident"><?php echo __("Resident"); ?></option>
                                     </select>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="status">Statut <span class="required">*</span></label>
+                                    <label for="status"><?php echo __("Status"); ?> <span class="required">*</span></label>
                                     <select id="status" name="status" required>
-                                        <option value="">Sélectionner un statut</option>
-                                        <option value="active">Actif</option>
-                                        <option value="inactive">Inactif</option>
+                                        <option value=""><?php echo __("Select a status"); ?></option>
+                                        <option value="active"><?php echo __("Active"); ?></option>
+                                        <option value="inactive"><?php echo __("Inactive"); ?></option>
                                     </select>
                                 </div>
                             </div>
                             
-                            <div class="form-section-title">Informations de Connexion</div>
+                            <div class="form-section-title"><?php echo __("Login Information"); ?></div>
                             
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="password">Mot de passe <span class="required">*</span></label>
+                                    <label for="password"><?php echo __("Password"); ?> <span class="required">*</span></label>
                                     <input type="password" id="password" name="password" required>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="confirm_password">Confirmer le mot de passe <span class="required">*</span></label>
+                                    <label for="confirm_password"><?php echo __("Confirm Password"); ?> <span class="required">*</span></label>
                                     <input type="password" id="confirm_password" name="confirm_password" required>
                                 </div>
                             </div>
@@ -403,11 +421,11 @@ $page_title = "Ajouter un Utilisateur";
                             <div class="form-actions">
                                 <a href="users.php" class="btn btn-secondary">
                                     <i class="fas fa-times"></i>
-                                    Annuler
+                                    <?php echo __("Cancel"); ?>
                                 </a>
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-save"></i>
-                                    Enregistrer
+                                    <?php echo __("Save"); ?>
                                 </button>
                             </div>
                         </form>
@@ -425,7 +443,7 @@ $page_title = "Ajouter un Utilisateur";
         
         function validatePassword() {
             if (password.value !== confirmPassword.value) {
-                confirmPassword.setCustomValidity("Passwords don't match");
+                confirmPassword.setCustomValidity("<?php echo __("Passwords do not match"); ?>");
             } else {
                 confirmPassword.setCustomValidity('');
             }

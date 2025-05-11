@@ -4,6 +4,7 @@ session_start();
 require_once '../includes/config.php';
 require_once '../includes/functions.php';
 require_once '../includes/role_access.php';
+require_once '../includes/translations.php';
 
 // Check if user is logged in and has appropriate role
 requireRole('admin');
@@ -35,16 +36,16 @@ fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
 
 // Add CSV header
 fputcsv($output, [
-    'ID',
-    'ID Utilisateur',
-    'Nom Utilisateur',
-    'Email Utilisateur',
-    'Action',
-    'Type d\'Entité',
-    'ID de l\'Entité',
-    'Détails',
-    'Adresse IP',
-    'Date & Heure'
+    __('ID'),
+    __('User ID'),
+    __('User Name'),
+    __('User Email'),
+    __('Action'),
+    __('Entity Type'),
+    __('Entity ID'),
+    __('Details'),
+    __('IP Address'),
+    __('Date & Time')
 ]);
 
 try {
@@ -106,20 +107,20 @@ try {
         fputcsv($output, [
             $row['id'],
             $row['user_id'],
-            $row['user_name'] ?? 'N/A',
-            $row['user_email'] ?? 'N/A',
-            ucfirst($row['action']),
-            ucfirst($row['entity_type']),
+            $row['user_name'] ?? __('N/A'),
+            $row['user_email'] ?? __('N/A'),
+            __(ucfirst($row['action'])),
+            __(ucfirst($row['entity_type'])),
             $row['entity_id'],
             $row['details'],
-            $row['ip_address'] ?? 'N/A',
+            $row['ip_address'] ?? __('N/A'),
             date('Y-m-d H:i:s', strtotime($row['created_at']))
         ]);
     }
     
 } catch (PDOException $e) {
     // In case of error, output error row
-    fputcsv($output, ['Error exporting data: ' . $e->getMessage()]);
+    fputcsv($output, [__('Error exporting data:') . ' ' . $e->getMessage()]);
 }
 
 // Close the output stream
