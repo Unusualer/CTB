@@ -82,13 +82,13 @@ function time_elapsed_string($datetime, $full = false) {
 }
 
 /**
- * Format currency with dollar sign and two decimal places
+ * Format currency with MAD and two decimal places
  *
  * @param float $amount Amount to format
  * @return string Formatted currency string
  */
 function format_currency($amount) {
-    return '$' . number_format((float)$amount, 2, '.', ',');
+    return number_format((float)$amount, 2, '.', ',') . ' MAD';
 }
 
 /**
@@ -338,6 +338,37 @@ function upload_file($file, $destination, $allowed_types = [], $max_size = 52428
  */
 function format_date($date, $format = 'M j, Y') {
     return date($format, strtotime($date));
+}
+
+/**
+ * Format a date to show month and year in the current language
+ * 
+ * @param string $date Date string
+ * @return string Formatted month and year in current language
+ */
+function format_month_year($date) {
+    // Get current language
+    $language = isset($_SESSION['language']) ? $_SESSION['language'] : 'en_US';
+    
+    if (empty($date)) {
+        return '';
+    }
+    
+    $timestamp = strtotime($date);
+    $month_num = date('n', $timestamp) - 1; // 0-based month index
+    $year = date('Y', $timestamp);
+    
+    // Month names array (these will be translated using the __ function)
+    $month_names = [
+        'January', 'February', 'March', 'April', 'May', 'June', 
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    
+    // Get translated month name
+    $month_name = __($month_names[$month_num]);
+    
+    // Return formatted month and year
+    return $month_name . ' ' . $year;
 }
 
 /**

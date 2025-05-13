@@ -1,6 +1,6 @@
 <!-- Sidebar Footer -->
 <div class="sidebar-footer">
-    <div class="theme-toggle">
+    <div class="theme-toggle" id="theme-toggle">
         <i class="fas fa-moon"></i>
         <span class="mode-text"><?php echo __("Dark / Light"); ?></span>
         <label class="switch">

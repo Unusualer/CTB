@@ -467,7 +467,7 @@ $current_language_name = $available_languages[$current_language] ?? $available_l
                         <div class="chart-header">
                             <h3><i class="fas fa-chart-line"></i> <?php echo __("Monthly Payment Overview"); ?></h3>
                             <div class="chart-actions">
-                                <button class="btn-icon"><i class="fas fa-ellipsis-v"></i></button>
+                                <a href="payments.php" class="btn-icon" title="<?php echo __("View All Payments"); ?>"><i class="fas fa-external-link-alt"></i></a>
                             </div>
                         </div>
                         <div class="chart-body">
@@ -479,7 +479,7 @@ $current_language_name = $available_languages[$current_language] ?? $available_l
                         <div class="chart-header">
                             <h3><i class="fas fa-chart-pie"></i> <?php echo __("Ticket Status Distribution"); ?></h3>
                             <div class="chart-actions">
-                                <button class="btn-icon"><i class="fas fa-ellipsis-v"></i></button>
+                                <a href="tickets.php" class="btn-icon" title="<?php echo __("View All Tickets"); ?>"><i class="fas fa-external-link-alt"></i></a>
                             </div>
                         </div>
                         <div class="chart-body">
@@ -683,17 +683,23 @@ $current_language_name = $available_languages[$current_language] ?? $available_l
         var paymentData = [];
 
         <?php foreach ($payment_data as $data): ?>
-            paymentLabels.push("<?php echo date('M Y', strtotime($data['month'] . '-01')); ?>");
+            paymentLabels.push("<?php echo format_month_year($data['month'] . '-01'); ?>");
             paymentData.push(<?php echo $data['total_amount']; ?>);
         <?php endforeach; ?>
 
         // Add a default dataset if none exists
         if (paymentLabels.length === 0) {
-            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
-            const currentYear = new Date().getFullYear();
+            const months = [
+                "<?php echo format_month_year(date('Y-01-01')); ?>", 
+                "<?php echo format_month_year(date('Y-02-01')); ?>", 
+                "<?php echo format_month_year(date('Y-03-01')); ?>", 
+                "<?php echo format_month_year(date('Y-04-01')); ?>", 
+                "<?php echo format_month_year(date('Y-05-01')); ?>", 
+                "<?php echo format_month_year(date('Y-06-01')); ?>"
+            ];
             
             months.forEach(month => {
-                paymentLabels.push(`${month} ${currentYear}`);
+                paymentLabels.push(month);
                 paymentData.push(0);
             });
         }
@@ -739,7 +745,7 @@ $current_language_name = $available_languages[$current_language] ?? $available_l
                                 label: function(context) {
                                     return 'Montant: ' + context.raw.toLocaleString(undefined, {
                                         style: 'currency',
-                                        currency: 'EUR',
+                                        currency: 'MAD',
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2
                                     });
@@ -763,7 +769,7 @@ $current_language_name = $available_languages[$current_language] ?? $available_l
                                 callback: function(value) {
                                     return value.toLocaleString(undefined, {
                                         style: 'currency',
-                                        currency: 'EUR',
+                                        currency: 'MAD',
                                         minimumFractionDigits: 0,
                                         maximumFractionDigits: 0
                                     });

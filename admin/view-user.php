@@ -152,7 +152,6 @@ $page_title = __("View User");
                                 <span class="user-status <?php echo $user['status']; ?>">
                                     <i class="fas fa-circle"></i> <?php echo __(ucfirst(htmlspecialchars($user['status']))); ?>
                                 </span>
-                                <span class="user-joined"><i class="far fa-calendar-alt"></i> <?php echo __("Joined"); ?> <?php echo format_date($user['created_at']); ?></span>
                             </div>
                         </div>
                     </div>
@@ -181,14 +180,6 @@ $page_title = __("View User");
                                 <div class="info-group">
                                     <label><i class="fas fa-check-circle"></i> <?php echo __("Status"); ?>:</label>
                                     <span class="status-badge <?php echo $user['status']; ?>"><?php echo __(ucfirst(htmlspecialchars($user['status']))); ?></span>
-                                </div>
-                                <div class="info-group">
-                                    <label><i class="fas fa-calendar-plus"></i> <?php echo __("Created on"); ?>:</label>
-                                    <span class="info-value"><?php echo format_date($user['created_at'], 'd F Y'); ?></span>
-                                </div>
-                                <div class="info-group">
-                                    <label><i class="fas fa-edit"></i> <?php echo __("Last updated"); ?>:</label>
-                                    <span class="info-value"><?php echo format_date($user['updated_at'], 'd F Y'); ?></span>
                                 </div>
                             </div>
                         </div>

@@ -124,10 +124,18 @@ try {
 
 // Page title
 $page_title = __("Assign Resident to Property");
+
+// Set the current theme from localStorage or system preference
+$theme = 'light';
+if (isset($_COOKIE['darkMode']) && $_COOKIE['darkMode'] === 'enabled') {
+    $theme = 'dark';
+} else if (!isset($_COOKIE['darkMode']) && isset($_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME']) && $_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME'] === 'dark') {
+    $theme = 'dark';
+}
 ?>
 
 <!DOCTYPE html>
-<html lang="<?php echo substr($_SESSION['language'] ?? 'en_US', 0, 2); ?>">
+<html lang="<?php echo substr($_SESSION['language'] ?? 'en_US', 0, 2); ?>" data-theme="<?php echo $theme; ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -440,7 +448,7 @@ $page_title = __("Assign Resident to Property");
         }
     </style>
 </head>
-<body>
+<body class="<?php echo $theme === 'dark' ? 'dark-mode' : ''; ?>">
     <div class="admin-container">
         <?php include 'includes/admin-sidebar.php'; ?>
 
@@ -572,35 +580,7 @@ $page_title = __("Assign Resident to Property");
         </main>
     </div>
 
-    <script>
-        // Enable dark/light mode toggle
-        const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
-        const storedTheme = localStorage.getItem("theme");
-        
-        if (storedTheme === "dark" || (!storedTheme && prefersDarkScheme.matches)) {
-            document.body.classList.add("dark-mode");
-            document.documentElement.setAttribute('data-theme', 'dark');
-        } else {
-            document.body.classList.remove("dark-mode");
-            document.documentElement.setAttribute('data-theme', 'light');
-        }
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            const themeToggle = document.getElementById('theme-toggle');
-            if (themeToggle) {
-                themeToggle.addEventListener('click', function() {
-                    if (document.body.classList.contains("dark-mode")) {
-                        document.body.classList.remove("dark-mode");
-                        document.documentElement.setAttribute('data-theme', 'light');
-                        localStorage.setItem("theme", "light");
-                    } else {
-                        document.body.classList.add("dark-mode");
-                        document.documentElement.setAttribute('data-theme', 'dark');
-                        localStorage.setItem("theme", "dark");
-                    }
-                });
-            }
-        });
-    </script>
+    <!-- Include the global dark mode script -->
+    <script src="js/dark-mode.js"></script>
 </body>
 </html> 

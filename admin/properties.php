@@ -27,6 +27,186 @@ if (!function_exists('__')) {
     }
 }
 
+// AJAX Endpoint
+if (isset($_GET['ajax']) && $_GET['ajax'] === 'true') {
+    header('Content-Type: application/json');
+    
+    // Initialize variables
+    $search = $_GET['search'] ?? '';
+    $type_filter = $_GET['type'] ?? '';
+    $status_filter = $_GET['status'] ?? '';
+    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $items_per_page = 10;
+    $offset = ($page - 1) * $items_per_page;
+    
+    try {
+        $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        // Build the query
+        $query = "SELECT p.*, u.name as user_name 
+                FROM properties p 
+                LEFT JOIN users u ON p.user_id = u.id
+                WHERE 1=1";
+        $count_query = "SELECT COUNT(*) as total FROM properties WHERE 1=1";
+        $params = [];
+        
+        // Apply filters
+        if (!empty($search)) {
+            $query .= " AND (p.identifier LIKE :search OR p.id LIKE :search OR p.type LIKE :search OR u.name LIKE :search)";
+            $count_query .= " AND (identifier LIKE :search OR id LIKE :search OR type LIKE :search OR (properties.user_id IS NOT NULL AND properties.user_id IN (SELECT id FROM users WHERE name LIKE :search)))";
+            $params[':search'] = "%$search%";
+        }
+        
+        if (!empty($type_filter)) {
+            $query .= " AND p.type = :type";
+            $count_query .= " AND type = :type";
+            $params[':type'] = $type_filter;
+        }
+        
+        if (!empty($status_filter)) {
+            if ($status_filter === 'assigned') {
+                $query .= " AND p.user_id IS NOT NULL";
+                $count_query .= " AND user_id IS NOT NULL";
+            } else if ($status_filter === 'unassigned') {
+                $query .= " AND p.user_id IS NULL";
+                $count_query .= " AND user_id IS NULL";
+            }
+        }
+        
+        // Add ordering
+        $query .= " ORDER BY p.id ASC LIMIT :offset, :limit";
+        
+        // Get total count
+        $count_stmt = $db->prepare($count_query);
+        foreach ($params as $key => $value) {
+            $count_stmt->bindValue($key, $value);
+        }
+        $count_stmt->execute();
+        $total = $count_stmt->fetch(PDO::FETCH_ASSOC)['total'];
+        $total_pages = ceil($total / $items_per_page);
+        
+        // Get properties
+        $stmt = $db->prepare($query);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $items_per_page, PDO::PARAM_INT);
+        $stmt->execute();
+        $properties = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Start output buffer to capture rendered HTML
+        ob_start();
+        if (empty($properties)): ?>
+            <div class="no-data">
+                <i class="fas fa-building"></i>
+                <p><?php echo __("No properties found. Try adjusting your filters."); ?></p>
+            </div>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th><?php echo __("ID"); ?></th>
+                            <th><?php echo __("Identifier"); ?></th>
+                            <th><?php echo __("Type"); ?></th>
+                            <th><?php echo __("Assigned to"); ?></th>
+                            <th><?php echo __("Actions"); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($properties as $property): ?>
+                            <tr>
+                                <td><?php echo $property['id']; ?></td>
+                                <td>
+                                    <div class="property-cell">
+                                        <div class="property-icon">
+                                            <i class="fas fa-<?php echo $property['type'] === 'apartment' ? 'home' : 'car'; ?>"></i>
+                                        </div>
+                                        <span class="property-identifier"><?php echo htmlspecialchars($property['identifier']); ?></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="property-type-badge">
+                                        <?php 
+                                            if ($property['type'] === 'apartment') {
+                                                echo __("Apartment");
+                                            } else if ($property['type'] === 'parking') {
+                                                echo __("Parking");
+                                            } else {
+                                                echo ucfirst(htmlspecialchars($property['type']));
+                                            }
+                                        ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <?php if (!empty($property['user_name'])): ?>
+                                        <span class="resident-tag">
+                                            <i class="fas fa-user"></i> <?php echo htmlspecialchars($property['user_name']); ?>
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="unassigned-tag">
+                                            <i class="fas fa-times-circle"></i> <?php echo __("Unassigned"); ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="actions">
+                                    <a href="view-property.php?id=<?php echo $property['id']; ?>" class="btn-icon" title="<?php echo __("View Property"); ?>">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="edit-property.php?id=<?php echo $property['id']; ?>" class="btn-icon" title="<?php echo __("Edit Property"); ?>">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <?php if ($total_pages > 1): ?>
+                <div class="pagination">
+                    <?php if ($page > 1): ?>
+                        <a href="javascript:void(0);" onclick="loadProperties(<?php echo $page - 1; ?>)" class="pagination-link">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    <?php endif; ?>
+                    
+                    <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
+                        <a href="javascript:void(0);" onclick="loadProperties(<?php echo $i; ?>)"
+                        class="pagination-link <?php echo $i === $page ? 'active' : ''; ?>">
+                            <?php echo $i; ?>
+                        </a>
+                    <?php endfor; ?>
+                    
+                    <?php if ($page < $total_pages): ?>
+                        <a href="javascript:void(0);" onclick="loadProperties(<?php echo $page + 1; ?>)" class="pagination-link">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+        <?php endif;
+        
+        $html = ob_get_clean();
+        
+        echo json_encode([
+            'html' => $html,
+            'total' => $total,
+            'page' => $page,
+            'totalPages' => $total_pages
+        ]);
+        
+        exit;
+    } catch (PDOException $e) {
+        echo json_encode(['error' => __("Database error") . ": " . $e->getMessage()]);
+        exit;
+    }
+}
+
+// Regular page load
 // Initialize variables
 $search = $_GET['search'] ?? '';
 $type_filter = $_GET['type'] ?? '';
@@ -50,8 +230,8 @@ try {
     
     // Apply filters
     if (!empty($search)) {
-        $query .= " AND (p.identifier LIKE :search)";
-        $count_query .= " AND (identifier LIKE :search)";
+        $query .= " AND (p.identifier LIKE :search OR p.id LIKE :search OR p.type LIKE :search OR u.name LIKE :search)";
+        $count_query .= " AND (identifier LIKE :search OR id LIKE :search OR type LIKE :search OR (properties.user_id IS NOT NULL AND properties.user_id IN (SELECT id FROM users WHERE name LIKE :search)))";
         $params[':search'] = "%$search%";
     }
     
@@ -72,7 +252,7 @@ try {
     }
     
     // Add ordering
-    $query .= " ORDER BY p.created_at DESC LIMIT :offset, :limit";
+    $query .= " ORDER BY p.id ASC LIMIT :offset, :limit";
     
     // Get total count
     $count_stmt = $db->prepare($count_query);
@@ -135,6 +315,20 @@ $page_title = __("Property Management");
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
+    <style>
+        .loading-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 0;
+            color: #6c757d;
+        }
+        .loading-spinner i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+    </style>
 </head>
 <body>
     <div class="admin-container">
@@ -226,7 +420,7 @@ $page_title = __("Property Management");
                                 </div>
                                 <div class="filter-group">
                                     <label for="type"><?php echo __("Type"); ?>:</label>
-                                    <select name="type" id="type" onchange="this.form.submit()">
+                                    <select name="type" id="type">
                                         <option value=""><?php echo __("All Types"); ?></option>
                                         <option value="apartment" <?php echo $type_filter === 'apartment' ? 'selected' : ''; ?>><?php echo __("Apartment"); ?></option>
                                         <option value="parking" <?php echo $type_filter === 'parking' ? 'selected' : ''; ?>><?php echo __("Parking"); ?></option>
@@ -234,13 +428,13 @@ $page_title = __("Property Management");
                                 </div>
                                 <div class="filter-group">
                                     <label for="status"><?php echo __("Status"); ?>:</label>
-                                    <select name="status" id="status" onchange="this.form.submit()">
+                                    <select name="status" id="status">
                                         <option value=""><?php echo __("All Statuses"); ?></option>
                                         <option value="assigned" <?php echo $status_filter === 'assigned' ? 'selected' : ''; ?>><?php echo __("Assigned"); ?></option>
                                         <option value="unassigned" <?php echo $status_filter === 'unassigned' ? 'selected' : ''; ?>><?php echo __("Unassigned"); ?></option>
                                     </select>
                                 </div>
-                                <a href="properties.php" class="reset-link"><?php echo __("Reset"); ?></a>
+                                <a href="javascript:void(0);" class="reset-link"><?php echo __("Reset"); ?></a>
                             </div>
                         </form>
                     </div>
@@ -259,7 +453,6 @@ $page_title = __("Property Management");
                                             <th><?php echo __("Identifier"); ?></th>
                                             <th><?php echo __("Type"); ?></th>
                                             <th><?php echo __("Assigned to"); ?></th>
-                                            <th><?php echo __("Created on"); ?></th>
                                             <th><?php echo __("Actions"); ?></th>
                                         </tr>
                                     </thead>
@@ -299,7 +492,6 @@ $page_title = __("Property Management");
                                                         </span>
                                                     <?php endif; ?>
                                                 </td>
-                                                <td><?php echo date('M d, Y', strtotime($property['created_at'])); ?></td>
                                                 <td class="actions">
                                                     <a href="view-property.php?id=<?php echo $property['id']; ?>" class="btn-icon" title="<?php echo __("View Property"); ?>">
                                                         <i class="fas fa-eye"></i>
@@ -346,47 +538,59 @@ $page_title = __("Property Management");
 
     <script src="js/dark-mode.js"></script>
     <script>
-        // Real-time search functionality
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.querySelector('.search-filter input[name="search"]');
-            const propertyRows = document.querySelectorAll('.table tbody tr');
+            const typeSelect = document.getElementById('type');
+            const statusSelect = document.getElementById('status');
+            const filterForm = document.getElementById('filter-form');
+            const contentContainer = document.querySelector('.card-body');
             
-            function performSearch(searchTerm) {
-                searchTerm = searchTerm.toLowerCase().trim();
+            // Function to load properties via AJAX
+            window.loadProperties = function(page = 1) {
+                const search = searchInput ? searchInput.value : '';
+                const type = typeSelect ? typeSelect.value : '';
+                const status = statusSelect ? statusSelect.value : '';
                 
-                let visibleCount = 0;
-                propertyRows.forEach(row => {
-                    const identifier = row.querySelector('.property-identifier')?.textContent.toLowerCase() || '';
-                    const type = row.querySelector('.property-type-badge')?.textContent.toLowerCase() || '';
-                    const resident = row.querySelector('.resident-tag')?.textContent.toLowerCase() || '';
-                    const unassigned = row.querySelector('.unassigned-tag')?.textContent.toLowerCase() || '';
-                    
-                    if (identifier.includes(searchTerm) || type.includes(searchTerm) || 
-                        resident.includes(searchTerm) || unassigned.includes(searchTerm)) {
-                        row.style.display = '';
-                        visibleCount++;
-                    } else {
-                        row.style.display = 'none';
-                    }
+                // Show loading indicator
+                contentContainer.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i><p><?php echo __("Loading..."); ?></p></div>';
+                
+                // Build the AJAX URL
+                const url = `properties.php?ajax=true&search=${encodeURIComponent(search)}&type=${encodeURIComponent(type)}&status=${encodeURIComponent(status)}&page=${page}`;
+                
+                // Make the AJAX request
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.error) {
+                            contentContainer.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                        } else {
+                            contentContainer.innerHTML = data.html;
+                            
+                            // Update URL with the current filters without reloading
+                            const newUrl = `properties.php?search=${encodeURIComponent(search)}&type=${encodeURIComponent(type)}&status=${encodeURIComponent(status)}&page=${page}`;
+                            window.history.pushState({ path: newUrl }, '', newUrl);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading properties:', error);
+                        contentContainer.innerHTML = `<div class="alert alert-danger"><?php echo __("An error occurred while loading properties."); ?></div>`;
+                    });
+            };
+            
+            // Prevent form submission and use AJAX instead
+            if (filterForm) {
+                filterForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    loadProperties(1);
                 });
-                
-                // Show/hide "no results" message if needed
-                const existingNoResults = document.querySelector('.search-no-results');
-                const tableContainer = document.querySelector('.table-responsive');
-                
-                if (visibleCount === 0 && !existingNoResults && tableContainer) {
-                    const noResults = document.createElement('div');
-                    noResults.className = 'no-data search-no-results';
-                    noResults.innerHTML = '<i class="fas fa-search"></i><p><?php echo __("No properties match your search criteria."); ?></p>';
-                    
-                    tableContainer.style.display = 'none';
-                    tableContainer.parentNode.insertBefore(noResults, tableContainer.nextSibling);
-                } else if (visibleCount > 0 && existingNoResults) {
-                    existingNoResults.remove();
-                    if (tableContainer) tableContainer.style.display = '';
-                }
             }
             
+            // Setup search input
             if (searchInput) {
                 // Set focus on search input if it's empty
                 if (!searchInput.value) {
@@ -395,8 +599,13 @@ $page_title = __("Property Management");
                     }, 100);
                 }
                 
+                // Debounce search input
+                let debounceTimer;
                 searchInput.addEventListener('input', function() {
-                    performSearch(this.value);
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => {
+                        loadProperties(1);
+                    }, 500); // Search after 500ms of typing pause
                 });
                 
                 // Add a clear button to the search input
@@ -420,15 +629,50 @@ $page_title = __("Property Management");
                 // Clear search when button is clicked
                 clearButton.addEventListener('click', function() {
                     searchInput.value = '';
-                    performSearch('');
+                    loadProperties(1);
                     this.style.display = 'none';
                     searchInput.focus();
                 });
-                
-                // If there's an initial search value, perform the search
-                if (searchInput.value) {
-                    performSearch(searchInput.value);
-                }
+            }
+            
+            // Handle select filters
+            if (typeSelect) {
+                typeSelect.addEventListener('change', function() {
+                    loadProperties(1);
+                });
+            }
+            
+            if (statusSelect) {
+                statusSelect.addEventListener('change', function() {
+                    loadProperties(1);
+                });
+            }
+            
+            // Add click handler for reset link
+            const resetLink = document.querySelector('.reset-link');
+            if (resetLink) {
+                resetLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Reset all form inputs
+                    if (searchInput) searchInput.value = '';
+                    if (typeSelect) typeSelect.value = '';
+                    if (statusSelect) statusSelect.value = '';
+                    
+                    // Reload properties
+                    loadProperties(1);
+                });
+            }
+            
+            // On initial page load, check if we should use AJAX right away
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('ajax') && urlParams.get('ajax') === 'true') {
+                // If this is an AJAX request, don't do anything
+                return;
+            } else if (urlParams.toString() && !document.referrer.includes('properties.php')) {
+                // If there are URL parameters and we're not coming from a properties.php page,
+                // use AJAX to load the data without a full page reload
+                loadProperties(urlParams.get('page') || 1);
             }
         });
     </script>

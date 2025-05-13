@@ -154,7 +154,6 @@ $page_title = __("View Property");
                                     <i class="fas fa-<?php echo !empty($assigned_resident) ? 'check-circle' : 'times-circle'; ?>"></i> 
                                     <?php echo !empty($assigned_resident) ? __('Assigned') : __('Unassigned'); ?>
                                 </span>
-                                <span class="user-joined"><i class="far fa-calendar-alt"></i> <?php echo __("Created"); ?> <?php echo date('M d, Y', strtotime($property['created_at'])); ?></span>
                             </div>
                         </div>
                     </div>
@@ -175,14 +174,6 @@ $page_title = __("View Property");
                                 <div class="info-group">
                                     <label><i class="fas fa-tag"></i> <?php echo __("Type"); ?>:</label>
                                     <span class="info-value"><?php echo ucfirst(htmlspecialchars(__($property['type']))); ?></span>
-                                </div>
-                                <div class="info-group">
-                                    <label><i class="fas fa-calendar"></i> <?php echo __("Created on"); ?>:</label>
-                                    <span class="info-value"><?php echo date('d F Y', strtotime($property['created_at'])); ?></span>
-                                </div>
-                                <div class="info-group">
-                                    <label><i class="fas fa-calendar-alt"></i> <?php echo __("Last updated"); ?>:</label>
-                                    <span class="info-value"><?php echo date('d F Y', strtotime($property['updated_at'])); ?></span>
                                 </div>
                             </div>
                         </div>

@@ -27,6 +27,192 @@ if (!function_exists('__')) {
     }
 }
 
+// AJAX Endpoint
+if (isset($_GET['ajax']) && $_GET['ajax'] === 'true') {
+    header('Content-Type: application/json');
+    
+    // Initialize variables
+    $search = $_GET['search'] ?? '';
+    $role_filter = $_GET['role'] ?? '';
+    $status_filter = $_GET['status'] ?? '';
+    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $items_per_page = 10;
+    $offset = ($page - 1) * $items_per_page;
+    
+    try {
+        $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        // Build the query
+        $query = "SELECT * FROM users WHERE 1=1";
+        $count_query = "SELECT COUNT(*) as total FROM users WHERE 1=1";
+        $params = [];
+        
+        // Apply filters
+        if (!empty($search)) {
+            $query .= " AND (name LIKE :search OR email LIKE :search OR id LIKE :search OR role LIKE :search)";
+            $count_query .= " AND (name LIKE :search OR email LIKE :search OR id LIKE :search OR role LIKE :search)";
+            $params[':search'] = "%$search%";
+        }
+        
+        if (!empty($role_filter)) {
+            $query .= " AND role = :role";
+            $count_query .= " AND role = :role";
+            $params[':role'] = $role_filter;
+        }
+        
+        if (!empty($status_filter)) {
+            $query .= " AND status = :status";
+            $count_query .= " AND status = :status";
+            $params[':status'] = $status_filter;
+        }
+        
+        // Add ordering
+        $query .= " ORDER BY id ASC LIMIT :offset, :limit";
+        
+        // Get total count
+        $count_stmt = $db->prepare($count_query);
+        foreach ($params as $key => $value) {
+            $count_stmt->bindValue($key, $value);
+        }
+        $count_stmt->execute();
+        $total = $count_stmt->fetch(PDO::FETCH_ASSOC)['total'];
+        $total_pages = ceil($total / $items_per_page);
+        
+        // Get users
+        $stmt = $db->prepare($query);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $items_per_page, PDO::PARAM_INT);
+        $stmt->execute();
+        $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Start output buffer to capture rendered HTML
+        ob_start();
+        if (empty($users)): ?>
+            <div class="no-data">
+                <i class="fas fa-users"></i>
+                <p><?php echo __("No users found. Try adjusting your filters or add a new user."); ?></p>
+                <a href="add-user.php" class="btn btn-primary"><?php echo __("Add User"); ?></a>
+            </div>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th><?php echo __("ID"); ?></th>
+                            <th><?php echo __("Name"); ?></th>
+                            <th><?php echo __("Email"); ?></th>
+                            <th><?php echo __("Role"); ?></th>
+                            <th><?php echo __("Status"); ?></th>
+                            <th><?php echo __("Actions"); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($users as $user): ?>
+                            <tr>
+                                <td><?php echo $user['id']; ?></td>
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="user-avatar-sm">
+                                            <?php if (!empty($user['profile_image'])): ?>
+                                                <img src="../assets/img/avatars/<?php echo htmlspecialchars($user['profile_image']); ?>" alt="<?php echo htmlspecialchars($user['name']); ?>">
+                                            <?php else: ?>
+                                                <div class="avatar-placeholder-sm">
+                                                    <span class="avatar-initial-sm"><?php echo substr(htmlspecialchars($user['name']), 0, 1); ?></span>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <span class="user-name"><?php echo htmlspecialchars($user['name']); ?></span>
+                                    </div>
+                                </td>
+                                <td><?php echo htmlspecialchars($user['email']); ?></td>
+                                <td>
+                                    <span class="user-role-badge">
+                                        <?php
+                                        $roleIcon = '';
+                                        switch($user['role']) {
+                                            case 'admin':
+                                                $roleIcon = '<i class="fas fa-user-shield"></i>';
+                                                break;
+                                            case 'manager':
+                                                $roleIcon = '<i class="fas fa-user-cog"></i>';
+                                                break;
+                                            case 'resident':
+                                                $roleIcon = '<i class="fas fa-user"></i>';
+                                                break;
+                                        }
+                                        echo $roleIcon . ' ' . __(ucfirst(htmlspecialchars($user['role'])));
+                                        ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-badge <?php echo $user['status']; ?>">
+                                        <i class="fas fa-circle"></i>
+                                        <?php echo __(ucfirst(htmlspecialchars($user['status']))); ?>
+                                    </span>
+                                </td>
+                                <td class="actions">
+                                    <a href="view-user.php?id=<?php echo $user['id']; ?>" class="btn-icon" title="<?php echo __("View User"); ?>">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="edit-user.php?id=<?php echo $user['id']; ?>" class="btn-icon" title="<?php echo __("Edit User"); ?>">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="javascript:void(0);" class="btn-icon delete-user" data-id="<?php echo $user['id']; ?>" title="<?php echo __("Delete User"); ?>">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <?php if ($total_pages > 1): ?>
+                <div class="pagination">
+                    <?php if ($page > 1): ?>
+                        <a href="javascript:void(0);" onclick="loadUsers(<?php echo $page - 1; ?>)" class="pagination-link">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    <?php endif; ?>
+                    
+                    <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
+                        <a href="javascript:void(0);" onclick="loadUsers(<?php echo $i; ?>)"
+                        class="pagination-link <?php echo $i === $page ? 'active' : ''; ?>">
+                            <?php echo $i; ?>
+                        </a>
+                    <?php endfor; ?>
+                    
+                    <?php if ($page < $total_pages): ?>
+                        <a href="javascript:void(0);" onclick="loadUsers(<?php echo $page + 1; ?>)" class="pagination-link">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+        <?php endif;
+        
+        $html = ob_get_clean();
+        
+        echo json_encode([
+            'html' => $html,
+            'total' => $total,
+            'page' => $page,
+            'totalPages' => $total_pages
+        ]);
+        
+        exit;
+    } catch (PDOException $e) {
+        echo json_encode(['error' => __("Database error") . ": " . $e->getMessage()]);
+        exit;
+    }
+}
+
+// Regular page load
 // Initialize variables
 $search = $_GET['search'] ?? '';
 $role_filter = $_GET['role'] ?? '';
@@ -65,7 +251,7 @@ try {
     }
     
     // Add ordering
-    $query .= " ORDER BY created_at DESC LIMIT :offset, :limit";
+    $query .= " ORDER BY id ASC LIMIT :offset, :limit";
     
     // Get total count
     $count_stmt = $db->prepare($count_query);
@@ -128,6 +314,20 @@ $page_title = __("User Management");
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
+    <style>
+        .loading-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 0;
+            color: #6c757d;
+        }
+        .loading-spinner i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+    </style>
 </head>
 <body>
     <div class="admin-container">
@@ -223,7 +423,7 @@ $page_title = __("User Management");
                                 </div>
                                 <div class="filter-group">
                                     <label for="role"><?php echo __("Role"); ?>:</label>
-                                    <select name="role" id="role" onchange="this.form.submit()">
+                                    <select name="role" id="role">
                                         <option value=""><?php echo __("All Roles"); ?></option>
                                         <option value="admin" <?php echo $role_filter === 'admin' ? 'selected' : ''; ?>><?php echo __("Administrator"); ?></option>
                                         <option value="manager" <?php echo $role_filter === 'manager' ? 'selected' : ''; ?>><?php echo __("Manager"); ?></option>
@@ -232,13 +432,13 @@ $page_title = __("User Management");
                                 </div>
                                 <div class="filter-group">
                                     <label for="status"><?php echo __("Status"); ?>:</label>
-                                    <select name="status" id="status" onchange="this.form.submit()">
+                                    <select name="status" id="status">
                                         <option value=""><?php echo __("All Statuses"); ?></option>
                                         <option value="active" <?php echo $status_filter === 'active' ? 'selected' : ''; ?>><?php echo __("Active"); ?></option>
                                         <option value="inactive" <?php echo $status_filter === 'inactive' ? 'selected' : ''; ?>><?php echo __("Inactive"); ?></option>
                                     </select>
                                 </div>
-                                <a href="users.php" class="reset-link"><?php echo __("Reset"); ?></a>
+                                <a href="javascript:void(0);" class="reset-link"><?php echo __("Reset"); ?></a>
                             </div>
                         </form>
                     </div>
@@ -259,7 +459,6 @@ $page_title = __("User Management");
                                             <th><?php echo __("Email"); ?></th>
                                             <th><?php echo __("Role"); ?></th>
                                             <th><?php echo __("Status"); ?></th>
-                                            <th><?php echo __("Created"); ?></th>
                                             <th><?php echo __("Actions"); ?></th>
                                         </tr>
                                     </thead>
@@ -307,7 +506,6 @@ $page_title = __("User Management");
                                                         <?php echo __(ucfirst(htmlspecialchars($user['status']))); ?>
                                                     </span>
                                                 </td>
-                                                <td><?php echo format_date($user['created_at']); ?></td>
                                                 <td class="actions">
                                                     <a href="view-user.php?id=<?php echo $user['id']; ?>" class="btn-icon" title="<?php echo __("View User"); ?>">
                                                         <i class="fas fa-eye"></i>
@@ -404,47 +602,75 @@ $page_title = __("User Management");
             }
         });
 
-        // Real-time search functionality
+        // AJAX loading and search functionality
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.querySelector('.search-filter input[name="search"]');
-            const userRows = document.querySelectorAll('.table tbody tr');
+            const roleSelect = document.getElementById('role');
+            const statusSelect = document.getElementById('status');
+            const filterForm = document.getElementById('filter-form');
+            const contentContainer = document.querySelector('.card-body');
             
-            function performSearch(searchTerm) {
-                searchTerm = searchTerm.toLowerCase().trim();
-                
-                let visibleCount = 0;
-                userRows.forEach(row => {
-                    const name = row.querySelector('.user-name')?.textContent.toLowerCase() || '';
-                    const email = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
-                    const role = row.querySelector('.user-role-badge')?.textContent.toLowerCase() || '';
-                    const status = row.querySelector('.status-badge')?.textContent.toLowerCase() || '';
-                    
-                    if (name.includes(searchTerm) || email.includes(searchTerm) || 
-                        role.includes(searchTerm) || status.includes(searchTerm)) {
-                        row.style.display = '';
-                        visibleCount++;
-                    } else {
-                        row.style.display = 'none';
-                    }
+            // Function to initialize delete buttons after AJAX content is loaded
+            function initDeleteButtons() {
+                const newDeleteButtons = document.querySelectorAll('.delete-user');
+                newDeleteButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const userId = this.getAttribute('data-id');
+                        deleteUserIdInput.value = userId;
+                        modal.style.display = 'block';
+                    });
                 });
-                
-                // Show/hide "no results" message if needed
-                const existingNoResults = document.querySelector('.search-no-results');
-                const tableContainer = document.querySelector('.table-responsive');
-                
-                if (visibleCount === 0 && !existingNoResults && tableContainer) {
-                    const noResults = document.createElement('div');
-                    noResults.className = 'no-data search-no-results';
-                    noResults.innerHTML = '<i class="fas fa-search"></i><p><?php echo __("No users match your search criteria."); ?></p>';
-                    
-                    tableContainer.style.display = 'none';
-                    tableContainer.parentNode.insertBefore(noResults, tableContainer.nextSibling);
-                } else if (visibleCount > 0 && existingNoResults) {
-                    existingNoResults.remove();
-                    if (tableContainer) tableContainer.style.display = '';
-                }
             }
             
+            // Function to load users via AJAX
+            window.loadUsers = function(page = 1) {
+                const search = searchInput ? searchInput.value : '';
+                const role = roleSelect ? roleSelect.value : '';
+                const status = statusSelect ? statusSelect.value : '';
+                
+                // Show loading indicator
+                contentContainer.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i><p><?php echo __("Loading..."); ?></p></div>';
+                
+                // Build the AJAX URL
+                const url = `users.php?ajax=true&search=${encodeURIComponent(search)}&role=${encodeURIComponent(role)}&status=${encodeURIComponent(status)}&page=${page}`;
+                
+                // Make the AJAX request
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.error) {
+                            contentContainer.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                        } else {
+                            contentContainer.innerHTML = data.html;
+                            
+                            // Initialize delete buttons on newly loaded content
+                            initDeleteButtons();
+                            
+                            // Update URL with the current filters without reloading
+                            const newUrl = `users.php?search=${encodeURIComponent(search)}&role=${encodeURIComponent(role)}&status=${encodeURIComponent(status)}&page=${page}`;
+                            window.history.pushState({ path: newUrl }, '', newUrl);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading users:', error);
+                        contentContainer.innerHTML = `<div class="alert alert-danger"><?php echo __("An error occurred while loading users."); ?></div>`;
+                    });
+            };
+            
+            // Prevent form submission and use AJAX instead
+            if (filterForm) {
+                filterForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    loadUsers(1);
+                });
+            }
+            
+            // Setup search input
             if (searchInput) {
                 // Set focus on search input if it's empty
                 if (!searchInput.value) {
@@ -453,8 +679,13 @@ $page_title = __("User Management");
                     }, 100);
                 }
                 
+                // Debounce search input
+                let debounceTimer;
                 searchInput.addEventListener('input', function() {
-                    performSearch(this.value);
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => {
+                        loadUsers(1);
+                    }, 500); // Search after 500ms of typing pause
                 });
                 
                 // Add a clear button to the search input
@@ -478,15 +709,50 @@ $page_title = __("User Management");
                 // Clear search when button is clicked
                 clearButton.addEventListener('click', function() {
                     searchInput.value = '';
-                    performSearch('');
+                    loadUsers(1);
                     this.style.display = 'none';
                     searchInput.focus();
                 });
-                
-                // If there's an initial search value, perform the search
-                if (searchInput.value) {
-                    performSearch(searchInput.value);
-                }
+            }
+            
+            // Handle select filters
+            if (roleSelect) {
+                roleSelect.addEventListener('change', function() {
+                    loadUsers(1);
+                });
+            }
+            
+            if (statusSelect) {
+                statusSelect.addEventListener('change', function() {
+                    loadUsers(1);
+                });
+            }
+            
+            // Add click handler for reset link
+            const resetLink = document.querySelector('.reset-link');
+            if (resetLink) {
+                resetLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Reset all form inputs
+                    if (searchInput) searchInput.value = '';
+                    if (roleSelect) roleSelect.value = '';
+                    if (statusSelect) statusSelect.value = '';
+                    
+                    // Reload users
+                    loadUsers(1);
+                });
+            }
+            
+            // On initial page load, check if we should use AJAX right away
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('ajax') && urlParams.get('ajax') === 'true') {
+                // If this is an AJAX request, don't do anything
+                return;
+            } else if (urlParams.toString() && !document.referrer.includes('users.php')) {
+                // If there are URL parameters and we're not coming from a users.php page,
+                // use AJAX to load the data without a full page reload
+                loadUsers(urlParams.get('page') || 1);
             }
         });
     </script>

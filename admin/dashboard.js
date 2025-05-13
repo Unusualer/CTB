@@ -188,7 +188,7 @@ function setupRevenueChart() {
                                 label += ': ';
                             }
                             if (context.parsed.y !== null) {
-                                label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
+                                label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'MAD' }).format(context.parsed.y);
                             }
                             return label;
                         }
@@ -214,7 +214,7 @@ function setupRevenueChart() {
                     ticks: {
                         color: textColor,
                         callback: function (value) {
-                            return '$' + value.toLocaleString();
+                            return value.toLocaleString() + ' MAD';
                         }
                     }
                 }
@@ -638,7 +638,7 @@ function animateCounterCurrency(element, target, duration = 1000) {
 
     const formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
-        currency: 'USD',
+        currency: 'MAD',
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
     });
