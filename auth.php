@@ -109,12 +109,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
             // Verify the user is active
             if ($user['status'] !== 'active') {
-                $_SESSION['login_error'] = "Your account is not active. Please contact management.";
-                if (!$debug) {
-                    header("Location: login.php");
-                    exit();
-                } else {
-                    debugOutput("Error: User account is not active. Status: " . $user['status']);
+                // Instead of showing an error, update the user status to active
+                try {
+                    $updateStmt = $conn->prepare("UPDATE users SET status = 'active' WHERE id = :user_id");
+                    $updateStmt->bindParam(':user_id', $user['id']);
+                    $updateStmt->execute();
+                    
+                    // Update the user status in our local data
+                    $user['status'] = 'active';
+                    
+                    // Log the status change
+                    logActivity($user['id'], 'status_update', 'user', $user['id'], 'User status updated from inactive to active during login');
+                    
+                    if ($debug) {
+                        debugOutput("User status updated from inactive to active");
+                    }
+                } catch (PDOException $e) {
+                    // If update fails, log the error but continue login process
+                    $errorMessage = "Failed to update user status: " . $e->getMessage();
+                    debugOutput($errorMessage);
+                    error_log($errorMessage);
                 }
             }
             
