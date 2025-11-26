@@ -31,7 +31,7 @@ if (!function_exists('__')) {
 <aside class="sidebar">
     <div class="sidebar-header">
         <a href="dashboard.php" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px;">
-            <img src="../assets/images/logo.png" alt="Logo CTB" class="logo">
+            <img src="../images/logo.png" alt="Logo CTB" class="logo">
             <h2>CTB Admin</h2>
         </a>
     </div>

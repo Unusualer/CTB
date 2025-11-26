@@ -16,7 +16,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <!-- Sidebar Header -->
     <div class="sidebar-header">
         <a href="index.php" class="sidebar-logo">
-            <img src="assets/img/logo-icon.png" alt="CTB Logo">
+            <img src="../images/logo.png" alt="CTB Logo">
             <span>CTB Admin</span>
         </a>
         <button id="sidebarToggle" class="sidebar-toggle">

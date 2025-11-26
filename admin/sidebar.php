@@ -9,8 +9,8 @@ if (!defined('BASE_PATH')) {
     <div class="sidebar-header">
         <div class="logo">
             <a href="<?php echo BASE_URL; ?>admin/dashboard.php">
-                <img src="<?php echo BASE_URL; ?>assets/images/logo.png" alt="<?php echo __('CTB Property Management'); ?>" class="logo-lg">
-                <img src="<?php echo BASE_URL; ?>assets/img/logo-icon.png" alt="<?php echo __('CTB'); ?>" class="logo-sm">
+                <img src="<?php echo BASE_URL; ?>images/logo.png" alt="<?php echo __('CTB Property Management'); ?>" class="logo-lg">
+                <img src="<?php echo BASE_URL; ?>images/logo.png" alt="<?php echo __('CTB'); ?>" class="logo-sm">
             </a>
         </div>
         <button class="sidebar-toggle" id="sidebarToggle">

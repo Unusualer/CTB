@@ -19,7 +19,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     <title><?php echo isset($pageTitle) ? __($pageTitle) : __('Admin Dashboard'); ?> - <?php echo __("CTB Property Management"); ?></title>
     
     <!-- Favicon -->
-    <link rel="shortcut icon" href="../assets/images/favicon.ico" type="image/x-icon">
+    <link rel="icon" type="image/png" href="../images/logo.png">
+    <link rel="shortcut icon" href="../images/logo.png" type="image/png">
+    <link rel="apple-touch-icon" href="../images/logo.png">
     
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
@@ -68,7 +70,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             <!-- Admin Sidebar -->
             <div class="admin-sidebar">
                 <div class="sidebar-brand">
-                    <img src="../assets/images/logo.png" alt="<?php echo __('Logo'); ?>">
+                    <img src="../images/logo.png" alt="<?php echo __('Logo'); ?>">
                     <h2><?php echo __('CTB Admin'); ?></h2>
                 </div>
                 <div class="sidebar-menu">

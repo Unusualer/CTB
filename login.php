@@ -33,9 +33,9 @@ if (isset($_SESSION['login_success'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="shortcut icon" href="images/logo.png" type="image/png">
+    <link rel="apple-touch-icon" href="images/logo.png">
     <link rel="manifest" href="site.webmanifest">
 
     <style>
@@ -1031,7 +1031,7 @@ if (isset($_SESSION['login_success'])) {
                     <img src="images/portfolio/architecture.jpg" alt="Complexe Tanger Boulevard" class="brand-bg">
                     <div class="brand-overlay"></div>
                     <div class="brand-content">
-                        <img src="images/logo.svg" alt="CTB" class="brand-logo">
+                        <img src="images/logo.png" alt="CTB" class="brand-logo">
                         <h1 class="brand-title">Complexe Tanger Boulevard</h1>
                         <p class="brand-subtitle">
                             Découvrez un cadre de vie luxueux au sein du premier complexe résidentiel et commercial de Tanger.

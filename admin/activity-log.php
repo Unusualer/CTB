@@ -21,6 +21,21 @@ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $items_per_page = 10;
 $offset = ($page - 1) * $items_per_page;
 
+// Handle sorting
+$sort_column = $_GET['sort'] ?? 'created_at';
+$sort_direction = $_GET['dir'] ?? 'desc';
+
+// Validate sort column (whitelist allowed columns)
+$allowed_columns = ['id', 'action', 'entity_type', 'entity_id', 'created_at'];
+if (!in_array($sort_column, $allowed_columns)) {
+    $sort_column = 'created_at';
+}
+
+// Validate sort direction
+if (!in_array(strtolower($sort_direction), ['asc', 'desc'])) {
+    $sort_direction = 'desc';
+}
+
 // Fetch activity logs with filters
 try {
     $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
@@ -73,8 +88,8 @@ try {
         $params[':date_to'] = $date_to;
     }
     
-    // Add ordering and limit
-    $query .= " ORDER BY a.created_at DESC LIMIT :offset, :limit";
+    // Add ordering and limit (column name is validated against whitelist, so safe to use)
+    $query .= " ORDER BY a.`" . $sort_column . "` " . strtoupper($sort_direction) . " LIMIT :offset, :limit";
     
     // Get total count
     $count_stmt = $db->prepare($count_query);
@@ -246,6 +261,37 @@ $page_title = __("Activity Log");
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
+    <style>
+        /* Sortable table header styles */
+        .table th.sortable {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            padding-right: 30px;
+            transition: background-color 0.2s;
+        }
+        
+        .table th.sortable:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .table th.sortable .sort-icon {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            font-size: 0.85em;
+        }
+        
+        .table th.sortable:hover .sort-icon {
+            color: #007bff;
+        }
+        
+        .table th.sortable[data-sorted="true"] .sort-icon {
+            color: #007bff;
+        }
+    </style>
 </head>
 <body>
     <div class="admin-container">
@@ -395,13 +441,58 @@ $page_title = __("Activity Log");
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th><?php echo __("ID"); ?></th>
+                                        <th class="sortable" data-column="id">
+                                            <?php echo __("ID"); ?>
+                                            <span class="sort-icon">
+                                                <?php if ($sort_column === 'id'): ?>
+                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
+                                                <?php else: ?>
+                                                    <i class="fas fa-sort"></i>
+                                                <?php endif; ?>
+                                            </span>
+                                        </th>
                                         <th><?php echo __("User"); ?></th>
-                                        <th><?php echo __("Action"); ?></th>
-                                        <th><?php echo __("Entity Type"); ?></th>
-                                        <th><?php echo __("Entity ID"); ?></th>
+                                        <th class="sortable" data-column="action">
+                                            <?php echo __("Action"); ?>
+                                            <span class="sort-icon">
+                                                <?php if ($sort_column === 'action'): ?>
+                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
+                                                <?php else: ?>
+                                                    <i class="fas fa-sort"></i>
+                                                <?php endif; ?>
+                                            </span>
+                                        </th>
+                                        <th class="sortable" data-column="entity_type">
+                                            <?php echo __("Entity Type"); ?>
+                                            <span class="sort-icon">
+                                                <?php if ($sort_column === 'entity_type'): ?>
+                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
+                                                <?php else: ?>
+                                                    <i class="fas fa-sort"></i>
+                                                <?php endif; ?>
+                                            </span>
+                                        </th>
+                                        <th class="sortable" data-column="entity_id">
+                                            <?php echo __("Entity ID"); ?>
+                                            <span class="sort-icon">
+                                                <?php if ($sort_column === 'entity_id'): ?>
+                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
+                                                <?php else: ?>
+                                                    <i class="fas fa-sort"></i>
+                                                <?php endif; ?>
+                                            </span>
+                                        </th>
                                         <th><?php echo __("Details"); ?></th>
-                                        <th><?php echo __("Date & Time"); ?></th>
+                                        <th class="sortable" data-column="created_at">
+                                            <?php echo __("Date & Time"); ?>
+                                            <span class="sort-icon">
+                                                <?php if ($sort_column === 'created_at'): ?>
+                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
+                                                <?php else: ?>
+                                                    <i class="fas fa-sort"></i>
+                                                <?php endif; ?>
+                                            </span>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -477,20 +568,20 @@ $page_title = __("Activity Log");
                         <?php if ($total_pages > 1): ?>
                             <div class="pagination">
                                 <?php if ($page > 1): ?>
-                                    <a href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&user_id=<?php echo $user_filter; ?>&action=<?php echo urlencode($action_filter); ?>&entity_type=<?php echo urlencode($entity_type_filter); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>" class="pagination-link">
+                                    <a href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&user_id=<?php echo $user_filter; ?>&action=<?php echo urlencode($action_filter); ?>&entity_type=<?php echo urlencode($entity_type_filter); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>&sort=<?php echo urlencode($sort_column); ?>&dir=<?php echo urlencode($sort_direction); ?>" class="pagination-link">
                                         <i class="fas fa-chevron-left"></i>
                                     </a>
                                 <?php endif; ?>
                                 
                                 <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
-                                    <a href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&user_id=<?php echo $user_filter; ?>&action=<?php echo urlencode($action_filter); ?>&entity_type=<?php echo urlencode($entity_type_filter); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>" 
+                                    <a href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&user_id=<?php echo $user_filter; ?>&action=<?php echo urlencode($action_filter); ?>&entity_type=<?php echo urlencode($entity_type_filter); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>&sort=<?php echo urlencode($sort_column); ?>&dir=<?php echo urlencode($sort_direction); ?>" 
                                        class="pagination-link <?php echo $i === $page ? 'active' : ''; ?>">
                                         <?php echo $i; ?>
                                     </a>
                                 <?php endfor; ?>
                                 
                                 <?php if ($page < $total_pages): ?>
-                                    <a href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&user_id=<?php echo $user_filter; ?>&action=<?php echo urlencode($action_filter); ?>&entity_type=<?php echo urlencode($entity_type_filter); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>" class="pagination-link">
+                                    <a href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&user_id=<?php echo $user_filter; ?>&action=<?php echo urlencode($action_filter); ?>&entity_type=<?php echo urlencode($entity_type_filter); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>&sort=<?php echo urlencode($sort_column); ?>&dir=<?php echo urlencode($sort_direction); ?>" class="pagination-link">
                                         <i class="fas fa-chevron-right"></i>
                                     </a>
                                 <?php endif; ?>
@@ -503,6 +594,43 @@ $page_title = __("Activity Log");
     </div>
 
     <script src="js/dark-mode.js"></script>
+    <script>
+        // Track current sort state - get from URL params or use defaults
+        const urlParams = new URLSearchParams(window.location.search);
+        let currentSort = {
+            column: urlParams.get('sort') || 'created_at',
+            direction: urlParams.get('dir') || 'desc'
+        };
+        
+        // Function to initialize sortable headers
+        function initSortableHeaders() {
+            const sortableHeaders = document.querySelectorAll('.table th.sortable');
+            sortableHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const column = this.getAttribute('data-column');
+                    
+                    // Toggle sort direction if clicking the same column, otherwise default to ascending
+                    if (currentSort.column === column) {
+                        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        currentSort.column = column;
+                        currentSort.direction = 'asc';
+                    }
+                    
+                    // Reload page with new sort
+                    const newUrl = new URL(window.location.href);
+                    newUrl.searchParams.set('sort', currentSort.column);
+                    newUrl.searchParams.set('dir', currentSort.direction);
+                    window.location.href = newUrl.toString();
+                });
+            });
+        }
+        
+        // Initialize sortable headers on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initSortableHeaders();
+        });
+    </script>
     <style>
         /* Entity badge styles */
         .entity-badge {
