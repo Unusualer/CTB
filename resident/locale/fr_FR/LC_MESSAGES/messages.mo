@@ -1,0 +1,1 @@
+This is a placeholder for a compiled .mo file. In a real environment, this would be generated from the .po file using msgfmt.

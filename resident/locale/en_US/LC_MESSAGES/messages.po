@@ -1,0 +1,113 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: CTB Property Management System\n"
+"POT-Creation-Date: 2023-06-01 12:00+0100\n"
+"PO-Revision-Date: 2023-06-01 12:00+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.0.1\n"
+"X-Poedit-KeywordsList: _;gettext;gettext_noop;__\n"
+"X-Poedit-Basepath: ../..\n"
+"X-Poedit-SearchPath-0: .\n"
+
+# Dashboard page translations
+msgid "Admin Dashboard"
+msgstr "Admin Dashboard"
+
+msgid "Dashboard Overview"
+msgstr "Dashboard Overview"
+
+msgid "Generate Report"
+msgstr "Generate Report"
+
+msgid "Total Users"
+msgstr "Total Users"
+
+msgid "Administrators"
+msgstr "Administrators"
+
+msgid "Managers"
+msgstr "Managers"
+
+msgid "Residents"
+msgstr "Residents"
+
+msgid "Properties"
+msgstr "Properties"
+
+msgid "Apartments"
+msgstr "Apartments"
+
+msgid "Parking"
+msgstr "Parking"
+
+msgid "Occupied"
+msgstr "Occupied"
+
+msgid "Tickets"
+msgstr "Tickets"
+
+msgid "Open"
+msgstr "Open"
+
+msgid "In Progress"
+msgstr "In Progress"
+
+msgid "Closed"
+msgstr "Closed"
+
+msgid "Total Payments"
+msgstr "Total Payments"
+
+msgid "Paid"
+msgstr "Paid"
+
+msgid "Pending"
+msgstr "Pending"
+
+msgid "Monthly Payment Overview"
+msgstr "Monthly Payment Overview"
+
+msgid "Ticket Status Distribution"
+msgstr "Ticket Status Distribution"
+
+msgid "Recent Activity"
+msgstr "Recent Activity"
+
+msgid "View All"
+msgstr "View All"
+
+msgid "Recent Tickets"
+msgstr "Recent Tickets"
+
+msgid "Maintenance Overview"
+msgstr "Maintenance Overview"
+
+msgid "Scheduled"
+msgstr "Scheduled"
+
+msgid "Completed"
+msgstr "Completed"
+
+msgid "Total"
+msgstr "Total"
+
+# Activity translations
+msgid "created"
+msgstr "created"
+
+msgid "updated"
+msgstr "updated"
+
+msgid "deleted"
+msgstr "deleted"
+
+msgid "logged in"
+msgstr "logged in"
+
+msgid "made a payment for"
+msgstr "made a payment for" 
