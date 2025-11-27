@@ -10,34 +10,24 @@ require_once '../includes/translations.php';
 requireAnyRole(['resident']);
 
 
-$statuses = ['open', 'in_progress', 'closed', 'reopened'];
-$users = [];
-
-// Get all users for the dropdown
-try {
-    $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    $users_stmt = $db->prepare("SELECT id, name, email FROM users ORDER BY name ASC");
-    $users_stmt->execute();
-    $users = $users_stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    $_SESSION['error'] = __("Database error:") . " " . $e->getMessage();
-}
+$current_user_id = $_SESSION['user_id'] ?? null;
+$current_user_name = $_SESSION['name'] ?? __('Resident User');
+$current_user_email = $_SESSION['email'] ?? '';
+$priority_options = ['low', 'medium', 'high', 'urgent'];
 
 // Process form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate input
-    $user_id = !empty($_POST['user_id']) ? (int)$_POST['user_id'] : 0;
+    $user_id = (int)($current_user_id ?? 0);
     $subject = trim($_POST['subject'] ?? '');
     $description = trim($_POST['description'] ?? '');
-    $status = trim($_POST['status'] ?? '');
+    $status = 'open';
+    $priority = $_POST['priority'] ?? 'medium';
     
     $errors = [];
     
-    // Validate user_id
     if (empty($user_id)) {
-        $errors[] = __("User is required.");
+        $errors[] = __("Unable to determine the current user. Please re-login.");
     }
     
     // Validate subject
@@ -50,9 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = __("Description is required.");
     }
     
-    // Validate status
-    if (empty($status) || !in_array($status, $statuses)) {
-        $errors[] = __("A valid status is required.");
+    if (!in_array($priority, $priority_options, true)) {
+        $errors[] = __("A valid priority is required.");
     }
     
     // If no errors, add ticket
@@ -62,13 +51,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
             // Insert new ticket
-            $stmt = $db->prepare("INSERT INTO tickets (user_id, subject, description, status, created_at, updated_at) 
-                                 VALUES (:user_id, :subject, :description, :status, NOW(), NOW())");
+            $stmt = $db->prepare("INSERT INTO tickets (user_id, subject, description, status, priority, created_at, updated_at) 
+                                 VALUES (:user_id, :subject, :description, :status, :priority, NOW(), NOW())");
             
             $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
             $stmt->bindParam(':subject', $subject);
             $stmt->bindParam(':description', $description);
             $stmt->bindParam(':status', $status);
+            $stmt->bindParam(':priority', $priority);
             
             $stmt->execute();
             
@@ -364,26 +354,18 @@ $page_title = __("Add Ticket");
                                 <i class="fas fa-info-circle"></i> <?php echo __("Ticket Information"); ?>
                             </div>
                             
-                                <div class="form-group">
-                                <label for="user_id">
-                                    <?php echo __("User"); ?> <span class="required">*</span>
-                                </label>
-                                <select name="user_id" id="user_id" required>
-                                    <option value=""><?php echo __("Select a user"); ?></option>
-                                        <?php foreach ($users as $user): ?>
-                                        <option value="<?php echo $user['id']; ?>" <?php if (isset($_POST['user_id']) && $_POST['user_id'] == $user['id']) echo 'selected'; ?>>
-                                                <?php echo htmlspecialchars($user['name']); ?> (<?php echo htmlspecialchars($user['email']); ?>)
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                                
-                                    <div class="form-group">
+                            <div class="form-group">
+                                <label><?php echo __("User"); ?></label>
+                                <input type="text" value="<?php echo htmlspecialchars($current_user_name); ?><?php echo $current_user_email ? ' (' . htmlspecialchars($current_user_email) . ')' : ''; ?>" disabled>
+                                <input type="hidden" name="user_id" value="<?php echo htmlspecialchars($current_user_id); ?>">
+                            </div>
+                            
+                            <div class="form-group">
                                 <label for="subject">
                                     <?php echo __("Subject"); ?> <span class="required">*</span>
                                 </label>
                                 <input type="text" id="subject" name="subject" value="<?php echo isset($_POST['subject']) ? htmlspecialchars($_POST['subject']) : ''; ?>" required>
-                                </div>
+                            </div>
                                 
                                 <div class="form-group">
                                 <label for="description">
@@ -393,14 +375,21 @@ $page_title = __("Add Ticket");
                             </div>
                             
                             <div class="form-group">
-                                <label for="status">
-                                    <?php echo __("Status"); ?> <span class="required">*</span>
+                                <label><?php echo __("Status"); ?></label>
+                                <input type="text" value="<?php echo __("Open"); ?>" disabled>
+                                <input type="hidden" name="status" value="open">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="priority">
+                                    <?php echo __("Priority"); ?> <span class="required">*</span>
                                 </label>
-                                <select name="status" id="status" required>
-                                    <option value="open" <?php if (isset($_POST['status']) && $_POST['status'] == 'open') echo 'selected'; ?>><?php echo __("Open"); ?></option>
-                                    <option value="in_progress" <?php if (isset($_POST['status']) && $_POST['status'] == 'in_progress') echo 'selected'; ?>><?php echo __("In Progress"); ?></option>
-                                    <option value="closed" <?php if (isset($_POST['status']) && $_POST['status'] == 'closed') echo 'selected'; ?>><?php echo __("Closed"); ?></option>
-                                    <option value="reopened" <?php if (isset($_POST['status']) && $_POST['status'] == 'reopened') echo 'selected'; ?>><?php echo __("Reopened"); ?></option>
+                                <select name="priority" id="priority" required>
+                                    <?php foreach ($priority_options as $option): ?>
+                                        <option value="<?php echo $option; ?>" <?php echo (isset($_POST['priority']) ? $_POST['priority'] : 'medium') === $option ? 'selected' : ''; ?>>
+                                            <?php echo __(ucfirst($option)); ?>
+                                        </option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
                             

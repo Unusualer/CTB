@@ -200,9 +200,6 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'true') {
                                     <a href="view-property.php?id=<?php echo $property['id']; ?>" class="btn-icon" title="<?php echo __("View Property"); ?>">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="edit-property.php?id=<?php echo $property['id']; ?>" class="btn-icon" title="<?php echo __("Edit Property"); ?>">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -280,13 +277,16 @@ try {
     $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
+    // For residents, only show their own properties
+    $current_user_id = $_SESSION['user_id'];
+    
     // Build the query
     $query = "SELECT p.*, u.name as user_name 
               FROM properties p 
               LEFT JOIN users u ON p.user_id = u.id
-              WHERE 1=1";
-    $count_query = "SELECT COUNT(*) as total FROM properties WHERE 1=1";
-    $params = [];
+              WHERE p.user_id = :user_id";
+    $count_query = "SELECT COUNT(*) as total FROM properties WHERE user_id = :user_id";
+    $params = [':user_id' => $current_user_id];
     
     // Apply filters
     if (!empty($search)) {
@@ -333,9 +333,10 @@ try {
     $stmt->execute();
     $properties = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Get counts by type for stats
+    // Get counts by type for stats - filtered by user
     $type_counts = [];
-    $type_stmt = $db->prepare("SELECT type, COUNT(*) as count FROM properties GROUP BY type");
+    $type_stmt = $db->prepare("SELECT type, COUNT(*) as count FROM properties WHERE user_id = :user_id GROUP BY type");
+    $type_stmt->bindParam(':user_id', $current_user_id, PDO::PARAM_INT);
     $type_stmt->execute();
     $type_results = $type_stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -343,14 +344,10 @@ try {
         $type_counts[$type_data['type']] = $type_data['count'];
     }
     
-    // Get counts for assigned vs unassigned
-    $assigned_stmt = $db->prepare("SELECT COUNT(*) as count FROM properties WHERE user_id IS NOT NULL");
-    $assigned_stmt->execute();
-    $assigned_count = $assigned_stmt->fetch(PDO::FETCH_ASSOC)['count'];
-    
-    $unassigned_stmt = $db->prepare("SELECT COUNT(*) as count FROM properties WHERE user_id IS NULL");
-    $unassigned_stmt->execute();
-    $unassigned_count = $unassigned_stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    // Get counts for assigned vs unassigned - filtered by user
+    // For residents, all their properties are assigned to them, so assigned_count = total
+    $assigned_count = $total;
+    $unassigned_count = 0;
     
 } catch (PDOException $e) {
     $_SESSION['error'] = __("Database error") . ": " . $e->getMessage();
@@ -480,16 +477,6 @@ $page_title = __("Property Management");
                     </div>
 
                     <div class="stat-card">
-                        <div class="stat-icon users">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="stat-details">
-                            <h3><?php echo __("Assigned"); ?></h3>
-                            <div class="stat-number"><?php echo $assigned_count; ?></div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
                         <div class="stat-icon payments">
                             <i class="fas fa-building"></i>
                         </div>
@@ -497,8 +484,8 @@ $page_title = __("Property Management");
                             <h3><?php echo __("Total Properties"); ?></h3>
                             <div class="stat-number"><?php echo $total; ?></div>
                             <div class="stat-breakdown">
-                                <span><i class="fas fa-circle" style="color: #28a745;"></i> <?php echo __("Assigned"); ?>: <?php echo $assigned_count; ?></span>
-                                <span><i class="fas fa-circle" style="color: #dc3545;"></i> <?php echo __("Unassigned"); ?>: <?php echo $unassigned_count; ?></span>
+                                <span><i class="fas fa-circle" style="color: #28a745;"></i> <?php echo __("Apartments"); ?>: <?php echo isset($type_counts['apartment']) ? $type_counts['apartment'] : 0; ?></span>
+                                <span><i class="fas fa-circle" style="color: #ffc107;"></i> <?php echo __("Parking"); ?>: <?php echo isset($type_counts['parking']) ? $type_counts['parking'] : 0; ?></span>
                             </div>
                         </div>
                     </div>
@@ -620,9 +607,6 @@ $page_title = __("Property Management");
                                                 <td class="actions">
                                                     <a href="view-property.php?id=<?php echo $property['id']; ?>" class="btn-icon" title="<?php echo __("View Property"); ?>">
                                                         <i class="fas fa-eye"></i>
-                                                    </a>
-                                                    <a href="edit-property.php?id=<?php echo $property['id']; ?>" class="btn-icon" title="<?php echo __("Edit Property"); ?>">
-                                                        <i class="fas fa-edit"></i>
                                                     </a>
                                                 </td>
                                             </tr>

@@ -9,8 +9,10 @@ require_once '../includes/translations.php';
 // Check if user is logged in and has appropriate role
 requireAnyRole(['resident']);
 
-
-// Check if ID is provided
+// Residents cannot edit maintenance - redirect to maintenance list
+$_SESSION['error'] = __("You do not have permission to edit maintenance updates.");
+header("Location: maintenance.php");
+exit();
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     $_SESSION['error'] = __("Maintenance ID is required.");
     header("Location: maintenance.php");

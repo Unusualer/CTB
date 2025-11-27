@@ -62,29 +62,6 @@ function formatDate($date) {
     return date('F j, Y', strtotime($date));
 }
 
-// Handle ticket deletion
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_ticket'])) {
-    // Get ticket ID - either from URL or from form submission
-    $delete_ticket_id = isset($_POST['ticket_id']) ? (int)$_POST['ticket_id'] : $ticket_id;
-    
-    try {
-        $delete_stmt = $db->prepare("DELETE FROM tickets WHERE id = :id");
-        $delete_stmt->bindParam(':id', $delete_ticket_id, PDO::PARAM_INT);
-        
-        if ($delete_stmt->execute()) {
-            // Log the activity
-            $admin_id = $_SESSION['user_id'];
-            log_activity($db, $admin_id, 'delete', 'ticket', $delete_ticket_id, __("Ticket #") . $delete_ticket_id . " " . __("deleted"));
-            
-            $_SESSION['success'] = __("The ticket has been successfully deleted.");
-            header("Location: tickets.php");
-            exit();
-        }
-    } catch (PDOException $e) {
-        $error_message = __("Failed to delete ticket:") . " " . $e->getMessage();
-    }
-}
-
 // Process status update if submitted via form
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $new_status = $_POST['status'];
@@ -1038,9 +1015,6 @@ $page_title = __("Ticket Details") . " #$ticket_id";
                     <a href="edit-ticket.php?id=<?php echo $ticket['id']; ?>" class="btn btn-primary">
                         <i class="fas fa-edit"></i> <?php echo __("Edit Ticket"); ?>
                     </a>
-                    <a href="javascript:void(0);" class="btn btn-danger delete-ticket" data-id="<?php echo $ticket['id']; ?>">
-                        <i class="fas fa-trash-alt"></i> <?php echo __("Delete Ticket"); ?>
-                    </a>
                 </div>
             </div>
 
@@ -1172,6 +1146,7 @@ $page_title = __("Ticket Details") . " #$ticket_id";
                         </div>
 
                         <div class="card-column">
+                        <div class="card-column">
                             <!-- User Information Card - Compact version -->
                             <div class="card compact-user-card">
                                 <div class="card-header">
@@ -1199,102 +1174,13 @@ $page_title = __("Ticket Details") . " #$ticket_id";
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Update Status Card - Now placed below User Info -->
-                            <div class="card mt-3">
-                                <div class="card-header">
-                                    <h3><i class="fas fa-reply"></i> <?php echo __("Update Ticket"); ?></h3>
                                 </div>
-                                <div class="card-body">
-                                    <form action="view-ticket.php?id=<?php echo $ticket_id; ?>" method="post">
-                                        <div class="form-group">
-                                            <label for="status"><?php echo __("Update Status"); ?></label>
-                                            <select id="status" name="status" class="form-control">
-                                                <option value="open" <?php echo $ticket['status'] === 'open' ? 'selected' : ''; ?>><?php echo __("Open"); ?></option>
-                                                <option value="in_progress" <?php echo $ticket['status'] === 'in_progress' ? 'selected' : ''; ?>><?php echo __("In Progress"); ?></option>
-                                                <option value="closed" <?php echo $ticket['status'] === 'closed' ? 'selected' : ''; ?>><?php echo __("Closed"); ?></option>
-                                                <option value="reopened" <?php echo $ticket['status'] === 'reopened' ? 'selected' : ''; ?>><?php echo __("Reopened"); ?></option>
-                                            </select>
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label for="priority"><?php echo __("Priority"); ?></label>
-                                            <select id="priority" name="priority" class="form-control">
-                                                <option value="low" <?php echo $ticket['priority'] === 'low' ? 'selected' : ''; ?>><?php echo __("Low"); ?></option>
-                                                <option value="medium" <?php echo $ticket['priority'] === 'medium' ? 'selected' : ''; ?>><?php echo __("Medium"); ?></option>
-                                                <option value="high" <?php echo $ticket['priority'] === 'high' ? 'selected' : ''; ?>><?php echo __("High"); ?></option>
-                                                <option value="urgent" <?php echo $ticket['priority'] === 'urgent' ? 'selected' : ''; ?>><?php echo __("Urgent"); ?></option>
-                                            </select>
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label for="response"><?php echo __("Response"); ?></label>
-                                            <textarea id="response" name="response" class="form-control" rows="5"><?php echo htmlspecialchars($ticket['response'] ?? ''); ?></textarea>
-                                            <small><?php echo __("Your response will be visible to the ticket submitter."); ?></small>
-                                        </div>
-                                        
-                                        <button type="submit" name="update_status" class="btn btn-primary">
-                                            <i class="fas fa-save"></i> <?php echo __("Save Changes"); ?>
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             <?php endif; ?>
         </main>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><?php echo __("Confirm Deletion"); ?></h3>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <p><?php echo __("Are you sure you want to delete this ticket? This action cannot be undone."); ?></p>
-            </div>
-            <div class="modal-footer">
-                <form action="view-ticket.php?id=<?php echo $ticket_id; ?>" method="POST">
-                    <input type="hidden" name="delete_ticket" value="1">
-                    <input type="hidden" name="ticket_id" id="deleteTicketId" value="<?php echo $ticket_id; ?>">
-                    <button type="button" class="btn btn-secondary close-modal"><?php echo __("Cancel"); ?></button>
-                    <button type="submit" class="btn btn-danger"><?php echo __("Delete"); ?></button>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <script src="js/dark-mode.js"></script>
-    <!-- Script for delete modal -->
-    <script>
-        // Delete modal functionality
-        const modal = document.getElementById('deleteModal');
-        const deleteButtons = document.querySelectorAll('.delete-ticket');
-        const closeButtons = document.querySelectorAll('.close, .close-modal');
-        const deleteTicketIdInput = document.getElementById('deleteTicketId');
-        
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const ticketId = this.getAttribute('data-id');
-                deleteTicketIdInput.value = ticketId;
-                modal.style.display = 'block';
-            });
-        });
-        
-        closeButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                modal.style.display = 'none';
-            });
-        });
-        
-        window.addEventListener('click', function(event) {
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
-        });
-    </script>
 </body>
 </html> 

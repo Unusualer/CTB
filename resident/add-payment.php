@@ -7,7 +7,12 @@ require_once '../includes/role_access.php';
 require_once '../includes/translations.php';
 
 // Check if user is logged in and has appropriate role
-requireRole('admin');
+requireAnyRole(['resident']);
+
+// Residents cannot add payments - redirect to payments list
+$_SESSION['error'] = __("You do not have permission to add payments.");
+header("Location: payments.php");
+exit();
 
 
 // Initialize variables

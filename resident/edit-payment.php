@@ -7,7 +7,12 @@ require_once '../includes/role_access.php';
 require_once '../includes/translations.php';
 
 // Check if user is logged in and has appropriate role
-requireRole('admin');
+requireAnyRole(['resident']);
+
+// Residents cannot edit payments - redirect to payments list
+$_SESSION['error'] = __("You do not have permission to edit payments.");
+header("Location: payments.php");
+exit();
 
 
 // Check if payment ID is provided

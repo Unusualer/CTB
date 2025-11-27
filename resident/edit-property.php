@@ -7,7 +7,12 @@ require_once '../includes/role_access.php';
 require_once '../includes/translations.php';
 
 // Check if user is logged in and has appropriate role
-requireRole('admin');
+requireAnyRole(['resident']);
+
+// Residents cannot edit properties - redirect to properties list
+$_SESSION['error'] = __("You do not have permission to edit properties.");
+header("Location: properties.php");
+exit();
 
 
 // Check if ID is provided

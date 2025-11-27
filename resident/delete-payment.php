@@ -4,9 +4,15 @@ session_start();
 require_once '../includes/config.php';
 require_once '../includes/functions.php';
 require_once '../includes/role_access.php';
+require_once '../includes/translations.php';
 
 // Check if user is logged in and has appropriate role
-requireRole('admin');
+requireAnyRole(['resident']);
+
+// Residents cannot delete payments - redirect to payments list
+$_SESSION['error'] = __("You do not have permission to delete payments.");
+header("Location: payments.php");
+exit();
 
 
 // Check if this is a POST request

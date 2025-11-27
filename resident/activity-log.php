@@ -9,6 +9,9 @@ require_once '../includes/translations.php';
 // Check if user is logged in and has appropriate role
 requireAnyRole(['resident']);
 
+// Activity log not available for residents
+header("Location: dashboard.php");
+exit();
 
 // Initialize variables
 $search = $_GET['search'] ?? '';

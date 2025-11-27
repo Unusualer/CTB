@@ -110,21 +110,27 @@ try {
     $stmt->execute();
     $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Get payment statistics
+    // Get payment statistics - filtered by user's properties
     // Total amounts
     $stats_query = "SELECT 
-                    SUM(amount) as total_amount,
+                    SUM(p.amount) as total_amount,
                     COUNT(*) as total_count
-                    FROM payments";
+                    FROM payments p
+                    LEFT JOIN properties pr ON p.property_id = pr.id
+                    WHERE pr.user_id = :user_id";
     $stats_stmt = $db->prepare($stats_query);
+    $stats_stmt->bindParam(':user_id', $current_user_id, PDO::PARAM_INT);
     $stats_stmt->execute();
     $payment_stats = $stats_stmt->fetch(PDO::FETCH_ASSOC);
     
     // Status statistics
-    $status_query = "SELECT status, COUNT(*) as count, SUM(amount) as total 
-                     FROM payments 
-                     GROUP BY status";
+    $status_query = "SELECT p.status, COUNT(*) as count, SUM(p.amount) as total 
+                     FROM payments p
+                     LEFT JOIN properties pr ON p.property_id = pr.id
+                     WHERE pr.user_id = :user_id
+                     GROUP BY p.status";
     $status_stmt = $db->prepare($status_query);
+    $status_stmt->bindParam(':user_id', $current_user_id, PDO::PARAM_INT);
     $status_stmt->execute();
     $status_stats = [];
     while ($row = $status_stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -135,10 +141,13 @@ try {
     }
     
     // Payment method statistics
-    $method_query = "SELECT type as payment_method, COUNT(*) as count
-                    FROM payments
-                    GROUP BY type";
+    $method_query = "SELECT p.type as payment_method, COUNT(*) as count
+                    FROM payments p
+                    LEFT JOIN properties pr ON p.property_id = pr.id
+                    WHERE pr.user_id = :user_id
+                    GROUP BY p.type";
     $method_stmt = $db->prepare($method_query);
+    $method_stmt->bindParam(':user_id', $current_user_id, PDO::PARAM_INT);
     $method_stmt->execute();
     $method_stats = [];
     while ($row = $method_stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -216,10 +225,6 @@ $page_title = __("Payment Management");
         <main class="main-content">
             <div class="page-header">
                 <h1><?php echo __("Payment Management"); ?></h1>
-                <a href="add-payment.php" class="btn btn-primary">
-                    <i class="fas fa-plus"></i>
-                    <?php echo __("Add Payment"); ?>
-                </a>
             </div>
 
             <!-- Stats Cards -->
@@ -272,8 +277,16 @@ $page_title = __("Payment Management");
                         <div class="stat-number"><?php echo $total; ?> <?php echo __("Total"); ?></div>
                         <div class="stat-breakdown">
                             <span><i class="fas fa-circle" style="color: #28a745;"></i> <?php echo __("Credit Card"); ?>: <?php echo isset($method_stats['credit_card']) ? $method_stats['credit_card'] : 0; ?></span>
-                            <span><i class="fas fa-circle" style="color: #ffc107;"></i> <?php echo __("Bank Transfer"); ?>: <?php echo isset($method_stats['bank_transfer']) ? $method_stats['bank_transfer'] : 0; ?></span>
-                            <span><i class="fas fa-circle" style="color: #dc3545;"></i> <?php echo __("Other"); ?>: <?php echo isset($method_stats['other']) ? $method_stats['other'] : 0; ?></span>
+                            <span><i class="fas fa-circle" style="color: #ffc107;"></i> <?php echo __("Bank Transfer"); ?>: <?php echo (isset($method_stats['bank_transfer']) ? $method_stats['bank_transfer'] : 0) + (isset($method_stats['transfer']) ? $method_stats['transfer'] : 0); ?></span>
+                            <span><i class="fas fa-circle" style="color: #dc3545;"></i> <?php echo __("Other"); ?>: <?php 
+                                $other_count = 0;
+                                foreach ($method_stats as $method => $count) {
+                                    if (!in_array($method, ['credit_card', 'bank_transfer', 'transfer'])) {
+                                        $other_count += $count;
+                                    }
+                                }
+                                echo $other_count;
+                            ?></span>
                         </div>
                     </div>
                 </div>
@@ -326,8 +339,7 @@ $page_title = __("Payment Management");
                     <?php if (empty($payments)): ?>
                         <div class="empty-state">
                             <i class="fas fa-credit-card"></i>
-                            <p><?php echo __("No payments found. Try adjusting your filters or add a new payment."); ?></p>
-                            <a href="add-payment.php" class="btn btn-primary"><?php echo __("Add Payment"); ?></a>
+                            <p><?php echo __("No payments found. Try adjusting your filters."); ?></p>
                         </div>
                     <?php else: ?>
                         <div class="table-responsive">
@@ -455,12 +467,6 @@ $page_title = __("Payment Management");
                                                 <a href="view-payment.php?id=<?php echo $payment['id']; ?>" class="btn-icon" title="<?php echo __("View Payment"); ?>">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="edit-payment.php?id=<?php echo $payment['id']; ?>" class="btn-icon" title="<?php echo __("Edit Payment"); ?>">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <a href="javascript:void(0);" class="btn-icon delete-payment" data-id="<?php echo $payment['id']; ?>" title="<?php echo __("Delete Payment"); ?>">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </a>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -495,26 +501,6 @@ $page_title = __("Payment Management");
                 </div>
             </div>
         </main>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><?php echo __("Confirm Deletion"); ?></h3>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <p><?php echo __("Are you sure you want to delete this payment? This action cannot be undone."); ?></p>
-            </div>
-            <div class="modal-footer">
-                <form id="deleteForm" action="delete-payment.php" method="POST">
-                    <input type="hidden" name="payment_id" id="deletePaymentId">
-                    <button type="button" class="btn btn-secondary close-modal"><?php echo __("Cancel"); ?></button>
-                    <button type="submit" class="btn btn-danger"><?php echo __("Delete"); ?></button>
-                </form>
-            </div>
-        </div>
     </div>
 
     <script src="js/dark-mode.js"></script>
@@ -571,33 +557,6 @@ $page_title = __("Payment Management");
                 dateFrom.value = this.value;
             }
             this.form.submit();
-        });
-        
-        // Delete payment modal functionality
-        const modal = document.getElementById('deleteModal');
-        const deleteButtons = document.querySelectorAll('.delete-payment');
-        const closeButtons = document.querySelectorAll('.close, .close-modal');
-        const deleteForm = document.getElementById('deleteForm');
-        const deletePaymentIdInput = document.getElementById('deletePaymentId');
-        
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const paymentId = this.getAttribute('data-id');
-                deletePaymentIdInput.value = paymentId;
-                modal.style.display = 'block';
-            });
-        });
-        
-        closeButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                modal.style.display = 'none';
-            });
-        });
-        
-        window.addEventListener('click', function(event) {
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
         });
     </script>
 </body>

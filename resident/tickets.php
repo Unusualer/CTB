@@ -90,9 +90,10 @@ try {
     $stmt->execute();
     $tickets = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Get counts by status for stats
+    // Get counts by status for stats (only current user's tickets)
     $status_counts = [];
-    $status_stmt = $db->prepare("SELECT status, COUNT(*) as count FROM tickets GROUP BY status");
+    $status_stmt = $db->prepare("SELECT status, COUNT(*) as count FROM tickets WHERE user_id = :user_id GROUP BY status");
+    $status_stmt->bindValue(':user_id', $current_user_id, PDO::PARAM_INT);
     $status_stmt->execute();
     $status_results = $status_stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -436,9 +437,6 @@ $page_title = __("Ticket Management");
                                                 <a href="edit-ticket.php?id=<?php echo $ticket['id']; ?>" class="btn-icon" title="<?php echo __("Edit Ticket"); ?>">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <a href="javascript:void(0);" class="btn-icon delete-ticket" data-id="<?php echo $ticket['id']; ?>" title="<?php echo __("Delete Ticket"); ?>">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </a>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -473,27 +471,6 @@ $page_title = __("Ticket Management");
                 </div>
             </div>
         </main>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><?php echo __("Confirm Deletion"); ?></h3>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <p><?php echo __("Are you sure you want to delete this ticket? This action cannot be undone."); ?></p>
-            </div>
-            <div class="modal-footer">
-                <form id="deleteForm" action="view-ticket.php" method="POST">
-                    <input type="hidden" name="delete_ticket" value="1">
-                    <input type="hidden" name="ticket_id" id="deleteTicketId">
-                    <button type="button" class="btn btn-secondary close-modal"><?php echo __("Cancel"); ?></button>
-                    <button type="submit" class="btn btn-danger"><?php echo __("Delete"); ?></button>
-                </form>
-            </div>
-        </div>
     </div>
 
     <script src="js/dark-mode.js"></script>
@@ -595,34 +572,5 @@ $page_title = __("Ticket Management");
             color: var(--primary-color-light);
         }
     </style>
-    <script>
-        // Delete ticket modal functionality
-        const modal = document.getElementById('deleteModal');
-        const deleteButtons = document.querySelectorAll('.delete-ticket');
-        const closeButtons = document.querySelectorAll('.close, .close-modal');
-        const deleteForm = document.getElementById('deleteForm');
-        const deleteTicketIdInput = document.getElementById('deleteTicketId');
-        
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const ticketId = this.getAttribute('data-id');
-                deleteTicketIdInput.value = ticketId;
-                deleteForm.action = `view-ticket.php?id=${ticketId}`;
-                modal.style.display = 'block';
-            });
-        });
-        
-        closeButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                modal.style.display = 'none';
-            });
-        });
-        
-        window.addEventListener('click', function(event) {
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
-        });
-    </script>
 </body>
 </html> 

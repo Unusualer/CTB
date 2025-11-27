@@ -325,7 +325,7 @@ $page_title = __("Payment Management");
                             <i class="fas fa-credit-card"></i>
                             <p><?php echo __("No payments found. Try adjusting your filters or add a new payment."); ?></p>
                                 <?php if (getCurrentRole() === 'admin'): ?>
-                                <a href="add-payment.php" class="btn btn-primary"><?php echo __("Add Payment"); ?></a>
+                            <a href="add-payment.php" class="btn btn-primary"><?php echo __("Add Payment"); ?></a>
                                 <?php endif; ?>
                         </div>
                     <?php else: ?>

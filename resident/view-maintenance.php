@@ -390,16 +390,11 @@ $page_title = __("View Maintenance");
 
         <!-- Main Content -->
         <main class="main-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <div class="breadcrumb" style="margin-bottom: 0;">
+            <div class="page-header">
+                <div class="breadcrumb">
                     <a href="maintenance.php"><?php echo __("Maintenance"); ?></a>
                     <span><?php echo __("View Maintenance"); ?></span>
                 </div>
-                
-                <a href="edit-maintenance.php?id=<?php echo $maintenance_id; ?>" class="btn btn-secondary">
-                    <i class="fas fa-edit"></i>
-                    <?php echo __("Edit Maintenance"); ?>
-                    </a>
             </div>
 
             <?php if (!empty($error_message)): ?>

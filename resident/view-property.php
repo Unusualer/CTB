@@ -110,11 +110,6 @@ $page_title = __("View Property");
                     <a href="properties.php"><?php echo __("Properties"); ?></a>
                     <span><?php echo __("View Property"); ?></span>
                 </div>
-                <div class="actions">
-                    <a href="edit-property.php?id=<?php echo $property['id']; ?>" class="btn btn-primary">
-                        <i class="fas fa-edit"></i> <?php echo __("Edit Property"); ?>
-                    </a>
-                </div>
             </div>
 
             <?php if (isset($_SESSION['success'])): ?>
@@ -212,9 +207,6 @@ $page_title = __("View Property");
                                         <i class="fas fa-user-slash"></i>
                                     </div>
                                     <p><?php echo __("No resident assigned to this property."); ?></p>
-                                    <a href="edit-property.php?id=<?php echo $property['id']; ?>" class="btn btn-primary">
-                                        <i class="fas fa-user-plus"></i> <?php echo __("Assign Resident"); ?>
-                                    </a>
                                 </div>
                             <?php endif; ?>
                         </div>

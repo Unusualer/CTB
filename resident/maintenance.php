@@ -55,46 +55,46 @@ try {
     $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    // For residents, only show their own maintenance requests
-    $current_user_id = $_SESSION['user_id'];
-    
+    // For residents, show all maintenance records (view-only)
     // Build the query
     $query = "SELECT m.*, u.name as created_by_name 
               FROM maintenance m 
-              LEFT JOIN users u ON m.created_by = u.id 
-              WHERE m.created_by = :user_id";
-    $count_query = "SELECT COUNT(*) as total FROM maintenance m WHERE created_by = :user_id";
-    $params = [':user_id' => $current_user_id];
+              LEFT JOIN users u ON m.created_by = u.id";
+    $count_query = "SELECT COUNT(*) as total FROM maintenance m";
+    $params = [];
+    $where_clauses = [];
     
     // Apply filters
     if (!empty($search)) {
-        $query .= " AND (m.title LIKE :search OR m.description LIKE :search OR m.location LIKE :search)";
-        $count_query .= " AND (m.title LIKE :search OR m.description LIKE :search OR m.location LIKE :search)";
+        $where_clauses[] = "(m.title LIKE :search OR m.description LIKE :search OR m.location LIKE :search)";
         $params[':search'] = "%$search%";
     }
     
     if (!empty($status_filter)) {
-        $query .= " AND m.status = :status";
-        $count_query .= " AND m.status = :status";
+        $where_clauses[] = "m.status = :status";
         $params[':status'] = $status_filter;
     }
     
     if (!empty($priority_filter)) {
-        $query .= " AND m.priority = :priority";
-        $count_query .= " AND m.priority = :priority";
+        $where_clauses[] = "m.priority = :priority";
         $params[':priority'] = $priority_filter;
     }
     
     if (!empty($date_from)) {
-        $query .= " AND m.start_date >= :date_from";
-        $count_query .= " AND m.start_date >= :date_from";
+        $where_clauses[] = "m.start_date >= :date_from";
         $params[':date_from'] = $date_from;
     }
     
     if (!empty($date_to)) {
-        $query .= " AND m.start_date <= :date_to";
-        $count_query .= " AND m.start_date <= :date_to";
+        $where_clauses[] = "m.start_date <= :date_to";
         $params[':date_to'] = $date_to;
+    }
+    
+    // Add WHERE clause if there are any filters
+    if (!empty($where_clauses)) {
+        $where_sql = " WHERE " . implode(" AND ", $where_clauses);
+        $query .= $where_sql;
+        $count_query .= $where_sql;
     }
     
     // Add ordering and limit (column name is validated against whitelist, so safe to use)
@@ -248,10 +248,6 @@ $page_title = __("Maintenance Updates");
         <main class="main-content">
             <div class="page-header">
                 <h1><?php echo __("Maintenance Updates"); ?></h1>
-                <a href="add-maintenance.php" class="btn btn-primary">
-                    <i class="fas fa-plus"></i>
-                    <?php echo __("Add Maintenance Update"); ?>
-                </a>
             </div>
 
             <?php if (!empty($success_message)): ?>
@@ -373,8 +369,7 @@ $page_title = __("Maintenance Updates");
                     <?php if (empty($maintenance_items)): ?>
                         <div class="empty-state">
                             <i class="fas fa-tools"></i>
-                            <p><?php echo __("No updates found. Try adjusting your filters or add a new update."); ?></p>
-                            <a href="add-maintenance.php" class="btn btn-primary"><?php echo __("Add Maintenance Update"); ?></a>
+                            <p><?php echo __("No updates found. Try adjusting your filters."); ?></p>
                         </div>
                     <?php else: ?>
                         <div class="table-responsive">
@@ -480,12 +475,6 @@ $page_title = __("Maintenance Updates");
                                                 <a href="view-maintenance.php?id=<?php echo $update['id']; ?>" class="btn-icon" title="<?php echo __("View Update"); ?>">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="edit-maintenance.php?id=<?php echo $update['id']; ?>" class="btn-icon" title="<?php echo __("Edit Update"); ?>">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <button type="button" class="btn-icon delete-maintenance" data-id="<?php echo $update['id']; ?>" title="<?php echo __("Delete Update"); ?>">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </button>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -520,26 +509,6 @@ $page_title = __("Maintenance Updates");
                 </div>
             </div>
         </main>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><?php echo __("Confirm Deletion"); ?></h3>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <p><?php echo __("Are you sure you want to delete this maintenance update? This action cannot be undone."); ?></p>
-            </div>
-            <div class="modal-footer">
-                <form id="deleteForm" action="delete-maintenance.php" method="POST">
-                    <input type="hidden" name="maintenance_id" id="deleteMaintenanceId">
-                    <button type="button" class="btn btn-secondary close-modal"><?php echo __("Cancel"); ?></button>
-                    <button type="submit" class="btn btn-danger"><?php echo __("Delete"); ?></button>
-                </form>
-            </div>
-        </div>
     </div>
 
     <script src="js/dark-mode.js"></script>
@@ -596,33 +565,6 @@ $page_title = __("Maintenance Updates");
                 dateFrom.value = this.value;
             }
             this.form.submit();
-        });
-        
-        // Delete maintenance modal functionality
-        const modal = document.getElementById('deleteModal');
-        const deleteButtons = document.querySelectorAll('.delete-maintenance');
-        const closeButtons = document.querySelectorAll('.close, .close-modal');
-        const deleteForm = document.getElementById('deleteForm');
-        const deleteMaintenanceIdInput = document.getElementById('deleteMaintenanceId');
-        
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const maintenanceId = this.getAttribute('data-id');
-                deleteMaintenanceIdInput.value = maintenanceId;
-                modal.style.display = 'block';
-            });
-        });
-        
-        closeButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                modal.style.display = 'none';
-            });
-        });
-        
-        window.addEventListener('click', function(event) {
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
         });
     </script>
 </body>

@@ -4,22 +4,19 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Check if user is logged in and has admin role
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    // Redirect to login page
-    header("Location: ../login.php?error=unauthorized");
-    exit();
-}
-
-// Get admin user details
+// Load dependencies
 require_once '../includes/config.php';
+require_once '../includes/role_access.php';
 
-$admin_id = $_SESSION['user_id'];
+// Ensure user has access to the manager area (admins can access too)
+requireAnyRole(['admin', 'manager']);
+
+// Get current user details
+$current_user_id = $_SESSION['user_id'];
 try {
-    // Get admin details
-    $admin_query = "SELECT * FROM users WHERE id = ? AND role = 'admin'";
-    $stmt = $conn->prepare($admin_query);
-    $stmt->execute([$admin_id]);
+    $user_query = "SELECT * FROM users WHERE id = ?";
+    $stmt = $conn->prepare($user_query);
+    $stmt->execute([$current_user_id]);
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$admin) {
@@ -55,6 +52,7 @@ try {
     $stmt = $conn->prepare($unresolved_tickets_query);
     $stmt->execute();
     $unresolved_tickets = $stmt->fetchColumn();
+    $current_role = $admin['role'] ?? 'manager';
 } catch (PDOException $e) {
     // Log error
     error_log("Database error in admin sidebar: " . $e->getMessage());
@@ -67,17 +65,27 @@ $current_page = basename($_SERVER['PHP_SELF']);
 // Get notification counts (this would be replaced with actual database queries)
 $pending_tickets = $unresolved_tickets ?? 0;
 $new_messages = 0;  // This would be populated from a database query
+// Human-readable role labels
+$role_labels = [
+    'admin'    => __("Administrator"),
+    'manager'  => __("Manager"),
+    'resident' => __("Resident"),
+];
+
+$role_label = $role_labels[$current_role] ?? __("User");
+$sidebar_brand = "CTB " . $role_label;
+$profile_alt = $role_label . ' ' . __("Profile");
 ?>
 
 <div class="admin-sidebar">
     <div class="sidebar-brand">
-        <h2><?php echo __("CTB Admin"); ?></h2>
+        <h2><?php echo htmlspecialchars($sidebar_brand); ?></h2>
     </div>
     
     <div class="admin-profile">
-        <img src="../images/avatar-placeholder.png" alt="<?php echo __("Admin Profile"); ?>">
-        <h4><?= htmlspecialchars($admin['name'] ?? __('Administrator')) ?></h4>
-        <p><?php echo __("Administrator"); ?></p>
+        <img src="../images/avatar-placeholder.png" alt="<?php echo htmlspecialchars($profile_alt); ?>">
+        <h4><?= htmlspecialchars($admin['name'] ?? $role_label) ?></h4>
+        <p><?php echo htmlspecialchars($role_label); ?></p>
     </div>
     
     <div class="sidebar-menu">

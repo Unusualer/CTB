@@ -111,15 +111,11 @@ $page_title = __("View User");
         <main class="main-content">
             <div class="page-header">
                 <div class="breadcrumb">
-                    <a href="users.php"><?php echo __("Users"); ?></a>
-                    <span><?php echo __("View User"); ?></span>
+                    <span><?php echo __("My Profile"); ?></span>
                 </div>
                 <div class="actions">
                     <a href="edit-user.php?id=<?php echo $user['id']; ?>" class="btn btn-primary">
                         <i class="fas fa-edit"></i> <?php echo __("Edit User"); ?>
-                    </a>
-                    <a href="javascript:void(0);" class="btn btn-danger delete-user" data-id="<?php echo $user['id']; ?>">
-                        <i class="fas fa-trash-alt"></i> <?php echo __("Delete User"); ?>
                     </a>
                 </div>
             </div>
@@ -267,55 +263,7 @@ $page_title = __("View User");
         </main>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><?php echo __("Confirm Deletion"); ?></h3>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <p><?php echo __("Are you sure you want to delete this user? This action cannot be undone."); ?></p>
-            </div>
-            <div class="modal-footer">
-                <form id="deleteForm" action="delete-user.php" method="POST">
-                    <input type="hidden" name="user_id" id="deleteUserId">
-                    <button type="button" class="btn btn-secondary close-modal"><?php echo __("Cancel"); ?></button>
-                    <button type="submit" class="btn btn-danger"><?php echo __("Delete"); ?></button>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <script src="js/dark-mode.js"></script>
-    <script>
-        // Delete user modal functionality
-        const modal = document.getElementById('deleteModal');
-        const deleteButtons = document.querySelectorAll('.delete-user');
-        const closeButtons = document.querySelectorAll('.close, .close-modal');
-        const deleteForm = document.getElementById('deleteForm');
-        const deleteUserIdInput = document.getElementById('deleteUserId');
-        
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const userId = this.getAttribute('data-id');
-                deleteUserIdInput.value = userId;
-                modal.style.display = 'block';
-            });
-        });
-        
-        closeButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                modal.style.display = 'none';
-            });
-        });
-        
-        window.addEventListener('click', function(event) {
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
-        });
-    </script>
 
     <style>
         /* Enhanced Property List Styling */

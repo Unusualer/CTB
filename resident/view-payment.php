@@ -25,6 +25,8 @@ try {
     $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
+    $current_user_id = $_SESSION['user_id'];
+    
     $sql = "SELECT p.*, p.type as payment_method, pr.identifier as property_identifier, pr.type as property_type, 
             u.name as user_name, u.email as user_email, u.phone as user_phone, u.id as user_id
             FROM payments p 
@@ -44,40 +46,11 @@ try {
     
     $payment = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    // Handle form submission for updating status
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
-        $new_status = $_POST['status'];
-        $admin_notes = $_POST['admin_notes'];
-        
-        // Check if admin_notes column exists
-        $check_column_sql = "SHOW COLUMNS FROM payments LIKE 'admin_notes'";
-        $check_stmt = $db->prepare($check_column_sql);
-        $check_stmt->execute();
-        
-        if ($check_stmt->rowCount() === 0) {
-            // Add admin_notes column if it doesn't exist
-            $alter_sql = "ALTER TABLE payments ADD COLUMN admin_notes TEXT DEFAULT NULL";
-            $alter_stmt = $db->prepare($alter_sql);
-            $alter_stmt->execute();
-        }
-        
-        $update_sql = "UPDATE payments SET status = :status, admin_notes = :notes, updated_at = NOW() WHERE id = :id";
-        $update_stmt = $db->prepare($update_sql);
-        $update_stmt->bindParam(":status", $new_status, PDO::PARAM_STR);
-        $update_stmt->bindParam(":notes", $admin_notes, PDO::PARAM_STR);
-        $update_stmt->bindParam(":id", $payment_id, PDO::PARAM_INT);
-        
-        if ($update_stmt->execute()) {
-            // Log the activity
-            $admin_id = $_SESSION['user_id'];
-            log_activity($db, $admin_id, 'update', 'payment', $payment_id, __("Updated payment") . " #$payment_id " . __("status to:") . " " . ucfirst($new_status));
-            
-            $_SESSION['success'] = __("Payment successfully updated.");
-            header("Location: view-payment.php?id=$payment_id");
-            exit();
-        } else {
-            $error_message = __("Failed to update payment status.");
-        }
+    // For residents, only allow viewing their own payments
+    if (getCurrentRole() === 'resident' && $payment['user_id'] != $current_user_id) {
+        $_SESSION['error'] = __("You can only view your own payments.");
+        header("Location: payments.php");
+        exit();
     }
     
 } catch (PDOException $e) {
@@ -430,14 +403,6 @@ $page_title = __("Payment Details");
                     <a href="payments.php"><?php echo __("Payments"); ?></a>
                     <span><?php echo __("View Payment"); ?></span>
                 </div>
-                <div class="actions">
-                    <a href="edit-payment.php?id=<?php echo $payment_id; ?>" class="btn btn-primary">
-                        <i class="fas fa-edit"></i> <?php echo __("Edit Payment"); ?>
-                    </a>
-                    <a href="javascript:void(0);" class="btn btn-danger delete-payment" data-id="<?php echo $payment_id; ?>">
-                        <i class="fas fa-trash-alt"></i> <?php echo __("Delete Payment"); ?>
-                    </a>
-                </div>
             </div>
 
             <?php if (!empty($error_message)): ?>
@@ -575,90 +540,10 @@ $page_title = __("Payment Details");
                         </div>
                     </div>
                 </div>
-
-                <!-- Update Status Card -->
-                <div class="card mt-4">
-                    <div class="card-header">
-                        <h3><i class="fas fa-edit"></i> <?php echo __("Update Payment Status"); ?></h3>
-                    </div>
-                    <div class="card-body">
-                        <form action="view-payment.php?id=<?php echo $payment_id; ?>" method="post">
-                            <div class="form-group">
-                                <label for="status"><?php echo __("Status"); ?></label>
-                                <select id="status" name="status" class="form-control">
-                                    <option value="completed" <?php echo $payment['status'] === 'completed' ? 'selected' : ''; ?>><?php echo __("Completed"); ?></option>
-                                    <option value="pending" <?php echo $payment['status'] === 'pending' ? 'selected' : ''; ?>><?php echo __("Pending"); ?></option>
-                                    <option value="failed" <?php echo $payment['status'] === 'failed' ? 'selected' : ''; ?>><?php echo __("Failed"); ?></option>
-                                    <option value="refunded" <?php echo $payment['status'] === 'refunded' ? 'selected' : ''; ?>><?php echo __("Refunded"); ?></option>
-                                    <option value="cancelled" <?php echo $payment['status'] === 'cancelled' ? 'selected' : ''; ?>><?php echo __("Cancelled"); ?></option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="admin_notes"><?php echo __("Admin Notes"); ?></label>
-                                <textarea id="admin_notes" name="admin_notes" class="form-control" rows="3"><?php echo htmlspecialchars($payment['admin_notes'] ?? ''); ?></textarea>
-                                <small class="form-text text-muted"><?php echo __("These notes are for administrative purposes only."); ?></small>
-                            </div>
-                            
-                            <button type="submit" name="update_status" class="btn btn-primary">
-                                <i class="fas fa-save"></i> <?php echo __("Save Changes"); ?>
-                            </button>
-                        </form>
-                    </div>
-                </div>
             <?php endif; ?>
         </main>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><?php echo __("Confirm Deletion"); ?></h3>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <p><?php echo __("Are you sure you want to delete this payment? This action cannot be undone."); ?></p>
-            </div>
-            <div class="modal-footer">
-                <form id="deleteForm" action="delete-payment.php" method="POST">
-                    <input type="hidden" name="payment_id" id="deletePaymentId" value="<?php echo $payment_id; ?>">
-                    <button type="button" class="btn btn-secondary close-modal"><?php echo __("Cancel"); ?></button>
-                    <button type="submit" class="btn btn-danger"><?php echo __("Delete"); ?></button>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <script src="js/dark-mode.js"></script>
-    <!-- Add the modal JavaScript -->
-    <script>
-        // Delete payment modal functionality
-        const modal = document.getElementById('deleteModal');
-        const deleteButtons = document.querySelectorAll('.delete-payment');
-        const closeButtons = document.querySelectorAll('.close, .close-modal');
-        const deleteForm = document.getElementById('deleteForm');
-        const deletePaymentIdInput = document.getElementById('deletePaymentId');
-        
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const paymentId = this.getAttribute('data-id');
-                deletePaymentIdInput.value = paymentId;
-                modal.style.display = 'block';
-            });
-        });
-        
-        closeButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                modal.style.display = 'none';
-            });
-        });
-        
-        window.addEventListener('click', function(event) {
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
-        });
-    </script>
 </body>
 </html> 

@@ -8,6 +8,15 @@ require_once '../includes/role_access.php';
 // Check if user is logged in and is a resident
 requireAnyRole(['resident']);
 
+// Residents should access their profile directly, not the users list
+$profile_id = $_SESSION['user_id'] ?? null;
+if ($profile_id) {
+    header("Location: view-user.php?id=" . urlencode((string)$profile_id));
+    exit();
+}
+header("Location: dashboard.php");
+exit();
+
 // Include translation function if not already included
 if (!function_exists('__')) {
     $translations_file = dirname(__DIR__) . '/includes/translations.php';

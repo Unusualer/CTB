@@ -6,7 +6,13 @@ require_once '../includes/functions.php';
 require_once '../includes/role_access.php';
 
 // Check if user is logged in and has appropriate role
-requireRole('admin');
+requireAnyRole(['resident']);
+
+// Residents cannot delete maintenance - redirect to maintenance list
+require_once '../includes/translations.php';
+$_SESSION['error'] = __("You do not have permission to delete maintenance updates.");
+header("Location: maintenance.php");
+exit();
 
 
 // Check if this is a POST request

@@ -703,13 +703,13 @@ $page_title = __("User Management");
                                                     <a href="view-user.php?id=<?php echo $user['id']; ?>" class="btn-icon" title="<?php echo __("View User"); ?>">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                    <a href="edit-user.php?id=<?php echo $user['id']; ?>" class="btn-icon" title="<?php echo __("Edit User"); ?>">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
+                                                    <a href="edit-user.php?id=<?php echo $user['id']; ?>" class="btn-icon" title="<?php echo __("Edit User"); ?>">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
                                     <?php if (getCurrentRole() === 'admin'): ?>
-                                    <a href="javascript:void(0);" class="btn-icon delete-user" data-id="<?php echo $user['id']; ?>" title="<?php echo __("Delete User"); ?>">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </a>
+                                                    <a href="javascript:void(0);" class="btn-icon delete-user" data-id="<?php echo $user['id']; ?>" title="<?php echo __("Delete User"); ?>">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </a>
                                     <?php endif; ?>
                                                 </td>
                                             </tr>

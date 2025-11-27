@@ -81,21 +81,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = __("Description is required.");
     }
     
-    // For residents, preserve existing status and priority (they can't change these)
+    // For residents, preserve existing status (they can't change it) but allow priority update
     $current_role = getCurrentRole();
     if ($current_role === 'resident') {
-        // Get existing ticket data to preserve status and priority
+        // Get existing ticket data to preserve status and user_id
         if (!isset($db)) {
             $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
             $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         }
-        $existing_stmt = $db->prepare("SELECT status, priority, user_id FROM tickets WHERE id = :id");
+        $existing_stmt = $db->prepare("SELECT status, user_id FROM tickets WHERE id = :id");
         $existing_stmt->bindParam(':id', $ticket_id, PDO::PARAM_INT);
         $existing_stmt->execute();
         $existing_ticket = $existing_stmt->fetch(PDO::FETCH_ASSOC);
         $status = $existing_ticket['status'];
-        $priority = $existing_ticket['priority'];
         $user_id = $existing_ticket['user_id']; // Preserve user_id too
+        
+        // Allow priority to be updated from POST
+        $priority = trim($_POST['priority'] ?? 'medium');
+        if (empty($priority) || !in_array($priority, $priorities)) {
+            $errors[] = __("A valid priority is required.");
+        }
     } else {
         // Validate status and priority for admin/manager
         if (empty($status) || !in_array($status, $statuses)) {
@@ -118,13 +123,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $current_status_stmt->execute();
             $current_status = $current_status_stmt->fetch(PDO::FETCH_ASSOC)['status'];
             
-            // Update ticket - residents can only update description and subject
+            // Update ticket - residents can update description, subject, and priority
             if ($current_role === 'resident') {
                 $stmt = $db->prepare("UPDATE tickets SET subject = :subject, 
-                                     description = :description, updated_at = NOW() 
+                                     description = :description, priority = :priority, updated_at = NOW() 
                                      WHERE id = :id");
                 $stmt->bindParam(':subject', $subject);
                 $stmt->bindParam(':description', $description);
+                $stmt->bindParam(':priority', $priority);
                 $stmt->bindParam(':id', $ticket_id, PDO::PARAM_INT);
             } else {
                 // Admin/manager can update all fields
@@ -561,7 +567,17 @@ $page_title = __("Edit Ticket");
                             </div>
                             <?php else: ?>
                             <input type="hidden" name="status" value="<?php echo htmlspecialchars($ticket['status']); ?>">
-                            <input type="hidden" name="priority" value="<?php echo htmlspecialchars($ticket['priority']); ?>">
+                            <div class="form-group">
+                                <label for="priority">
+                                    <?php echo __("Priority"); ?> <span class="required">*</span>
+                                </label>
+                                <select name="priority" id="priority" required>
+                                    <option value="low" <?php echo $ticket['priority'] === 'low' ? 'selected' : ''; ?>><?php echo __("Low"); ?></option>
+                                    <option value="medium" <?php echo $ticket['priority'] === 'medium' ? 'selected' : ''; ?>><?php echo __("Medium"); ?></option>
+                                    <option value="high" <?php echo $ticket['priority'] === 'high' ? 'selected' : ''; ?>><?php echo __("High"); ?></option>
+                                    <option value="urgent" <?php echo $ticket['priority'] === 'urgent' ? 'selected' : ''; ?>><?php echo __("Urgent"); ?></option>
+                                </select>
+                            </div>
                             <?php endif; ?>
                             
                             <?php if (getCurrentRole() !== 'resident'): ?>

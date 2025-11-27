@@ -9,8 +9,10 @@ require_once '../includes/translations.php';
 // Check if user is logged in and has appropriate role
 requireAnyRole(['resident']);
 
-
-// Initialize variables
+// Residents cannot add maintenance - redirect to maintenance list
+$_SESSION['error'] = __("You do not have permission to add maintenance updates.");
+header("Location: maintenance.php");
+exit();
 $success_message = '';
 $error_message = '';
 $maintenance = [
