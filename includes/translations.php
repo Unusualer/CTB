@@ -42,14 +42,40 @@ function __($text) {
     
     // If translations for this language aren't in cache, load them
     if (!isset($translations_cache[$language])) {
-        $translation_paths = [
-            // Try main admin locale directory
-            dirname(__DIR__) . '/admin/locale/' . $language . '/translations.json',
-            // Try from the current script's location
-            dirname($_SERVER['SCRIPT_FILENAME']) . '/locale/' . $language . '/translations.json',
-            // Last resort - from document root
-            $_SERVER['DOCUMENT_ROOT'] . '/CTB/admin/locale/' . $language . '/translations.json'
-        ];
+        // Determine which role directory we're in
+        $script_path = $_SERVER['SCRIPT_FILENAME'];
+        $role_dirs = ['admin', 'manager', 'resident'];
+        $detected_role = null;
+        
+        foreach ($role_dirs as $role) {
+            if (strpos($script_path, '/' . $role . '/') !== false || strpos($script_path, '\\' . $role . '\\') !== false) {
+                $detected_role = $role;
+                break;
+            }
+        }
+        
+        $translation_paths = [];
+        
+        // If we detected a role, prioritize that role's locale directory
+        if ($detected_role) {
+            $translation_paths[] = dirname(__DIR__) . '/' . $detected_role . '/locale/' . $language . '/translations.json';
+        }
+        
+        // Try from the current script's location (for role-specific pages)
+        $translation_paths[] = dirname($_SERVER['SCRIPT_FILENAME']) . '/locale/' . $language . '/translations.json';
+        
+        // Try all role directories
+        foreach ($role_dirs as $role) {
+            $translation_paths[] = dirname(__DIR__) . '/' . $role . '/locale/' . $language . '/translations.json';
+        }
+        
+        // Last resort - from document root
+        foreach ($role_dirs as $role) {
+            $translation_paths[] = $_SERVER['DOCUMENT_ROOT'] . '/CTB/' . $role . '/locale/' . $language . '/translations.json';
+        }
+        
+        // Remove duplicates while preserving order
+        $translation_paths = array_unique($translation_paths);
         
         $loaded = false;
         foreach ($translation_paths as $translation_file) {

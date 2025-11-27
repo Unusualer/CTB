@@ -50,7 +50,7 @@ try {
     if (getCurrentRole() === 'resident' && $payment['user_id'] != $current_user_id) {
         $_SESSION['error'] = __("You can only view your own payments.");
         header("Location: payments.php");
-        exit();
+            exit();
     }
     
 } catch (PDOException $e) {
@@ -133,9 +133,7 @@ $page_title = __("Payment Details");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title; ?> - <?php echo __("Community Trust Bank"); ?></title>
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="../images/logo.png">
-    <link rel="shortcut icon" href="../images/logo.png" type="image/png">
-    <link rel="apple-touch-icon" href="../images/logo.png">
+    <?php favicon_links(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">

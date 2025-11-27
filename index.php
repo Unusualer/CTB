@@ -20,9 +20,10 @@
 
     <!-- favicons
     ================================================== -->
-    <link rel="icon" type="image/png" href="images/logo.png">
-    <link rel="shortcut icon" href="images/logo.png" type="image/png">
-    <link rel="apple-touch-icon" href="images/logo.png">
+    <?php 
+    require_once 'includes/functions.php';
+    favicon_links(); 
+    ?>
     <link rel="manifest" href="site.webmanifest">
 
 </head>
@@ -50,7 +51,7 @@
 
             <div class="s-header__logo">
                 <a class="logo" href="index.php">
-                    <img src="images/logo.svg" alt="Homepage">
+                    <img src="images/logo.png" alt="Homepage">
                 </a>
             </div>
 

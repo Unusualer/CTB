@@ -114,11 +114,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $priority = $existing_maintenance['priority'];
     } else {
         // Validate status and priority for admin/manager
-        if (empty($status) || !in_array($status, $statuses)) {
-            $errors[] = __("A valid status is required.");
-        }
-        if (empty($priority) || !in_array($priority, $priorities)) {
-            $errors[] = __("A valid priority is required.");
+    if (empty($status) || !in_array($status, $statuses)) {
+        $errors[] = __("A valid status is required.");
+    }
+    if (empty($priority) || !in_array($priority, $priorities)) {
+        $errors[] = __("A valid priority is required.");
         }
     }
     
@@ -126,8 +126,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         try {
             if (!isset($db)) {
-                $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
-                $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
+            $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             }
             
             // Update maintenance - residents can only update description, title, location, dates
@@ -149,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->bindParam(':id', $maintenance_id, PDO::PARAM_INT);
             } else {
                 // Admin/manager can update all fields including status and priority
-                $stmt = $db->prepare("UPDATE maintenance SET 
+            $stmt = $db->prepare("UPDATE maintenance SET 
                                   title = :title, 
                                   description = :description, 
                                   location = :location, 
@@ -160,16 +160,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                   updated_by = :updated_by, 
                                   updated_at = NOW() 
                                   WHERE id = :id");
-                
-                $stmt->bindParam(':title', $title);
-                $stmt->bindParam(':description', $description);
-                $stmt->bindParam(':location', $location);
-                $stmt->bindParam(':start_date', $start_date);
-                $stmt->bindParam(':end_date', $end_date);
-                $stmt->bindParam(':status', $status);
-                $stmt->bindParam(':priority', $priority);
-                $stmt->bindParam(':updated_by', $_SESSION['user_id'], PDO::PARAM_INT);
-                $stmt->bindParam(':id', $maintenance_id, PDO::PARAM_INT);
+            
+            $stmt->bindParam(':title', $title);
+            $stmt->bindParam(':description', $description);
+            $stmt->bindParam(':location', $location);
+            $stmt->bindParam(':start_date', $start_date);
+            $stmt->bindParam(':end_date', $end_date);
+            $stmt->bindParam(':status', $status);
+            $stmt->bindParam(':priority', $priority);
+            $stmt->bindParam(':updated_by', $_SESSION['user_id'], PDO::PARAM_INT);
+            $stmt->bindParam(':id', $maintenance_id, PDO::PARAM_INT);
             }
             
             $stmt->execute();
@@ -234,6 +234,8 @@ function getStatusLabel($status) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title; ?> - <?php echo __("Community Trust Bank"); ?></title>
+    <!-- Favicon -->
+    <?php favicon_links(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">

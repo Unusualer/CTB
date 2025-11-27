@@ -55,37 +55,26 @@ if (isset($_GET['lang']) && in_array($_GET['lang'], ['en_US', 'fr_FR', 'es_ES'])
     exit;
 }
 
-// Check if user is logged in and is an admin
+// Check if user is logged in and is a resident
 requireAnyRole(['resident']);
+
+// Get current user ID
+$current_user_id = $_SESSION['user_id'] ?? null;
+
+if (!$current_user_id) {
+    $_SESSION['error'] = __("User session not found. Please log in again.");
+    header("Location: ../login.php");
+    exit();
+}
 
 // Get count statistics
 try {
     $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    // Count users by role
-    $stmt = $db->prepare("SELECT role, COUNT(*) as count FROM users GROUP BY role");
-    $stmt->execute();
-    $users_by_role = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    $total_users = 0;
-    $total_admins = 0;
-    $total_managers = 0;
-    $total_residents = 0;
-    
-    foreach ($users_by_role as $role_data) {
-        if ($role_data['role'] == 'admin') {
-            $total_admins = $role_data['count'];
-        } elseif ($role_data['role'] == 'manager') {
-            $total_managers = $role_data['count'];
-        } elseif ($role_data['role'] == 'resident') {
-            $total_residents = $role_data['count'];
-        }
-        $total_users += $role_data['count'];
-    }
-    
-    // Count properties
-    $stmt = $db->prepare("SELECT type, COUNT(*) as count FROM properties GROUP BY type");
+    // Count properties for current user only
+    $stmt = $db->prepare("SELECT type, COUNT(*) as count FROM properties WHERE user_id = :user_id GROUP BY type");
+    $stmt->bindParam(':user_id', $current_user_id, PDO::PARAM_INT);
     $stmt->execute();
     $properties_by_type = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -102,13 +91,9 @@ try {
         $total_properties += $type_data['count'];
     }
     
-    // Count occupied properties
-    $stmt = $db->prepare("SELECT COUNT(*) as count FROM properties WHERE user_id IS NOT NULL");
-    $stmt->execute();
-    $occupied_properties = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
-    
-    // Count tickets by status
-    $stmt = $db->prepare("SELECT status, COUNT(*) as count FROM tickets GROUP BY status");
+    // Count tickets by status for current user only
+    $stmt = $db->prepare("SELECT status, COUNT(*) as count FROM tickets WHERE user_id = :user_id GROUP BY status");
+    $stmt->bindParam(':user_id', $current_user_id, PDO::PARAM_INT);
     $stmt->execute();
     $tickets_by_status = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -131,13 +116,26 @@ try {
         $total_tickets += $status_data['count'];
     }
     
-    // Get total payments 
-    $stmt = $db->prepare("SELECT SUM(amount) as total FROM payments");
+    // Get total payments for current user's properties
+    $stmt = $db->prepare("
+        SELECT SUM(p.amount) as total 
+        FROM payments p
+        INNER JOIN properties pr ON p.property_id = pr.id
+        WHERE pr.user_id = :user_id
+    ");
+    $stmt->bindParam(':user_id', $current_user_id, PDO::PARAM_INT);
     $stmt->execute();
     $total_payments = $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?: 0;
     
-    // Get payments by status
-    $stmt = $db->prepare("SELECT status, SUM(amount) as total FROM payments GROUP BY status");
+    // Get payments by status for current user's properties
+    $stmt = $db->prepare("
+        SELECT p.status, SUM(p.amount) as total 
+        FROM payments p
+        INNER JOIN properties pr ON p.property_id = pr.id
+        WHERE pr.user_id = :user_id
+        GROUP BY p.status
+    ");
+    $stmt->bindParam(':user_id', $current_user_id, PDO::PARAM_INT);
     $stmt->execute();
     $payments_by_status = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -152,46 +150,7 @@ try {
         }
     }
     
-    // Get monthly payment data for chart (last 6 months)
-    $stmt = $db->prepare("
-        SELECT 
-            DATE_FORMAT(month, '%Y-%m') as month,
-            SUM(amount) as total_amount
-        FROM 
-            payments
-        WHERE 
-            month >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
-        GROUP BY 
-            DATE_FORMAT(month, '%Y-%m')
-        ORDER BY 
-            month ASC
-    ");
-    $stmt->execute();
-    $payment_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // Get recent activity (last 10 entries)
-    $stmt = $db->prepare("
-        SELECT a.*, u.name
-        FROM activity_log a
-        LEFT JOIN users u ON a.user_id = u.id
-        ORDER BY a.created_at DESC
-        LIMIT 10
-    ");
-    $stmt->execute();
-    $recent_activity = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // Get recent tickets (5 most recent)
-    $stmt = $db->prepare("
-        SELECT t.*, u.name
-        FROM tickets t
-        LEFT JOIN users u ON t.user_id = u.id
-        ORDER BY t.created_at DESC
-        LIMIT 5
-    ");
-    $stmt->execute();
-    $recent_tickets = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // Get maintenance data
+    // Get maintenance data (all maintenance records - residents can view all)
     $stmt = $db->prepare("
         SELECT status, COUNT(*) as count 
         FROM maintenance 
@@ -218,13 +177,15 @@ try {
     
 } catch (PDOException $e) {
     $_SESSION['error'] = "Database error: " . $e->getMessage();
-    $total_users = $total_properties = $total_tickets = $total_payments = 0;
-    $recent_activity = $recent_tickets = [];
-    $payment_data = [];
+    $total_properties = $total_tickets = $total_payments = $total_maintenance = 0;
+    $total_apartments = $total_parking = 0;
+    $open_tickets = $in_progress_tickets = $closed_tickets = 0;
+    $paid_amount = $pending_amount = 0;
+    $scheduled_maintenance = $in_progress_maintenance = $completed_maintenance = 0;
 }
 
 // Page title
-$page_title = __("Admin Dashboard");
+$page_title = __("Dashboard");
 
 // Available languages
 $available_languages = [
@@ -245,14 +206,256 @@ $current_language_name = $available_languages[$current_language] ?? $available_l
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title; ?> - Community Trust Bank</title>
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="../images/logo.png">
-    <link rel="shortcut icon" href="../images/logo.png" type="image/png">
-    <link rel="apple-touch-icon" href="../images/logo.png">
+    <?php favicon_links(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
     <link rel="stylesheet" href="css/dashboard-style.css">
     <style>
+    /* Enhanced Card Styling */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+    }
+    
+    .stat-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, var(--card-accent, #4361ee) 0%, var(--card-accent-dark, #3a56e4) 100%);
+    }
+    
+    .stat-card:nth-child(1)::before {
+        background: linear-gradient(180deg, #25c685 0%, #13b571 100%);
+    }
+    
+    .stat-card:nth-child(2)::before {
+        background: linear-gradient(180deg, #f8b830 0%, #f6a819 100%);
+    }
+    
+    .stat-card:nth-child(3)::before {
+        background: linear-gradient(180deg, #4cc9f0 0%, #39b8df 100%);
+    }
+    
+    .stat-card:nth-child(4)::before {
+        background: linear-gradient(180deg, #4361ee 0%, #3a56e4 100%);
+    }
+    
+    [data-theme="dark"] .stat-card {
+        background: #2d3748;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+    
+    /* Icon Styling */
+    .stat-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover .stat-icon {
+        transform: scale(1.05);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+    
+    .stat-icon.properties {
+        background: linear-gradient(135deg, #25c685 0%, #13b571 100%);
+    }
+    
+    .stat-icon.tickets {
+        background: linear-gradient(135deg, #f8b830 0%, #f6a819 100%);
+    }
+    
+    .stat-icon.payments {
+        background: linear-gradient(135deg, #4cc9f0 0%, #39b8df 100%);
+    }
+    
+    .stat-icon.maintenance {
+        background: linear-gradient(135deg, #4361ee 0%, #3a56e4 100%);
+    }
+    
+    .stat-icon i {
+        font-size: 28px;
+        color: white;
+    }
+    
+    /* Stat Details */
+    .stat-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .stat-details h3 {
+        font-size: 14px;
+        font-weight: 600;
+        color: #718096;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+    }
+    
+    [data-theme="dark"] .stat-details h3 {
+        color: #a0aec0;
+    }
+    
+    .stat-header-row {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 4px;
+    }
+    
+    .stat-number {
+        font-size: 36px;
+        font-weight: 700;
+        color: #2d3748;
+        line-height: 1.2;
+        margin: 0;
+    }
+    
+    [data-theme="dark"] .stat-number {
+        color: #f8f9fc;
+    }
+    
+    /* Breakdown Styling */
+    .stat-breakdown {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+    
+    .stat-breakdown span {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: #718096;
+        padding: 6px 10px;
+        background: rgba(0, 0, 0, 0.03);
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+    
+    [data-theme="dark"] .stat-breakdown span {
+        background: rgba(255, 255, 255, 0.05);
+        color: #a0aec0;
+    }
+    
+    .stat-breakdown span:hover {
+        background: rgba(0, 0, 0, 0.06);
+        transform: translateX(2px);
+    }
+    
+    [data-theme="dark"] .stat-breakdown span:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .stat-breakdown span i {
+        width: 16px;
+        opacity: 0.8;
+    }
+    
+    .stat-card:nth-child(1) .stat-breakdown span i {
+        color: #25c685;
+    }
+    
+    .stat-card:nth-child(2) .stat-breakdown span i {
+        color: #f8b830;
+    }
+    
+    .stat-card:nth-child(3) .stat-breakdown span i {
+        color: #4cc9f0;
+    }
+    
+    .stat-card:nth-child(4) .stat-breakdown span i {
+        color: #4361ee;
+    }
+    
+    /* View Link Styling */
+    .view-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 16px;
+        background: rgba(67, 97, 238, 0.08);
+        color: #4361ee;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+        transition: all 0.3s ease;
+        margin-top: 4px;
+        border: 1px solid rgba(67, 97, 238, 0.15);
+    }
+    
+    [data-theme="dark"] .view-link {
+        background: rgba(78, 115, 223, 0.15);
+        color: #9bb5ff;
+        border-color: rgba(78, 115, 223, 0.25);
+    }
+    
+    .view-link:hover {
+        background: #4361ee;
+        color: white;
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        border-color: #4361ee;
+    }
+    
+    [data-theme="dark"] .view-link:hover {
+        background: #4e73df;
+        box-shadow: 0 4px 12px rgba(78, 115, 223, 0.4);
+    }
+    
+    .view-link i {
+        transition: transform 0.3s ease;
+    }
+    
+    .view-link:hover i {
+        transform: translateX(2px);
+    }
+    
+    /* Responsive grid for 2x2 layout */
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
     /* Language Switcher Styles */
     .language-switcher {
         position: relative;
@@ -367,7 +570,6 @@ $current_language_name = $available_languages[$current_language] ?? $available_l
         background-color: rgba(28, 200, 138, 0.1);
     }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="admin-container">
@@ -379,11 +581,6 @@ $current_language_name = $available_languages[$current_language] ?? $available_l
                 <div class="page-header">
                     <h1><?php echo __("Dashboard Overview"); ?></h1>
                     <div class="header-actions" style="display: flex; align-items: center;">
-                        <button class="btn btn-primary">
-                            <i class="fas fa-download"></i>
-                            <?php echo __("Generate Report"); ?>
-                        </button>
-                        
                         <!-- Language Switcher -->
                         <div class="language-switcher">
                             <button class="dropdown-toggle" type="button" id="languageDropdown" onclick="toggleLanguageDropdown()">
@@ -403,268 +600,87 @@ $current_language_name = $available_languages[$current_language] ?? $available_l
                     </div>
                 </div>
 
-                <!-- Stats Cards -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon users">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="stat-details">
-                            <h3><?php echo __("Total Users"); ?></h3>
-                            <p class="stat-number"><?php echo number_format($total_users); ?></p>
-                            <div class="stat-breakdown">
-                                <span><i class="fas fa-user-shield"></i> <?php echo __("Administrators"); ?>: <?php echo number_format($total_admins ?? 0); ?></span>
-                                <span><i class="fas fa-user-tie"></i> <?php echo __("Managers"); ?>: <?php echo number_format($total_managers); ?></span>
-                                <span><i class="fas fa-user"></i> <?php echo __("Residents"); ?>: <?php echo number_format($total_residents); ?></span>
-                            </div>
-                        </div>
-                    </div>
-
+                <!-- Summary Cards (2x2 Grid) -->
+                <div class="stats-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                    <!-- 1. My Properties -->
                     <div class="stat-card">
                         <div class="stat-icon properties">
                             <i class="fas fa-building"></i>
                         </div>
                         <div class="stat-details">
-                            <h3><?php echo __("Properties"); ?></h3>
+                            <div class="stat-header-row">
+                                <h3><?php echo __("My Properties"); ?></h3>
                             <p class="stat-number"><?php echo number_format($total_properties); ?></p>
+                            </div>
                             <div class="stat-breakdown">
                                 <span><i class="fas fa-home"></i> <?php echo __("Apartments"); ?>: <?php echo number_format($total_apartments); ?></span>
                                 <span><i class="fas fa-car"></i> <?php echo __("Parking"); ?>: <?php echo number_format($total_parking); ?></span>
-                                <span><i class="fas fa-check-circle"></i> <?php echo __("Occupied"); ?>: <?php echo number_format($occupied_properties); ?></span>
                             </div>
+                            <a href="properties.php" class="view-link">
+                                <i class="fas fa-arrow-right"></i> <?php echo __("View All"); ?>
+                            </a>
                         </div>
                     </div>
 
+                    <!-- 2. My Tickets -->
                     <div class="stat-card">
                         <div class="stat-icon tickets">
                             <i class="fas fa-ticket-alt"></i>
                         </div>
                         <div class="stat-details">
-                            <h3><?php echo __("Tickets"); ?></h3>
+                            <div class="stat-header-row">
+                                <h3><?php echo __("My Tickets"); ?></h3>
                             <p class="stat-number"><?php echo number_format($total_tickets); ?></p>
+                            </div>
                             <div class="stat-breakdown">
                                 <span><i class="fas fa-exclamation-circle"></i> <?php echo __("Open"); ?>: <?php echo number_format($open_tickets); ?></span>
                                 <span><i class="fas fa-clock"></i> <?php echo __("In Progress"); ?>: <?php echo number_format($in_progress_tickets); ?></span>
                                 <span><i class="fas fa-check"></i> <?php echo __("Closed"); ?>: <?php echo number_format($closed_tickets); ?></span>
                             </div>
+                            <a href="tickets.php" class="view-link">
+                                <i class="fas fa-arrow-right"></i> <?php echo __("View All"); ?>
+                            </a>
                         </div>
                     </div>
 
+                    <!-- 3. My Payments -->
                     <div class="stat-card">
                         <div class="stat-icon payments">
                             <i class="fas fa-dollar-sign"></i>
                         </div>
                         <div class="stat-details">
-                            <h3><?php echo __("Total Payments"); ?></h3>
+                            <div class="stat-header-row">
+                                <h3><?php echo __("My Payments"); ?></h3>
                             <p class="stat-number"><?php echo format_currency($total_payments); ?></p>
+                            </div>
                             <div class="stat-breakdown">
                                 <span><i class="fas fa-check-circle"></i> <?php echo __("Paid"); ?>: <?php echo format_currency($paid_amount); ?></span>
                                 <span><i class="fas fa-clock"></i> <?php echo __("Pending"); ?>: <?php echo format_currency($pending_amount); ?></span>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Charts Section -->
-                <div class="charts-grid">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3><i class="fas fa-chart-line"></i> <?php echo __("Monthly Payment Overview"); ?></h3>
-                            <div class="chart-actions">
-                                <a href="payments.php" class="btn-icon" title="<?php echo __("View All Payments"); ?>"><i class="fas fa-external-link-alt"></i></a>
-                            </div>
-                        </div>
-                        <div class="chart-body">
-                            <canvas id="monthlyPaymentsChart"></canvas>
+                            <a href="payments.php" class="view-link">
+                                <i class="fas fa-arrow-right"></i> <?php echo __("View All"); ?>
+                            </a>
                         </div>
                     </div>
 
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3><i class="fas fa-chart-pie"></i> <?php echo __("Ticket Status Distribution"); ?></h3>
-                            <div class="chart-actions">
-                                <a href="tickets.php" class="btn-icon" title="<?php echo __("View All Tickets"); ?>"><i class="fas fa-external-link-alt"></i></a>
-                            </div>
-                        </div>
-                        <div class="chart-body">
-                            <canvas id="ticketStatusChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Activity and Tickets -->
-                <div class="content-grid">
-                    <div class="content-card">
-                        <div class="card-header">
-                            <h3><i class="fas fa-history"></i> <?php echo __("Recent Activity"); ?></h3>
-                            <a href="activity-log.php" class="view-all"><?php echo __("View All"); ?></a>
-                        </div>
-                        <div class="activity-list dashboard-activity">
-                            <?php if (!empty($recent_activity)): ?>
-                                <?php foreach ($recent_activity as $activity): ?>
-                                    <div class="activity-item">
-                                        <div class="activity-icon <?php echo $activity['action']; ?>">
-                                            <?php
-                                            $icon_class = '';
-                                            switch ($activity['action']) {
-                                                case 'create':
-                                                case 'add':
-                                                    $icon_class = 'fas fa-plus';
-                                                    break;
-                                                case 'payment':
-                                                    $icon_class = 'fas fa-credit-card';
-                                                    break;
-                                                case 'update':
-                                                    $icon_class = 'fas fa-edit';
-                                                    break;
-                                                case 'delete':
-                                                    $icon_class = 'fas fa-trash';
-                                                    break;
-                                                case 'login':
-                                                    $icon_class = 'fas fa-sign-in-alt';
-                                                    break;
-                                                default:
-                                                    $icon_class = 'fas fa-history';
-                                            }
-                                            ?>
-                                            <i class="<?php echo $icon_class; ?>"></i>
-                                        </div>
-                                        <div class="activity-details">
-                                            <p class="activity-text">
-                                                <strong><?php echo htmlspecialchars($activity['name']); ?></strong> 
-                                                <?php 
-                                                    $action_verb = $activity['action'];
-                                                    switch ($action_verb) {
-                                                        case 'payment':
-                                                            echo __("made a payment for");
-                                                            break;
-                                                        case 'login':
-                                                            echo __("logged in");
-                                                            break;
-                                                        case 'create':
-                                                            echo __("created");
-                                                            break;
-                                                        case 'update':
-                                                            echo __("updated");
-                                                            break;
-                                                        case 'delete':
-                                                            echo __("deleted");
-                                                            break;
-                                                        default:
-                                                            echo ucfirst($action_verb);
-                                                    }
-                                                ?>
-                                                <?php echo strtolower($activity['entity_type']); ?>
-                                                <?php if (!empty($activity['entity_id'])): ?>
-                                                    #<?php echo $activity['entity_id']; ?>
-                                                <?php endif; ?>
-                                                <?php if (!empty($activity['details'])): ?>
-                                                    - <?php echo __($activity['details']); ?>
-                                                <?php endif; ?>
-                                            </p>
-                                            <span class="activity-time">
-                                                <?php echo time_elapsed_string($activity['created_at']); ?>
-                                            </span>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <div class="empty-state">
-                                    <i class="fas fa-history"></i>
-                                    <p><?php echo __("No recent activity"); ?></p>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-
-                    <div class="content-card">
-                        <div class="card-header">
-                            <h3><i class="fas fa-ticket-alt"></i> <?php echo __("Recent Tickets"); ?></h3>
-                            <a href="tickets.php" class="view-all"><?php echo __("View All"); ?></a>
-                        </div>
-                        <div class="tickets-list dashboard-tickets">
-                            <?php if (!empty($recent_tickets)): ?>
-                                <?php foreach ($recent_tickets as $ticket): ?>
-                                    <div class="ticket-item">
-                                        <div class="ticket-status <?php echo $ticket['status']; ?>">
-                                            <?php 
-                                                $status_text = $ticket['status'];
-                                                switch ($status_text) {
-                                                    case 'open':
-                                                        echo __("Open");
-                                                        break;
-                                                    case 'in_progress':
-                                                        echo __("In Progress");
-                                                        break;
-                                                    case 'closed':
-                                                        echo __("Closed");
-                                                        break;
-                                                    case 'reopened':
-                                                        echo __("Reopened");
-                                                        break;
-                                                    default:
-                                                        echo ucfirst($status_text);
-                                                }
-                                            ?>
-                                        </div>
-                                        <div class="ticket-details">
-                                            <h4><?php echo htmlspecialchars($ticket['subject']); ?></h4>
-                                            <p class="ticket-info">
-                                                <span class="ticket-user">
-                                                    <i class="fas fa-user"></i>
-                                                    <?php echo htmlspecialchars($ticket['name']); ?>
-                                                </span>
-                                            </p>
-                                            <span class="ticket-time">
-                                                <?php echo time_elapsed_string($ticket['created_at']); ?>
-                                            </span>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <div class="empty-state">
-                                    <i class="fas fa-ticket-alt"></i>
-                                    <p><?php echo __("No recent tickets"); ?></p>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Maintenance Section -->
-                <div class="content-card maintenance-card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-tools"></i> <?php echo __("Maintenance Overview"); ?></h3>
-                        <a href="maintenance.php" class="view-all"><?php echo __("View All"); ?></a>
-                    </div>
-                    <div class="maintenance-stats">
-                        <div class="maintenance-stat">
-                            <div class="stat-circle scheduled">
-                                <i class="fas fa-calendar"></i>
-                                <span class="count"><?php echo $scheduled_maintenance; ?></span>
-                            </div>
-                            <p><?php echo __("Scheduled"); ?></p>
-                        </div>
-                        <div class="maintenance-stat">
-                            <div class="stat-circle in-progress">
+                    <!-- 4. Maintenance Overview -->
+                    <div class="stat-card">
+                        <div class="stat-icon maintenance">
                                 <i class="fas fa-tools"></i>
-                                <span class="count"><?php echo $in_progress_maintenance; ?></span>
-                            </div>
-                            <p><?php echo __("In Progress"); ?></p>
                         </div>
-                        <div class="maintenance-stat">
-                            <div class="stat-circle completed">
-                                <i class="fas fa-check"></i>
-                                <span class="count"><?php echo $completed_maintenance; ?></span>
+                        <div class="stat-details">
+                            <div class="stat-header-row">
+                                <h3><?php echo __("Maintenance Overview"); ?></h3>
+                                <p class="stat-number"><?php echo number_format($total_maintenance); ?></p>
                             </div>
-                            <p><?php echo __("Completed"); ?></p>
-                        </div>
-                        <div class="maintenance-stat">
-                            <div class="stat-circle total">
-                                <i class="fas fa-clipboard-list"></i>
-                                <span class="count"><?php echo $total_maintenance; ?></span>
+                            <div class="stat-breakdown">
+                                <span><i class="fas fa-calendar"></i> <?php echo __("Scheduled"); ?>: <?php echo number_format($scheduled_maintenance); ?></span>
+                                <span><i class="fas fa-tools"></i> <?php echo __("In Progress"); ?>: <?php echo number_format($in_progress_maintenance); ?></span>
+                                <span><i class="fas fa-check"></i> <?php echo __("Completed"); ?>: <?php echo number_format($completed_maintenance); ?></span>
                             </div>
-                            <p><?php echo __("Total"); ?></p>
+                            <a href="maintenance.php" class="view-link">
+                                <i class="fas fa-arrow-right"></i> <?php echo __("View All"); ?>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -672,202 +688,6 @@ $current_language_name = $available_languages[$current_language] ?? $available_l
         </main>
     </div>
 
-    <script>
-    // Set new default font family and font color to mimic Bootstrap's default styling
-    Chart.defaults.font.family = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-    Chart.defaults.color = '#858796';
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get theme from localStorage or default to light
-        const currentTheme = localStorage.getItem('darkMode') === 'enabled' ? 'dark' : 'light';
-        
-        // Monthly Payments Chart
-        var monthlyPaymentsChart = document.getElementById("monthlyPaymentsChart");
-        var paymentLabels = [];
-        var paymentData = [];
-
-        <?php foreach ($payment_data as $data): ?>
-            paymentLabels.push("<?php echo format_month_year($data['month'] . '-01'); ?>");
-            paymentData.push(<?php echo $data['total_amount']; ?>);
-        <?php endforeach; ?>
-
-        // Add a default dataset if none exists
-        if (paymentLabels.length === 0) {
-            const months = [
-                "<?php echo format_month_year(date('Y-01-01')); ?>", 
-                "<?php echo format_month_year(date('Y-02-01')); ?>", 
-                "<?php echo format_month_year(date('Y-03-01')); ?>", 
-                "<?php echo format_month_year(date('Y-04-01')); ?>", 
-                "<?php echo format_month_year(date('Y-05-01')); ?>", 
-                "<?php echo format_month_year(date('Y-06-01')); ?>"
-            ];
-            
-            months.forEach(month => {
-                paymentLabels.push(month);
-                paymentData.push(0);
-            });
-        }
-
-        if (monthlyPaymentsChart) {
-            var myLineChart = new Chart(monthlyPaymentsChart, {
-                type: 'line',
-                data: {
-                    labels: paymentLabels,
-                    datasets: [{
-                        label: "<?php echo __('Monthly Payment Overview'); ?>",
-                        lineTension: 0.3,
-                        backgroundColor: "rgba(78, 115, 223, 0.05)",
-                        borderColor: "rgba(78, 115, 223, 1)",
-                        pointRadius: 3,
-                        pointBackgroundColor: "rgba(78, 115, 223, 1)",
-                        pointBorderColor: "rgba(78, 115, 223, 1)",
-                        pointHoverRadius: 3,
-                        pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
-                        pointHoverBorderColor: "rgba(78, 115, 223, 1)",
-                        pointHitRadius: 10,
-                        pointBorderWidth: 2,
-                        data: paymentData,
-                        fill: true
-                    }],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            backgroundColor: currentTheme === 'dark' ? '#2d3748' : '#fff',
-                            titleColor: currentTheme === 'dark' ? '#fff' : '#5a5c69',
-                            bodyColor: currentTheme === 'dark' ? '#e0e0e0' : '#858796',
-                            borderColor: currentTheme === 'dark' ? '#4a5568' : '#e3e6f0',
-                            borderWidth: 1,
-                            padding: 12,
-                            displayColors: false,
-                            callbacks: {
-                                label: function(context) {
-                                    return 'Montant: ' + context.raw.toLocaleString(undefined, {
-                                        style: 'currency',
-                                        currency: 'MAD',
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2
-                                    });
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                display: false,
-                                drawBorder: false
-                            },
-                            ticks: {
-                                color: currentTheme === 'dark' ? '#e0e0e0' : '#858796'
-                            }
-                        },
-                        y: {
-                            ticks: {
-                                color: currentTheme === 'dark' ? '#e0e0e0' : '#858796',
-                                callback: function(value) {
-                                    return value.toLocaleString(undefined, {
-                                        style: 'currency',
-                                        currency: 'MAD',
-                                        minimumFractionDigits: 0,
-                                        maximumFractionDigits: 0
-                                    });
-                                }
-                            },
-                            grid: {
-                                color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Ticket Status Chart
-        var ticketStatusChart = document.getElementById("ticketStatusChart");
-        var ticketStatuses = ["<?php echo __('Open'); ?>", "<?php echo __('In Progress'); ?>", "<?php echo __('Closed'); ?>"];
-        var ticketData = [
-            <?php echo $open_tickets; ?>,
-            <?php echo $in_progress_tickets; ?>,
-            <?php echo $closed_tickets; ?>
-        ];
-        var ticketColors = [
-            'rgba(78, 115, 223, 1)', 
-            'rgba(28, 200, 138, 1)', 
-            'rgba(54, 185, 204, 1)'
-        ];
-        var ticketHoverColors = [
-            'rgba(46, 89, 217, 1)', 
-            'rgba(23, 166, 115, 1)', 
-            'rgba(44, 159, 175, 1)'
-        ];
-
-        if (ticketStatusChart) {
-            var myPieChart = new Chart(ticketStatusChart, {
-                type: 'doughnut',
-                data: {
-                    labels: ticketStatuses,
-                    datasets: [{
-                        data: ticketData,
-                        backgroundColor: ticketColors,
-                        hoverBackgroundColor: ticketHoverColors,
-                        hoverBorderColor: currentTheme === 'dark' ? '#2c3035' : '#ffffff',
-                        borderWidth: 2,
-                        borderColor: currentTheme === 'dark' ? '#2d3748' : '#ffffff',
-                    }],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'bottom',
-                            labels: {
-                                color: currentTheme === 'dark' ? '#e0e0e0' : '#858796',
-                                padding: 20,
-                                font: {
-                                    size: 12,
-                                    weight: '500'
-                                }
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: currentTheme === 'dark' ? '#2d3748' : '#fff',
-                            titleColor: currentTheme === 'dark' ? '#fff' : '#5a5c69',
-                            bodyColor: currentTheme === 'dark' ? '#e0e0e0' : '#858796',
-                            borderColor: currentTheme === 'dark' ? '#4a5568' : '#e3e6f0',
-                            borderWidth: 1,
-                            padding: 12,
-                            displayColors: false,
-                            callbacks: {
-                                label: function(context) {
-                                    var label = context.label || '';
-                                    var value = context.raw;
-                                    var total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    var percentage = Math.round((value / total) * 100);
-                                    return label + ': ' + value + ' (' + percentage + '%)';
-                                }
-                            }
-                        }
-                    },
-                    cutout: '70%',
-                    animation: {
-                        animateScale: true,
-                        animateRotate: true,
-                        duration: 2000,
-                        easing: 'easeOutCirc'
-                    }
-                },
-            });
-        }
-    });
-    </script>
     <script src="js/dark-mode.js"></script>
     <script src="js/dashboard.js"></script>
     

@@ -102,9 +102,9 @@ This document outlines the CRUD (Create, Read, Update, Delete) permissions for e
 - **Delete**: ❌ Cannot delete properties
 
 ### Tickets Management
-- **Create**: ✅ Own tickets only
+- **Create**: ✅ Own tickets only (status defaulted to "Open", cannot be changed)
 - **Read**: ✅ Own tickets only
-- **Update**: ✅ Own tickets only (can update description, cannot change status/priority)
+- **Update**: ✅ Own tickets only (can update subject, description, and priority; cannot change status or response)
 - **Delete**: ❌ Cannot delete tickets
 
 ### Payments Management
@@ -114,13 +114,13 @@ This document outlines the CRUD (Create, Read, Update, Delete) permissions for e
 - **Delete**: ❌ Cannot delete payments
 
 ### Maintenance Management
-- **Create**: ✅ Own maintenance requests
-- **Read**: ✅ Own maintenance requests
-- **Update**: ✅ Own maintenance requests (can update description, cannot change status)
+- **Create**: ❌ Cannot create maintenance requests
+- **Read**: ✅ All maintenance records (view-only, no filtering by user)
+- **Update**: ❌ Cannot update maintenance records
 - **Delete**: ❌ Cannot delete maintenance requests
 
 ### Activity Log
-- **Read**: ✅ Own activity log only
+- **Read**: ❌ Cannot access activity log
 - **Export**: ❌ Cannot export
 
 ### Dashboard
@@ -134,7 +134,8 @@ This document outlines the CRUD (Create, Read, Update, Delete) permissions for e
 
 2. **Data Filtering**: 
    - Manager views should filter out admin users from user lists
-   - Resident views should filter all data to show only their own records
+   - Resident views should filter most data to show only their own records (properties, tickets, payments)
+   - Resident maintenance views show all maintenance records (read-only)
 
 3. **UI Elements**: 
    - Hide/disable buttons for actions the user cannot perform
@@ -158,26 +159,34 @@ This document outlines the CRUD (Create, Read, Update, Delete) permissions for e
 
 ### Files that should allow RESIDENT access:
 - `view-user.php` - Own profile only
-- `edit-user.php` - Own profile only
-- `view-property.php` - Own properties only
-- `tickets.php` - Own tickets only
-- `add-ticket.php` - Create own tickets
-- `edit-ticket.php` - Edit own tickets (limited fields)
-- `view-payment.php` - Own payments only
-- `view-maintenance.php` - Own maintenance only
-- `add-maintenance.php` - Create own maintenance
-- `edit-maintenance.php` - Edit own maintenance (limited fields)
+- `edit-user.php` - Own profile only (limited fields: name, email, phone, password)
+- `properties.php` - Own properties only (view-only, no edit/delete)
+- `view-property.php` - Own properties only (view-only, no edit)
+- `tickets.php` - Own tickets only (view-only, no delete)
+- `add-ticket.php` - Create own tickets (status fixed to "Open", can set priority)
+- `edit-ticket.php` - Edit own tickets (subject, description, priority only)
+- `view-ticket.php` - View own tickets only (no update/delete)
+- `payments.php` - Own payments only (view-only, no add/edit/delete)
+- `view-payment.php` - Own payments only (view-only)
+- `maintenance.php` - All maintenance records (view-only, no add/edit/delete)
+- `view-maintenance.php` - All maintenance records (view-only)
 - `dashboard.php` - Personal dashboard only
-- `activity-log.php` - Own activity only
 
-### Files that should remain ADMIN only:
-- `users.php` - Full user management
-- `add-user.php` - Create users (manager can create residents)
-- `edit-user.php` - Edit users (manager can edit residents)
-- `delete-user.php` - Delete users
-- `add-property.php` - Create properties
-- `edit-property.php` - Edit properties
-- `delete-payment.php` - Delete payments
-- `delete-maintenance.php` - Delete maintenance
-- `export-activity-log.php` - Export logs
+### Files that should remain ADMIN only (or MANAGER for some):
+- `users.php` - Full user management (admin) / Residents only (manager)
+- `add-user.php` - Create users (admin: all, manager: residents only)
+- `edit-user.php` - Edit users (admin: all, manager: residents only, resident: own profile only)
+- `delete-user.php` - Delete users (admin only)
+- `add-property.php` - Create properties (admin, manager)
+- `edit-property.php` - Edit properties (admin, manager)
+- `delete-property.php` - Delete properties (admin only)
+- `add-payment.php` - Create payments (admin, manager)
+- `edit-payment.php` - Edit payments (admin, manager)
+- `delete-payment.php` - Delete payments (admin only)
+- `add-maintenance.php` - Create maintenance (admin, manager)
+- `edit-maintenance.php` - Edit maintenance (admin, manager)
+- `delete-maintenance.php` - Delete maintenance (admin only)
+- `delete-ticket.php` - Delete tickets (admin only)
+- `activity-log.php` - View activity logs (admin, manager)
+- `export-activity-log.php` - Export logs (admin only)
 

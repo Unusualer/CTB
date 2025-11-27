@@ -33,9 +33,10 @@ if (isset($_SESSION['login_success'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="icon" type="image/png" href="images/logo.png">
-    <link rel="shortcut icon" href="images/logo.png" type="image/png">
-    <link rel="apple-touch-icon" href="images/logo.png">
+    <?php 
+    require_once 'includes/functions.php';
+    favicon_links(); 
+    ?>
     <link rel="manifest" href="site.webmanifest">
 
     <style>

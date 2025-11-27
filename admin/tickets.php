@@ -18,21 +18,6 @@ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $items_per_page = 10;
 $offset = ($page - 1) * $items_per_page;
 
-// Handle sorting
-$sort_column = $_GET['sort'] ?? 'created_at';
-$sort_direction = $_GET['dir'] ?? 'desc';
-
-// Validate sort column (whitelist allowed columns)
-$allowed_columns = ['id', 'subject', 'status', 'priority', 'created_at'];
-if (!in_array($sort_column, $allowed_columns)) {
-    $sort_column = 'created_at';
-}
-
-// Validate sort direction
-if (!in_array(strtolower($sort_direction), ['asc', 'desc'])) {
-    $sort_direction = 'desc';
-}
-
 // Get total count and tickets list
 try {
     $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
@@ -65,8 +50,8 @@ try {
         $params[':priority'] = $priority_filter;
     }
     
-    // Add ordering (column name is validated against whitelist, so safe to use)
-    $query .= " ORDER BY t.`" . $sort_column . "` " . strtoupper($sort_direction) . " LIMIT :offset, :limit";
+    // Add ordering
+    $query .= " ORDER BY t.created_at DESC LIMIT :offset, :limit";
     
     // Get total count
     $count_stmt = $db->prepare($count_query);
@@ -116,47 +101,10 @@ $page_title = __("Ticket Management");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title; ?> - <?php echo __("Community Trust Bank"); ?></title>
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="../images/logo.png">
-    <link rel="shortcut icon" href="../images/logo.png" type="image/png">
-    <link rel="apple-touch-icon" href="../images/logo.png">
+    <?php favicon_links(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
-    <style>
-        /* Sortable table header styles */
-        .table th.sortable {
-            cursor: pointer;
-            user-select: none;
-            position: relative;
-            padding-right: 30px;
-            transition: background-color 0.2s;
-        }
-        
-        .table th.sortable:hover {
-            background-color: rgba(0, 0, 0, 0.05);
-        }
-        
-        .table th.sortable .sort-icon {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6c757d;
-            font-size: 0.85em;
-        }
-        
-        .table th.sortable:hover .sort-icon {
-            color: #007bff;
-        }
-        
-        .table th.sortable[data-sorted="true"] .sort-icon {
-            color: #007bff;
-        }
-        
-        .table th.actions {
-            cursor: default;
-        }
-    </style>
 </head>
 <body>
     <div class="admin-container">
@@ -284,58 +232,13 @@ $page_title = __("Ticket Management");
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th class="sortable" data-column="id">
-                                            <?php echo __("ID"); ?>
-                                            <span class="sort-icon">
-                                                <?php if ($sort_column === 'id'): ?>
-                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
-                                                <?php else: ?>
-                                                    <i class="fas fa-sort"></i>
-                                                <?php endif; ?>
-                                            </span>
-                                        </th>
-                                        <th class="sortable" data-column="subject">
-                                            <?php echo __("Title"); ?>
-                                            <span class="sort-icon">
-                                                <?php if ($sort_column === 'subject'): ?>
-                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
-                                                <?php else: ?>
-                                                    <i class="fas fa-sort"></i>
-                                                <?php endif; ?>
-                                            </span>
-                                        </th>
+                                        <th><?php echo __("ID"); ?></th>
+                                        <th><?php echo __("Title"); ?></th>
                                         <th><?php echo __("Property"); ?></th>
                                         <th><?php echo __("Reported By"); ?></th>
-                                        <th class="sortable" data-column="status">
-                                            <?php echo __("Status"); ?>
-                                            <span class="sort-icon">
-                                                <?php if ($sort_column === 'status'): ?>
-                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
-                                                <?php else: ?>
-                                                    <i class="fas fa-sort"></i>
-                                                <?php endif; ?>
-                                            </span>
-                                        </th>
-                                        <th class="sortable" data-column="priority">
-                                            <?php echo __("Priority"); ?>
-                                            <span class="sort-icon">
-                                                <?php if ($sort_column === 'priority'): ?>
-                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
-                                                <?php else: ?>
-                                                    <i class="fas fa-sort"></i>
-                                                <?php endif; ?>
-                                            </span>
-                                        </th>
-                                        <th class="sortable" data-column="created_at">
-                                            <?php echo __("Created"); ?>
-                                            <span class="sort-icon">
-                                                <?php if ($sort_column === 'created_at'): ?>
-                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
-                                                <?php else: ?>
-                                                    <i class="fas fa-sort"></i>
-                                                <?php endif; ?>
-                                            </span>
-                                        </th>
+                                        <th><?php echo __("Status"); ?></th>
+                                        <th><?php echo __("Priority"); ?></th>
+                                        <th><?php echo __("Created"); ?></th>
                                         <th><?php echo __("Actions"); ?></th>
                                     </tr>
                                 </thead>
@@ -447,20 +350,20 @@ $page_title = __("Ticket Management");
                         <?php if ($total_pages > 1): ?>
                             <div class="pagination">
                                 <?php if ($page > 1): ?>
-                                    <a href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status_filter); ?>&priority=<?php echo urlencode($priority_filter); ?>&sort=<?php echo urlencode($sort_column); ?>&dir=<?php echo urlencode($sort_direction); ?>" class="pagination-link">
+                                    <a href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status_filter); ?>&priority=<?php echo urlencode($priority_filter); ?>" class="pagination-link">
                                         <i class="fas fa-chevron-left"></i>
                                     </a>
                                 <?php endif; ?>
                                 
                                 <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
-                                    <a href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status_filter); ?>&priority=<?php echo urlencode($priority_filter); ?>&sort=<?php echo urlencode($sort_column); ?>&dir=<?php echo urlencode($sort_direction); ?>" 
+                                    <a href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status_filter); ?>&priority=<?php echo urlencode($priority_filter); ?>" 
                                        class="pagination-link <?php echo $i === $page ? 'active' : ''; ?>">
                                         <?php echo $i; ?>
                                     </a>
                                 <?php endfor; ?>
                                 
                                 <?php if ($page < $total_pages): ?>
-                                    <a href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status_filter); ?>&priority=<?php echo urlencode($priority_filter); ?>&sort=<?php echo urlencode($sort_column); ?>&dir=<?php echo urlencode($sort_direction); ?>" class="pagination-link">
+                                    <a href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status_filter); ?>&priority=<?php echo urlencode($priority_filter); ?>" class="pagination-link">
                                         <i class="fas fa-chevron-right"></i>
                                     </a>
                                 <?php endif; ?>
@@ -494,43 +397,6 @@ $page_title = __("Ticket Management");
     </div>
 
     <script src="js/dark-mode.js"></script>
-    <script>
-        // Track current sort state - get from URL params or use defaults
-        const urlParams = new URLSearchParams(window.location.search);
-        let currentSort = {
-            column: urlParams.get('sort') || 'created_at',
-            direction: urlParams.get('dir') || 'desc'
-        };
-        
-        // Function to initialize sortable headers
-        function initSortableHeaders() {
-            const sortableHeaders = document.querySelectorAll('.table th.sortable');
-            sortableHeaders.forEach(header => {
-                header.addEventListener('click', function() {
-                    const column = this.getAttribute('data-column');
-                    
-                    // Toggle sort direction if clicking the same column, otherwise default to ascending
-                    if (currentSort.column === column) {
-                        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-                    } else {
-                        currentSort.column = column;
-                        currentSort.direction = 'asc';
-                    }
-                    
-                    // Reload page with new sort
-                    const newUrl = new URL(window.location.href);
-                    newUrl.searchParams.set('sort', currentSort.column);
-                    newUrl.searchParams.set('dir', currentSort.direction);
-                    window.location.href = newUrl.toString();
-                });
-            });
-        }
-        
-        // Initialize sortable headers on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            initSortableHeaders();
-        });
-    </script>
     <style>
         /* Styles pour la cellule d'information utilisateur */
         .user-info-cell {

@@ -466,4 +466,62 @@ function pagination_links($current_page, $total_pages, $url_pattern = '?page=%d'
     $links .= '</ul></nav>';
     
     return $links;
+}
+
+/**
+ * Output favicon links with automatic path detection
+ * This function automatically determines the correct path to images/logo.png
+ * based on the current file's location (root, admin, or admin/includes)
+ */
+function favicon_links() {
+    // Get the directory of the file that called this function
+    $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+    
+    // Try to get the calling file from the backtrace
+    // First check if called from a template (2 levels deep), then direct call (1 level)
+    $calling_file = null;
+    if (isset($backtrace[1]['file'])) {
+        $calling_file = $backtrace[1]['file'];
+    } elseif (isset($backtrace[0]['file'])) {
+        $calling_file = $backtrace[0]['file'];
+    }
+    
+    if (!$calling_file) {
+        $calling_file = __FILE__;
+    }
+    
+    $calling_dir = dirname($calling_file);
+    
+    // Get the project root directory (parent of includes directory)
+    $project_root = dirname(__DIR__);
+    
+    // Normalize paths for comparison (convert backslashes to forward slashes)
+    $calling_dir_normalized = str_replace('\\', '/', $calling_dir);
+    $project_root_normalized = str_replace('\\', '/', $project_root);
+    
+    // Calculate relative path from calling file to project root
+    $relative_path = str_replace($project_root_normalized, '', $calling_dir_normalized);
+    $relative_path = trim($relative_path, '/');
+    
+    // Determine the path prefix based on directory depth
+    if (empty($relative_path)) {
+        // Root level (index.php, login.php)
+        $logo_path = 'images/logo.png';
+    } elseif (strpos($relative_path, 'admin/includes') !== false || strpos($relative_path, 'resident/includes') !== false || strpos($relative_path, 'manager/includes') !== false) {
+        // Admin/Resident/Manager includes directory
+        $logo_path = '../../images/logo.png';
+    } elseif (strpos($relative_path, 'admin') !== false || strpos($relative_path, 'resident') !== false || strpos($relative_path, 'manager') !== false) {
+        // Admin/Resident/Manager directory
+        $logo_path = '../images/logo.png';
+    } else {
+        // Other subdirectories - default to going up one level
+        $logo_path = '../images/logo.png';
+    }
+    
+    // Output favicon links
+    echo '    <!-- Favicon -->' . "\n";
+    echo '    <link rel="shortcut icon" href="' . htmlspecialchars($logo_path) . '" type="image/png">' . "\n";
+    echo '    <link rel="icon" type="image/png" sizes="32x32" href="' . htmlspecialchars($logo_path) . '">' . "\n";
+    echo '    <link rel="icon" type="image/png" sizes="16x16" href="' . htmlspecialchars($logo_path) . '">' . "\n";
+    echo '    <link rel="apple-touch-icon" sizes="180x180" href="' . htmlspecialchars($logo_path) . '">' . "\n";
 } 

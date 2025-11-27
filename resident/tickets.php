@@ -120,9 +120,7 @@ $page_title = __("Ticket Management");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title; ?> - <?php echo __("Community Trust Bank"); ?></title>
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="../images/logo.png">
-    <link rel="shortcut icon" href="../images/logo.png" type="image/png">
-    <link rel="apple-touch-icon" href="../images/logo.png">
+    <?php favicon_links(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
@@ -519,7 +517,9 @@ $page_title = __("Ticket Management");
             gap: 10px;
         }
         
-        .user-avatar {
+        /* Scope avatar styles to only affect table avatars, not sidebar */
+        .data-table .user-info-cell .user-avatar,
+        table .user-info-cell .user-avatar {
             width: 32px;
             height: 32px;
             border-radius: 50%;
@@ -531,7 +531,8 @@ $page_title = __("Ticket Management");
             flex-shrink: 0;
         }
         
-        .user-avatar.unknown {
+        .data-table .user-info-cell .user-avatar.unknown,
+        table .user-info-cell .user-avatar.unknown {
             background: linear-gradient(135deg, #6c757d, #495057);
         }
         

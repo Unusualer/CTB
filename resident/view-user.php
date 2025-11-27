@@ -73,12 +73,6 @@ try {
         $assigned_properties = $prop_stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
-    // Get activity log for this user
-    $log_stmt = $db->prepare("SELECT * FROM activity_log WHERE user_id = :user_id ORDER BY created_at DESC LIMIT 10");
-    $log_stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-    $log_stmt->execute();
-    $activity_logs = $log_stmt->fetchAll(PDO::FETCH_ASSOC);
-    
 } catch (PDOException $e) {
     $_SESSION['error'] = __("Database error") . ": " . $e->getMessage();
     header("Location: users.php");
@@ -86,7 +80,7 @@ try {
 }
 
 // Page title
-$page_title = __("View User");
+$page_title = __("My Profile");
 ?>
 
 <!DOCTYPE html>
@@ -94,11 +88,9 @@ $page_title = __("View User");
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?> - Community Trust Bank</title>
+    <title><?php echo $page_title; ?> - <?php echo __("Community Trust Bank"); ?></title>
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="../images/logo.png">
-    <link rel="shortcut icon" href="../images/logo.png" type="image/png">
-    <link rel="apple-touch-icon" href="../images/logo.png">
+    <?php favicon_links(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
@@ -230,34 +222,6 @@ $page_title = __("View User");
                         </div>
                     <?php endif; ?>
 
-                    <!-- Activity Log Card -->
-                    <div class="card activity-card">
-                        <div class="card-header">
-                            <h3><i class="fas fa-history"></i> <?php echo __("Recent Activity"); ?></h3>
-                        </div>
-                        <div class="card-body">
-                            <?php if (empty($activity_logs)): ?>
-                                <div class="no-data">
-                                    <i class="far fa-clock"></i>
-                                    <p><?php echo __("No recent activity found."); ?></p>
-                                </div>
-                            <?php else: ?>
-                                <div class="activity-timeline">
-                                    <?php foreach ($activity_logs as $log): ?>
-                                        <div class="activity-item">
-                                            <div class="activity-icon">
-                                                <i class="fas fa-circle"></i>
-                                            </div>
-                                            <div class="activity-content">
-                                                <p class="activity-text"><?php echo isset($log['description']) ? htmlspecialchars($log['description']) : __("No description available"); ?></p>
-                                                <p class="activity-time"><?php echo isset($log['created_at']) ? date('d M Y H:i', strtotime($log['created_at'])) : __("Unknown date"); ?></p>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
                 </div>
             </div>
         </main>

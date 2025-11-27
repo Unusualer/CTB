@@ -116,6 +116,12 @@ body {
     color: white;
 }
 
+/* Ensure sidebar avatar maintains its size */
+.sidebar .user-info .user-avatar {
+    width: 40px !important;
+    height: 40px !important;
+}
+
 .user-details h4 {
     font-size: 0.875rem;
     font-weight: 600;

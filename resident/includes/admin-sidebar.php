@@ -49,11 +49,11 @@ $profile_link = $current_user_id ? "view-user.php?id=" . urlencode((string)$curr
     
     <a href="<?php echo htmlspecialchars($profile_link); ?>" style="text-decoration: none; color: inherit; display: block;">
         <div class="user-info" style="cursor: pointer; transition: background-color 0.2s;">
-            <div class="user-avatar">
-                <i class="fas fa-user-circle"></i>
-            </div>
-            <div class="user-details">
-                <h4><?php echo htmlspecialchars($_SESSION['name'] ?? 'Resident User'); ?></h4>
+        <div class="user-avatar">
+            <i class="fas fa-user-circle"></i>
+        </div>
+        <div class="user-details">
+                <h4><?php echo htmlspecialchars($_SESSION['name'] ?? __("Resident User")); ?></h4>
                 <p><?php echo htmlspecialchars($role_label); ?></p>
             </div>
         </div>
