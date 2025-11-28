@@ -151,6 +151,66 @@ $page_title = __("Payment Management");
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
     <link rel="stylesheet" href="css/colorful-theme.css">
+    <style>
+        /* Status indicators with colored backgrounds and white text */
+        .status-indicator {
+            display: inline-block;
+            padding: 0.4rem 0.9rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #ffffff !important;
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        .status-indicator.status-danger {
+            background-color: #dc3545;
+        }
+        
+        .status-indicator.status-warning {
+            background-color: #ffc107;
+            color: #000000 !important;
+        }
+        
+        .status-indicator.status-success {
+            background-color: #198754;
+        }
+        
+        .status-indicator.status-primary {
+            background-color: #4361ee;
+        }
+        
+        .status-indicator.status-secondary {
+            background-color: #6c757d;
+        }
+        
+        /* Dark mode - keep white text but adjust backgrounds if needed */
+        [data-theme="dark"] .status-indicator.status-danger {
+            background-color: #dc3545;
+            color: #ffffff !important;
+        }
+        
+        [data-theme="dark"] .status-indicator.status-warning {
+            background-color: #ffc107;
+            color: #000000 !important;
+        }
+        
+        [data-theme="dark"] .status-indicator.status-success {
+            background-color: #198754;
+            color: #ffffff !important;
+        }
+        
+        [data-theme="dark"] .status-indicator.status-primary {
+            background-color: #4361ee;
+            color: #ffffff !important;
+        }
+        
+        [data-theme="dark"] .status-indicator.status-secondary {
+            background-color: #6c757d;
+            color: #ffffff !important;
+        }
+    </style>
 </head>
 <body>
     <div class="admin-container">
@@ -337,12 +397,15 @@ $page_title = __("Payment Management");
                                             </td>
                                             <td>
                                                 <?php 
-                                                    $statusClass = '';
-                                                    switch ($payment['status']) {
+                                                    $statusClass = 'secondary';
+                                                    switch (strtolower($payment['status'])) {
+                                                        case 'paid': 
                                                         case 'completed': $statusClass = 'success'; break;
                                                         case 'pending': $statusClass = 'warning'; break;
                                                         case 'failed': $statusClass = 'danger'; break;
                                                         case 'refunded': $statusClass = 'primary'; break;
+                                                        case 'cancelled': $statusClass = 'secondary'; break;
+                                                        default: $statusClass = 'secondary'; break;
                                                     }
                                                 ?>
                                                 <span class="status-indicator status-<?php echo $statusClass; ?>">

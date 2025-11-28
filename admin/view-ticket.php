@@ -350,76 +350,6 @@ $page_title = __("Ticket Details") . " #$ticket_id";
             color: #8e99ad;
         }
         
-        /* Status indicator */
-        .status-indicator {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 1rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-        }
-        
-        .status-primary {
-            background-color: rgba(var(--primary-rgb), 0.15);
-            color: var(--primary-color);
-        }
-        
-        .status-success {
-            background-color: rgba(25, 135, 84, 0.15);
-            color: #198754;
-        }
-        
-        .status-warning {
-            background-color: rgba(255, 193, 7, 0.15);
-            color: #ffc107;
-        }
-        
-        .status-danger {
-            background-color: rgba(220, 53, 69, 0.15);
-            color: #dc3545;
-        }
-        
-        .status-info {
-            background-color: rgba(13, 202, 240, 0.15);
-            color: #0dcaf0;
-        }
-        
-        .status-secondary {
-            background-color: rgba(108, 117, 125, 0.15);
-            color: #6c757d;
-        }
-        
-        /* Dark mode status badges */
-        [data-theme="dark"] .status-primary {
-            background-color: rgba(var(--primary-rgb), 0.3);
-            color: var(--primary-color-light);
-        }
-        
-        [data-theme="dark"] .status-success {
-            background-color: rgba(25, 135, 84, 0.3);
-            color: #25c274;
-        }
-        
-        [data-theme="dark"] .status-warning {
-            background-color: rgba(255, 193, 7, 0.3);
-            color: #ffda6a;
-        }
-        
-        [data-theme="dark"] .status-danger {
-            background-color: rgba(220, 53, 69, 0.3);
-            color: #ff8085;
-        }
-        
-        [data-theme="dark"] .status-info {
-            background-color: rgba(13, 202, 240, 0.3);
-            color: #6edbf7;
-        }
-        
-        [data-theme="dark"] .status-secondary {
-            background-color: rgba(108, 117, 125, 0.3);
-            color: #a1a8ae;
-        }
-        
         /* Status badges */
         .status-badge {
             display: inline-flex;
@@ -433,80 +363,156 @@ $page_title = __("Ticket Details") . " #$ticket_id";
             transition: all 0.2s ease;
         }
         
-        .status-badge.active {
-            background-color: rgba(25, 135, 84, 0.15);
-            color: #198754;
-        }
-        
-        .status-badge.inactive {
-            background-color: rgba(220, 53, 69, 0.15);
-            color: #dc3545;
-        }
-        
         .status-badge.open {
-            background-color: rgba(220, 53, 69, 0.15);
-            color: #dc3545;
-            border: 1px solid rgba(220, 53, 69, 0.3);
+            background-color: #dc3545;
+            color: #ffffff;
+            border: none;
         }
         
         .status-badge.in_progress {
-            background-color: rgba(255, 193, 7, 0.15);
-            color: #ffc107;
-            border: 1px solid rgba(255, 193, 7, 0.3);
+            background-color: #ffc107;
+            color: #000000;
+            border: none;
         }
         
         .status-badge.closed {
-            background-color: rgba(25, 135, 84, 0.15);
-            color: #198754;
-            border: 1px solid rgba(25, 135, 84, 0.3);
+            background-color: #198754;
+            color: #ffffff;
+            border: none;
         }
         
         .status-badge.reopened {
-            background-color: rgba(var(--primary-rgb), 0.15);
-            color: var(--primary-color);
-            border: 1px solid rgba(var(--primary-rgb), 0.3);
+            background-color: #4361ee;
+            color: #ffffff;
+            border: none;
         }
         
-        /* Dark mode status badges */
+        /* Priority badges */
+        .status-badge.low {
+            background-color: #198754;
+            color: #ffffff;
+            border: none;
+        }
+        
+        .status-badge.medium {
+            background-color: #ffc107;
+            color: #000000;
+            border: none;
+        }
+        
+        .status-badge.high {
+            background-color: #dc3545;
+            color: #ffffff;
+            border: none;
+        }
+        
+        .status-badge.urgent {
+            background-color: #dc3545;
+            color: #ffffff;
+            border: none;
+        }
+        
+        .status-badge.success {
+            background-color: #198754;
+            color: #ffffff;
+            border: none;
+        }
+        
+        .status-badge.warning {
+            background-color: #ffc107;
+            color: #000000;
+            border: none;
+        }
+        
+        .status-badge.danger {
+            background-color: #dc3545;
+            color: #ffffff;
+            border: none;
+        }
+        
+        .status-badge.primary {
+            background-color: #4361ee;
+            color: #ffffff;
+            border: none;
+        }
+        
+        /* Dark mode status badges - keep white text */
         [data-theme="dark"] .status-badge {
             background-color: rgba(255, 255, 255, 0.05);
             color: #e0e0e0;
         }
         
-        [data-theme="dark"] .status-badge.active {
-            background-color: rgba(25, 135, 84, 0.25);
-            color: #25c274;
-            border: 1px solid rgba(25, 135, 84, 0.5);
-        }
-        
-        [data-theme="dark"] .status-badge.inactive {
-            background-color: rgba(220, 53, 69, 0.25);
-            color: #ff8085;
-            border: 1px solid rgba(220, 53, 69, 0.5);
-        }
-        
         [data-theme="dark"] .status-badge.open {
-            background-color: rgba(220, 53, 69, 0.25);
-            color: #ff8085;
-            border: 1px solid rgba(220, 53, 69, 0.5);
+            background-color: #dc3545;
+            color: #ffffff;
+            border: none;
         }
         
         [data-theme="dark"] .status-badge.in_progress {
-            background-color: rgba(255, 193, 7, 0.25);
-            color: #ffda6a;
-            border: 1px solid rgba(255, 193, 7, 0.5);
+            background-color: #ffc107;
+            color: #000000;
+            border: none;
         }
         
         [data-theme="dark"] .status-badge.closed {
-            background-color: rgba(25, 135, 84, 0.25);
-            color: #25c274;
-            border: 1px solid rgba(25, 135, 84, 0.5);
+            background-color: #198754;
+            color: #ffffff;
+            border: none;
         }
         
         [data-theme="dark"] .status-badge.reopened {
-            background-color: rgba(var(--primary-rgb), 0.25);
-            color: var(--primary-color-light);
-            border: 1px solid rgba(var(--primary-rgb), 0.5);
+            background-color: #4361ee;
+            color: #ffffff;
+            border: none;
+        }
+        
+        /* Dark mode priority badges */
+        [data-theme="dark"] .status-badge.low {
+            background-color: #198754;
+            color: #ffffff;
+            border: none;
+        }
+        
+        [data-theme="dark"] .status-badge.medium {
+            background-color: #ffc107;
+            color: #000000;
+            border: none;
+        }
+        
+        [data-theme="dark"] .status-badge.high {
+            background-color: #dc3545;
+            color: #ffffff;
+            border: none;
+        }
+        
+        [data-theme="dark"] .status-badge.urgent {
+            background-color: #dc3545;
+            color: #ffffff;
+            border: none;
+        }
+        
+        [data-theme="dark"] .status-badge.success {
+            background-color: #198754;
+            color: #ffffff;
+            border: none;
+        }
+        
+        [data-theme="dark"] .status-badge.warning {
+            background-color: #ffc107;
+            color: #000000;
+            border: none;
+        }
+        
+        [data-theme="dark"] .status-badge.danger {
+            background-color: #dc3545;
+            color: #ffffff;
+            border: none;
+        }
+        
+        [data-theme="dark"] .status-badge.primary {
+            background-color: #4361ee;
+            color: #ffffff;
+            border: none;
         }
         
         /* Property Styling from view-user.php */
@@ -1080,12 +1086,11 @@ $page_title = __("Ticket Details") . " #$ticket_id";
                                     <div class="user-id-badge"><?php echo __("ID"); ?>: <?php echo $ticket['id']; ?></div>
                                 </div>
                                 <div class="profile-meta">
-                                    <span class="user-status <?php echo $ticket['status']; ?>">
-                                        <i class="fas fa-circle"></i> <?php 
-                                        echo __($ticket['status']); ?>
+                                    <span class="status-badge <?php echo $ticket['status']; ?>">
+                                        <?php echo __($ticket['status']); ?>
                                     </span>
                                     <?php if (isset($ticket['priority']) && !empty($ticket['priority'])): ?>
-                                    <span class="status-badge <?php echo getPriorityClass($ticket['priority']); ?>">
+                                    <span class="status-badge <?php echo htmlspecialchars($ticket['priority']); ?>">
                                         <?php echo __($ticket['priority']); ?>
                                     </span>
                                     <?php endif; ?>
@@ -1147,7 +1152,7 @@ $page_title = __("Ticket Details") . " #$ticket_id";
                                     <?php if (isset($ticket['priority']) && !empty($ticket['priority'])): ?>
                                     <div class="info-group">
                                         <label><i class="fas fa-exclamation-triangle"></i> <?php echo __("Priority"); ?>:</label>
-                                        <span class="status-badge <?php echo getPriorityClass($ticket['priority']); ?>">
+                                        <span class="status-badge <?php echo htmlspecialchars($ticket['priority']); ?>">
                                             <?php echo __($ticket['priority']); ?>
                                         </span>
                                     </div>

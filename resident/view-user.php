@@ -173,14 +173,6 @@ $page_title = __("My Profile");
                                     <label><i class="fas fa-phone"></i> <?php echo __("Phone"); ?>:</label>
                                     <span class="info-value"><?php echo !empty($user['phone']) ? htmlspecialchars($user['phone']) : __("Not provided"); ?></span>
                                 </div>
-                                <div class="info-group">
-                                    <label><i class="fas fa-user-shield"></i> <?php echo __("Role"); ?>:</label>
-                                    <span class="info-value"><?php echo __(ucfirst(htmlspecialchars($user['role']))); ?></span>
-                                </div>
-                                <div class="info-group">
-                                    <label><i class="fas fa-check-circle"></i> <?php echo __("Status"); ?>:</label>
-                                    <span class="status-badge <?php echo $user['status']; ?>"><?php echo __(ucfirst(htmlspecialchars($user['status']))); ?></span>
-                                </div>
                             </div>
                         </div>
                     </div>

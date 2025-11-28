@@ -239,6 +239,24 @@ $page_title = __("Edit Ticket");
             width: 100%;
         }
         
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+            padding-right: 2.5rem;
+        }
+        
+        select:disabled {
+            background-image: none;
+            padding-right: 16px;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
         input:hover, select:hover, textarea:hover {
             border-color: var(--primary-color-light);
         }
@@ -363,6 +381,21 @@ $page_title = __("Edit Ticket");
             border-color: #3f4756;
         }
         
+        [data-theme="dark"] select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+            padding-right: 2.5rem;
+        }
+        
+        [data-theme="dark"] select:disabled {
+            background-image: none;
+            padding-right: 16px;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
         [data-theme="dark"] input:hover, 
         [data-theme="dark"] select:hover,
         [data-theme="dark"] textarea:hover {
@@ -459,7 +492,7 @@ $page_title = __("Edit Ticket");
                                 <label for="user_id">
                                     <?php echo __("User"); ?> <span class="required">*</span>
                                 </label>
-                                <select name="user_id" id="user_id" required>
+                                <select name="user_id" id="user_id" required disabled>
                                     <option value=""><?php echo __("Select a user"); ?></option>
                                         <?php foreach ($users as $user): ?>
                                         <option value="<?php echo $user['id']; ?>" <?php echo ($ticket['user_id'] == $user['id']) ? 'selected' : ''; ?>>
@@ -467,6 +500,7 @@ $page_title = __("Edit Ticket");
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
+                                    <input type="hidden" name="user_id" value="<?php echo $ticket['user_id']; ?>">
                                 </div>
                                 
                                 <div class="form-group">

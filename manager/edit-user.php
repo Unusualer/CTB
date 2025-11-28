@@ -39,6 +39,40 @@ $user = null;
 $roles = ['admin', 'manager', 'resident'];
 $statuses = ['active', 'inactive'];
 
+// Get user data first to check permissions
+$user = null;
+try {
+    $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    // Fetch user details
+    $stmt = $db->prepare("SELECT * FROM users WHERE id = :id");
+    $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
+    $stmt->execute();
+    
+    if ($stmt->rowCount() === 0) {
+        $_SESSION['error'] = __("User not found.");
+        header("Location: users.php");
+        exit();
+    }
+    
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // For managers, only allow editing residents or their own profile
+    $current_role = getCurrentRole();
+    $current_user_id = (int)$_SESSION['user_id'];
+    if ($current_role === 'manager' && $user['role'] !== 'resident' && $user_id !== $current_user_id) {
+        $_SESSION['error'] = __("Managers can only edit resident accounts or their own profile.");
+        header("Location: users.php");
+        exit();
+    }
+    
+} catch (PDOException $e) {
+    $_SESSION['error'] = __("Database error") . ": " . $e->getMessage();
+    header("Location: users.php");
+    exit();
+}
+
 // Process form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate input
@@ -65,6 +99,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate role
     if (empty($role) || !in_array($role, $roles)) {
         $errors[] = __("A valid role is required.");
+    }
+    
+    // For managers editing their own profile, ensure role stays as manager
+    $current_role = getCurrentRole();
+    $current_user_id = (int)$_SESSION['user_id'];
+    if ($current_role === 'manager' && $user_id === $current_user_id) {
+        // Managers cannot change their own role
+        $role = 'manager';
+    }
+    
+    // For managers editing residents, ensure role stays as resident
+    if ($current_role === 'manager' && $user_id !== $current_user_id) {
+        // Managers can only edit residents
+        if ($role !== 'resident') {
+            $errors[] = __("Managers can only edit resident accounts.");
+            $role = 'resident';
+        }
     }
     
     // Validate status
@@ -133,38 +184,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $_SESSION['error'] = implode("<br>", $errors);
     }
-}
-
-// Get user data
-try {
-    $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    // Fetch user details
-    $stmt = $db->prepare("SELECT * FROM users WHERE id = :id");
-    $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
-    $stmt->execute();
-    
-    if ($stmt->rowCount() === 0) {
-        $_SESSION['error'] = __("User not found.");
-        header("Location: users.php");
-        exit();
-    }
-    
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    // For managers, only allow editing residents
-    $current_role = getCurrentRole();
-    if ($current_role === 'manager' && $user['role'] !== 'resident') {
-        $_SESSION['error'] = __("Managers can only edit resident accounts.");
-        header("Location: users.php");
-        exit();
-    }
-    
-} catch (PDOException $e) {
-    $_SESSION['error'] = __("Database error") . ": " . $e->getMessage();
-    header("Location: users.php");
-    exit();
 }
 
 // Page title
@@ -463,11 +482,20 @@ $page_title = __("Edit User");
                                 
                                 <div class="form-group">
                                     <label for="role"><?php echo __("Role"); ?> <span class="required">*</span></label>
-                                    <select id="role" name="role" required <?php echo (getCurrentRole() === 'manager') ? 'disabled' : ''; ?>>
+                                    <?php 
+                                    $current_role = getCurrentRole();
+                                    $current_user_id = (int)$_SESSION['user_id'];
+                                    $is_own_profile = ($current_role === 'manager' && $user_id === $current_user_id);
+                                    ?>
+                                    <select id="role" name="role" required <?php echo ($current_role === 'manager') ? 'disabled' : ''; ?>>
                                         <?php 
                                         $allowed_roles = $roles;
-                                        if (getCurrentRole() === 'manager') {
+                                        if ($current_role === 'manager' && !$is_own_profile) {
+                                            // Manager editing a resident - only show resident
                                             $allowed_roles = ['resident'];
+                                        } elseif ($is_own_profile) {
+                                            // Manager editing their own profile - only show manager
+                                            $allowed_roles = ['manager'];
                                         }
                                         foreach ($allowed_roles as $role_option): ?>
                                             <option value="<?php echo $role_option; ?>" <?php echo $user['role'] === $role_option ? 'selected' : ''; ?>>
@@ -489,8 +517,8 @@ $page_title = __("Edit User");
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
-                                    <?php if (getCurrentRole() === 'manager'): ?>
-                                    <input type="hidden" name="role" value="resident">
+                                    <?php if ($current_role === 'manager'): ?>
+                                    <input type="hidden" name="role" value="<?php echo $is_own_profile ? 'manager' : 'resident'; ?>">
                                     <?php endif; ?>
                                 </div>
                                 

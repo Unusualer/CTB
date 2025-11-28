@@ -327,76 +327,6 @@ $page_title = __("Ticket Details") . " #$ticket_id";
             color: #8e99ad;
         }
         
-        /* Status indicator */
-        .status-indicator {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 1rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-        }
-        
-        .status-primary {
-            background-color: rgba(var(--primary-rgb), 0.15);
-            color: var(--primary-color);
-        }
-        
-        .status-success {
-            background-color: rgba(25, 135, 84, 0.15);
-            color: #198754;
-        }
-        
-        .status-warning {
-            background-color: rgba(255, 193, 7, 0.15);
-            color: #ffc107;
-        }
-        
-        .status-danger {
-            background-color: rgba(220, 53, 69, 0.15);
-            color: #dc3545;
-        }
-        
-        .status-info {
-            background-color: rgba(13, 202, 240, 0.15);
-            color: #0dcaf0;
-        }
-        
-        .status-secondary {
-            background-color: rgba(108, 117, 125, 0.15);
-            color: #6c757d;
-        }
-        
-        /* Dark mode status badges */
-        [data-theme="dark"] .status-primary {
-            background-color: rgba(var(--primary-rgb), 0.3);
-            color: var(--primary-color-light);
-        }
-        
-        [data-theme="dark"] .status-success {
-            background-color: rgba(25, 135, 84, 0.3);
-            color: #25c274;
-        }
-        
-        [data-theme="dark"] .status-warning {
-            background-color: rgba(255, 193, 7, 0.3);
-            color: #ffda6a;
-        }
-        
-        [data-theme="dark"] .status-danger {
-            background-color: rgba(220, 53, 69, 0.3);
-            color: #ff8085;
-        }
-        
-        [data-theme="dark"] .status-info {
-            background-color: rgba(13, 202, 240, 0.3);
-            color: #6edbf7;
-        }
-        
-        [data-theme="dark"] .status-secondary {
-            background-color: rgba(108, 117, 125, 0.3);
-            color: #a1a8ae;
-        }
-        
         /* Status badges */
         .status-badge {
             display: inline-flex;
@@ -421,69 +351,119 @@ $page_title = __("Ticket Details") . " #$ticket_id";
         }
         
         .status-badge.open {
-            background-color: rgba(220, 53, 69, 0.15);
-            color: #dc3545;
-            border: 1px solid rgba(220, 53, 69, 0.3);
+            background-color: #dc3545;
+            color: #ffffff;
+            border: none;
         }
         
         .status-badge.in_progress {
-            background-color: rgba(255, 193, 7, 0.15);
-            color: #ffc107;
-            border: 1px solid rgba(255, 193, 7, 0.3);
+            background-color: #ffc107;
+            color: #000000;
+            border: none;
         }
         
         .status-badge.closed {
-            background-color: rgba(25, 135, 84, 0.15);
-            color: #198754;
-            border: 1px solid rgba(25, 135, 84, 0.3);
+            background-color: #198754;
+            color: #ffffff;
+            border: none;
         }
         
         .status-badge.reopened {
-            background-color: rgba(var(--primary-rgb), 0.15);
-            color: var(--primary-color);
-            border: 1px solid rgba(var(--primary-rgb), 0.3);
+            background-color: #4361ee;
+            color: #ffffff;
+            border: none;
         }
         
-        /* Dark mode status badges */
+        /* Priority badges */
+        .status-badge.low {
+            background-color: #198754;
+            color: #ffffff;
+            border: none;
+        }
+        
+        .status-badge.medium {
+            background-color: #ffc107;
+            color: #000000;
+            border: none;
+        }
+        
+        .status-badge.high {
+            background-color: #dc3545;
+            color: #ffffff;
+            border: none;
+        }
+        
+        .status-badge.urgent {
+            background-color: #dc3545;
+            color: #ffffff;
+            border: none;
+        }
+        
+        /* Dark mode status badges - keep white text */
         [data-theme="dark"] .status-badge {
             background-color: rgba(255, 255, 255, 0.05);
             color: #e0e0e0;
         }
         
         [data-theme="dark"] .status-badge.active {
-            background-color: rgba(25, 135, 84, 0.25);
-            color: #25c274;
-            border: 1px solid rgba(25, 135, 84, 0.5);
+            background-color: #198754;
+            color: #ffffff;
+            border: none;
         }
         
         [data-theme="dark"] .status-badge.inactive {
-            background-color: rgba(220, 53, 69, 0.25);
-            color: #ff8085;
-            border: 1px solid rgba(220, 53, 69, 0.5);
+            background-color: #dc3545;
+            color: #ffffff;
+            border: none;
         }
         
         [data-theme="dark"] .status-badge.open {
-            background-color: rgba(220, 53, 69, 0.25);
-            color: #ff8085;
-            border: 1px solid rgba(220, 53, 69, 0.5);
+            background-color: #dc3545;
+            color: #ffffff;
+            border: none;
         }
         
         [data-theme="dark"] .status-badge.in_progress {
-            background-color: rgba(255, 193, 7, 0.25);
-            color: #ffda6a;
-            border: 1px solid rgba(255, 193, 7, 0.5);
+            background-color: #ffc107;
+            color: #000000;
+            border: none;
         }
         
         [data-theme="dark"] .status-badge.closed {
-            background-color: rgba(25, 135, 84, 0.25);
-            color: #25c274;
-            border: 1px solid rgba(25, 135, 84, 0.5);
+            background-color: #198754;
+            color: #ffffff;
+            border: none;
         }
         
         [data-theme="dark"] .status-badge.reopened {
-            background-color: rgba(var(--primary-rgb), 0.25);
-            color: var(--primary-color-light);
-            border: 1px solid rgba(var(--primary-rgb), 0.5);
+            background-color: #4361ee;
+            color: #ffffff;
+            border: none;
+        }
+        
+        /* Dark mode priority badges */
+        [data-theme="dark"] .status-badge.low {
+            background-color: #198754;
+            color: #ffffff;
+            border: none;
+        }
+        
+        [data-theme="dark"] .status-badge.medium {
+            background-color: #ffc107;
+            color: #000000;
+            border: none;
+        }
+        
+        [data-theme="dark"] .status-badge.high {
+            background-color: #dc3545;
+            color: #ffffff;
+            border: none;
+        }
+        
+        [data-theme="dark"] .status-badge.urgent {
+            background-color: #dc3545;
+            color: #ffffff;
+            border: none;
         }
         
         /* Property Styling from view-user.php */
@@ -900,6 +880,22 @@ $page_title = __("Ticket Details") . " #$ticket_id";
             }
         }
         
+        .card-full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .description-response-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        @media (min-width: 768px) {
+            .description-response-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
         .info-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -1053,12 +1049,11 @@ $page_title = __("Ticket Details") . " #$ticket_id";
                                     <h2><?php echo htmlspecialchars($ticket['subject']); ?></h2>
                                 </div>
                                 <div class="profile-meta">
-                                    <span class="user-status <?php echo $ticket['status']; ?>">
-                                        <i class="fas fa-circle"></i> <?php 
-                                        echo __($ticket['status']); ?>
+                                    <span class="status-badge <?php echo $ticket['status']; ?>">
+                                        <?php echo __($ticket['status']); ?>
                                     </span>
                                     <?php if (isset($ticket['priority']) && !empty($ticket['priority'])): ?>
-                                    <span class="status-badge <?php echo getPriorityClass($ticket['priority']); ?>">
+                                    <span class="status-badge <?php echo htmlspecialchars($ticket['priority']); ?>">
                                         <?php echo __($ticket['priority']); ?>
                                     </span>
                                     <?php endif; ?>
@@ -1068,6 +1063,7 @@ $page_title = __("Ticket Details") . " #$ticket_id";
                                     </span>
                                     <?php endif; ?>
                                     <span class="user-joined"><i class="far fa-calendar-alt"></i> <?php echo __("Created"); ?> <?php echo date('d M Y', strtotime($ticket['created_at'])); ?></span>
+                                    <span class="user-joined"><i class="fas fa-edit"></i> <?php echo __("Last updated"); ?> <?php echo date('d M Y', strtotime($ticket['updated_at'])); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -1075,104 +1071,37 @@ $page_title = __("Ticket Details") . " #$ticket_id";
 
                     <div class="card-grid">
                         <!-- Ticket Information Card -->
-                        <div class="card user-info-card">
+                        <div class="card user-info-card card-full-width">
                             <div class="card-header">
                                 <h3><i class="fas fa-info-circle"></i> <?php echo __("Ticket Information"); ?></h3>
                             </div>
                             <div class="card-body">
-                                <div class="detail-group">
-                                    <div class="label"><?php echo __("Description"); ?></div>
-                                    <div class="description-box">
-                                        <?php echo nl2br(htmlspecialchars($ticket['description'])); ?>
-                                    </div>
-                                </div>
-                                
-                                <?php if (!empty($ticket['response'])): ?>
-                                <div class="detail-group">
-                                    <div class="label"><?php echo __("Response"); ?></div>
-                                    <div class="description-box">
-                                        <?php echo nl2br(htmlspecialchars($ticket['response'])); ?>
-                                    </div>
-                                </div>
-                                <?php endif; ?>
-                                
-                                <div class="info-grid">
-                                    <div class="info-group">
-                                        <label><i class="fas fa-user"></i> <?php echo __("Submitted by"); ?>:</label>
-                                        <div class="user-info-display">
-                                            <div class="user-avatar">
-                                                <i class="fas fa-user"></i>
-                                            </div>
-                                            <div class="user-details">
-                                                <a href="view-user.php?id=<?php echo $ticket['user_id']; ?>" class="user-name">
-                                                    <?php echo htmlspecialchars($ticket['username'] ?? __("Unknown User")); ?>
-                                                </a>
-                                                <span class="user-email"><?php echo htmlspecialchars($ticket['email'] ?? __("Unknown Email")); ?></span>
-                                            </div>
+                                <div class="description-response-grid">
+                                    <div class="detail-group">
+                                        <div class="label"><?php echo __("Description"); ?></div>
+                                        <div class="description-box">
+                                            <?php echo nl2br(htmlspecialchars($ticket['description'])); ?>
                                         </div>
                                     </div>
-                                    <div class="info-group">
-                                        <label><i class="fas fa-check-circle"></i> <?php echo __("Status"); ?>:</label>
-                                        <span class="status-badge <?php echo $ticket['status']; ?>">
-                                            <?php echo __($ticket['status']); ?>
-                                        </span>
+                                    
+                                    <div class="detail-group">
+                                        <div class="label"><?php echo __("Response"); ?></div>
+                                        <div class="description-box">
+                                            <?php echo !empty($ticket['response']) ? nl2br(htmlspecialchars($ticket['response'])) : __("No response yet."); ?>
+                                        </div>
                                     </div>
-                                    <?php if (isset($ticket['priority']) && !empty($ticket['priority'])): ?>
-                                    <div class="info-group">
-                                        <label><i class="fas fa-exclamation-triangle"></i> <?php echo __("Priority"); ?>:</label>
-                                        <span class="status-badge <?php echo getPriorityClass($ticket['priority']); ?>">
-                                            <?php echo __($ticket['priority']); ?>
-                                        </span>
-                                    </div>
-                                    <?php endif; ?>
+                                </div>
+                                
+                                <div class="info-grid">
                                     <?php if (isset($ticket['category']) && !empty($ticket['category'])): ?>
                                     <div class="info-group">
                                         <label><i class="fas fa-tag"></i> <?php echo __("Category"); ?>:</label>
                                         <span class="info-value"><?php echo htmlspecialchars($ticket['category']); ?></span>
                                     </div>
                                     <?php endif; ?>
-                                    <div class="info-group">
-                                        <label><i class="fas fa-calendar-plus"></i> <?php echo __("Created on"); ?>:</label>
-                                        <span class="info-value"><?php echo date('d F Y', strtotime($ticket['created_at'])); ?></span>
-                                    </div>
-                                    <div class="info-group">
-                                        <label><i class="fas fa-edit"></i> <?php echo __("Last updated"); ?>:</label>
-                                        <span class="info-value"><?php echo date('d F Y', strtotime($ticket['updated_at'])); ?></span>
-                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="card-column">
-                        <div class="card-column">
-                            <!-- User Information Card - Compact version -->
-                            <div class="card compact-user-card">
-                                <div class="card-header">
-                                    <h3><i class="fas fa-user"></i> <?php echo __("User Information"); ?></h3>
-                                </div>
-                                <div class="card-body">
-                                    <div class="compact-user-info">
-                                        <div class="user-info-header">
-                                            <div class="user-avatar">
-                                                <i class="fas fa-user"></i>
-                                            </div>
-                                            <div>
-                                                <h4><?php echo htmlspecialchars($ticket['username'] ?? __("Unknown User")); ?></h4>
-                                                <div class="user-meta">
-                                                    <span><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($ticket['email'] ?? __("Unknown Email")); ?></span>
-                                                    <?php if (!empty($ticket['phone'])): ?>
-                                                    <span><i class="fas fa-phone"></i> <?php echo htmlspecialchars($ticket['phone']); ?></span>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <a href="view-user.php?id=<?php echo $ticket['user_id']; ?>" class="btn btn-sm btn-primary mt-2">
-                                            <i class="fas fa-eye"></i> <?php echo __("View User"); ?>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                                </div>
                     </div>
                 </div>
             <?php endif; ?>

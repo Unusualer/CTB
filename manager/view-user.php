@@ -56,6 +56,15 @@ try {
     
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     
+    // For managers, only allow viewing residents or their own profile
+    $current_role = getCurrentRole();
+    $current_user_id = (int)$_SESSION['user_id'];
+    if ($current_role === 'manager' && $user['role'] !== 'resident' && $user_id !== $current_user_id) {
+        $_SESSION['error'] = __("Managers can only view resident accounts or their own profile.");
+        header("Location: users.php");
+        exit();
+    }
+    
     // If user is a resident, get assigned properties
     if ($user['role'] === 'resident') {
         $prop_stmt = $db->prepare("SELECT * FROM properties WHERE user_id = :user_id");
@@ -63,12 +72,6 @@ try {
         $prop_stmt->execute();
         $assigned_properties = $prop_stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    
-    // Get activity log for this user
-    $log_stmt = $db->prepare("SELECT * FROM activity_log WHERE user_id = :user_id ORDER BY created_at DESC LIMIT 10");
-    $log_stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-    $log_stmt->execute();
-    $activity_logs = $log_stmt->fetchAll(PDO::FETCH_ASSOC);
     
 } catch (PDOException $e) {
     $_SESSION['error'] = __("Database error") . ": " . $e->getMessage();
@@ -108,9 +111,14 @@ $page_title = __("View User");
                     <a href="edit-user.php?id=<?php echo $user['id']; ?>" class="btn btn-primary">
                         <i class="fas fa-edit"></i> <?php echo __("Edit User"); ?>
                     </a>
+                    <?php
+                        $can_delete_user = $current_role === 'admin' || ($current_role === 'manager' && $user['role'] === 'resident' && $user['id'] !== $current_user_id);
+                        if ($can_delete_user):
+                    ?>
                     <a href="javascript:void(0);" class="btn btn-danger delete-user" data-id="<?php echo $user['id']; ?>">
                         <i class="fas fa-trash-alt"></i> <?php echo __("Delete User"); ?>
                     </a>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -140,7 +148,6 @@ $page_title = __("View User");
                                 <img src="../assets/img/avatars/<?php echo htmlspecialchars($user['profile_image']); ?>" alt="<?php echo htmlspecialchars($user['name']); ?>">
                             <?php else: ?>
                                 <div class="avatar-placeholder">
-                                    <i class="fas fa-user-circle"></i>
                                     <span class="avatar-initial"><?php echo substr(htmlspecialchars($user['name']), 0, 1); ?></span>
                                 </div>
                             <?php endif; ?>
@@ -175,14 +182,6 @@ $page_title = __("View User");
                                 <div class="info-group">
                                     <label><i class="fas fa-phone"></i> <?php echo __("Phone"); ?>:</label>
                                     <span class="info-value"><?php echo !empty($user['phone']) ? htmlspecialchars($user['phone']) : __("Not provided"); ?></span>
-                                </div>
-                                <div class="info-group">
-                                    <label><i class="fas fa-user-shield"></i> <?php echo __("Role"); ?>:</label>
-                                    <span class="info-value"><?php echo __(ucfirst(htmlspecialchars($user['role']))); ?></span>
-                                </div>
-                                <div class="info-group">
-                                    <label><i class="fas fa-check-circle"></i> <?php echo __("Status"); ?>:</label>
-                                    <span class="status-badge <?php echo $user['status']; ?>"><?php echo __(ucfirst(htmlspecialchars($user['status']))); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -223,35 +222,6 @@ $page_title = __("View User");
                             </div>
                         </div>
                     <?php endif; ?>
-
-                    <!-- Activity Log Card -->
-                    <div class="card activity-card">
-                        <div class="card-header">
-                            <h3><i class="fas fa-history"></i> <?php echo __("Recent Activity"); ?></h3>
-                        </div>
-                        <div class="card-body">
-                            <?php if (empty($activity_logs)): ?>
-                                <div class="no-data">
-                                    <i class="far fa-clock"></i>
-                                    <p><?php echo __("No recent activity found."); ?></p>
-                                </div>
-                            <?php else: ?>
-                                <div class="activity-timeline">
-                                    <?php foreach ($activity_logs as $log): ?>
-                                        <div class="activity-item">
-                                            <div class="activity-icon">
-                                                <i class="fas fa-circle"></i>
-                                            </div>
-                                            <div class="activity-content">
-                                                <p class="activity-text"><?php echo isset($log['description']) ? htmlspecialchars($log['description']) : __("No description available"); ?></p>
-                                                <p class="activity-time"><?php echo isset($log['created_at']) ? date('d M Y H:i', strtotime($log['created_at'])) : __("Unknown date"); ?></p>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
                 </div>
             </div>
         </main>

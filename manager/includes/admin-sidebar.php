@@ -91,12 +91,6 @@ $profile_link = $current_user_id ? "view-user.php?id=" . urlencode((string)$curr
                     <span><?php echo __("Payments"); ?></span>
                 </a>
             </li>
-            <li <?php echo isActive('activity-log.php'); ?>>
-                <a href="activity-log.php">
-                    <i class="fas fa-history"></i>
-                    <span><?php echo __("Activity Log"); ?></span>
-                </a>
-            </li>
             <li <?php echo isActive('maintenance.php') || $current_page == 'view-maintenance.php' || $current_page == 'edit-maintenance.php' || $current_page == 'add-maintenance.php' ? 'class="active"' : ''; ?>>
                 <a href="maintenance.php">
                     <i class="fas fa-tools"></i>

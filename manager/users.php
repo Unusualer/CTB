@@ -234,7 +234,10 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'true') {
                                     <a href="edit-user.php?id=<?php echo $user['id']; ?>" class="btn-icon" title="<?php echo __("Edit User"); ?>">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <?php if (getCurrentRole() === 'admin'): ?>
+                                    <?php
+                                        $can_delete_user = $current_role === 'admin' || ($current_role === 'manager' && $user['role'] === 'resident');
+                                        if ($can_delete_user):
+                                    ?>
                                     <a href="javascript:void(0);" class="btn-icon delete-user" data-id="<?php echo $user['id']; ?>" title="<?php echo __("Delete User"); ?>">
                                         <i class="fas fa-trash-alt"></i>
                                     </a>
@@ -705,11 +708,14 @@ $page_title = __("User Management");
                                                     <a href="edit-user.php?id=<?php echo $user['id']; ?>" class="btn-icon" title="<?php echo __("Edit User"); ?>">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                    <?php if (getCurrentRole() === 'admin'): ?>
+                                                <?php
+                                                    $can_delete_user = $current_role === 'admin' || ($current_role === 'manager' && $user['role'] === 'resident');
+                                                    if ($can_delete_user):
+                                                ?>
                                                     <a href="javascript:void(0);" class="btn-icon delete-user" data-id="<?php echo $user['id']; ?>" title="<?php echo __("Delete User"); ?>">
                                                         <i class="fas fa-trash-alt"></i>
                                                     </a>
-                                    <?php endif; ?>
+                                                <?php endif; ?>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>

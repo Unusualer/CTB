@@ -297,43 +297,63 @@ $page_title = __("Payment Details");
             color: #a0a0a0 !important;
         }
         
-        /* Status indicator */
+        /* Status indicator with colored backgrounds and white text */
         .status-indicator {
             display: inline-block;
-            padding: 0.25rem 0.75rem;
+            padding: 0.4rem 0.9rem;
             border-radius: 1rem;
             font-size: 0.875rem;
             font-weight: 600;
+            color: #ffffff !important;
+            text-align: center;
+            white-space: nowrap;
         }
         
-        .status-primary {
-            background-color: rgba(var(--primary-rgb), 0.15);
-            color: var(--primary-color);
+        .status-indicator.status-danger {
+            background-color: #dc3545;
         }
         
-        .status-success {
-            background-color: rgba(25, 135, 84, 0.15);
-            color: #198754;
+        .status-indicator.status-warning {
+            background-color: #ffc107;
+            color: #000000 !important;
         }
         
-        .status-warning {
-            background-color: rgba(255, 193, 7, 0.15);
-            color: #ffc107;
+        .status-indicator.status-success {
+            background-color: #198754;
         }
         
-        .status-danger {
-            background-color: rgba(220, 53, 69, 0.15);
-            color: #dc3545;
+        .status-indicator.status-primary {
+            background-color: #4361ee;
         }
         
-        .status-info {
-            background-color: rgba(13, 202, 240, 0.15);
-            color: #0dcaf0;
+        .status-indicator.status-secondary {
+            background-color: #6c757d;
         }
         
-        .status-secondary {
-            background-color: rgba(108, 117, 125, 0.15);
-            color: #6c757d;
+        /* Dark mode - keep white text but adjust backgrounds if needed */
+        [data-theme="dark"] .status-indicator.status-danger {
+            background-color: #dc3545;
+            color: #ffffff !important;
+        }
+        
+        [data-theme="dark"] .status-indicator.status-warning {
+            background-color: #ffc107;
+            color: #000000 !important;
+        }
+        
+        [data-theme="dark"] .status-indicator.status-success {
+            background-color: #198754;
+            color: #ffffff !important;
+        }
+        
+        [data-theme="dark"] .status-indicator.status-primary {
+            background-color: #4361ee;
+            color: #ffffff !important;
+        }
+        
+        [data-theme="dark"] .status-indicator.status-secondary {
+            background-color: #6c757d;
+            color: #ffffff !important;
         }
         
         .btn-block {

@@ -397,11 +397,11 @@ $current_language_name = $available_languages[$current_language] ?? $available_l
     }
     
     .stat-card:nth-child(3) .stat-details h3 {
-        color: #0d6b8a;
+        color: #1a8fb3;
     }
     
     .stat-card:nth-child(4) .stat-details h3 {
-        color: #2d3f9e;
+        color: #6d7fe8;
     }
     
     [data-theme="dark"] .stat-details h3 {
@@ -487,13 +487,13 @@ $current_language_name = $available_languages[$current_language] ?? $available_l
     .stat-card:nth-child(3) .stat-breakdown span {
         background: rgba(76, 201, 240, 0.12);
         border-color: rgba(76, 201, 240, 0.25);
-        color: #0d6b8a;
+        color: #1a8fb3;
     }
     
     .stat-card:nth-child(4) .stat-breakdown span {
         background: rgba(67, 97, 238, 0.12);
         border-color: rgba(67, 97, 238, 0.25);
-        color: #2d3f9e;
+        color: #6d7fe8;
     }
     
     [data-theme="dark"] .stat-breakdown span {
@@ -1406,19 +1406,19 @@ $current_language_name = $available_languages[$current_language] ?? $available_l
                             <a href="payments.php" class="view-link">
                                 <i class="fas fa-arrow-right"></i> <?php echo __("View All"); ?>
                             </a>
-                        </div>
                     </div>
+                </div>
 
                     <!-- 4. Maintenance Overview -->
                     <div class="stat-card">
                         <div class="stat-icon maintenance">
                                 <i class="fas fa-tools"></i>
-                        </div>
+                            </div>
                         <div class="stat-details">
                             <div class="stat-header-row">
                                 <h3><?php echo __("Maintenance Overview"); ?></h3>
                                 <p class="stat-number"><?php echo number_format($total_maintenance); ?></p>
-                            </div>
+                        </div>
                             <div class="stat-breakdown">
                                 <span><i class="fas fa-calendar"></i> <?php echo __("Scheduled"); ?>: <?php echo number_format($scheduled_maintenance); ?></span>
                                 <span><i class="fas fa-tools"></i> <?php echo __("In Progress"); ?>: <?php echo number_format($in_progress_maintenance); ?></span>
