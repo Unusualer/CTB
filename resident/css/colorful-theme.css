@@ -143,10 +143,26 @@ html:not([data-theme="dark"]) .card:hover {
 }
 
 .table thead th {
-    background: linear-gradient(135deg, rgba(67, 97, 238, 0.1) 0%, rgba(37, 198, 133, 0.05) 100%);
+    background: linear-gradient(135deg, rgba(67, 97, 238, 0.12) 0%, rgba(37, 198, 133, 0.08) 100%);
     color: #2d3748;
     font-weight: 600;
     border-bottom: 2px solid rgba(67, 97, 238, 0.15);
+    position: relative;
+}
+
+.table thead th::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #4361ee 0%, #25c685 50%, #4cc9f0 100%);
+    transition: width 0.3s ease;
+}
+
+.table thead th:hover::after {
+    width: 100%;
 }
 
 [data-theme="dark"] .table thead th {

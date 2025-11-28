@@ -474,6 +474,21 @@ html:not([data-theme="dark"]) .sidebar {
     box-shadow: 4px 0 20px rgba(67, 97, 238, 0.08);
 }
 
+.sidebar {
+    overflow: hidden;
+}
+
+.sidebar-nav {
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
 html:not([data-theme="dark"]) .sidebar-header {
     background: linear-gradient(135deg, rgba(67, 97, 238, 0.08) 0%, rgba(37, 198, 133, 0.05) 100%);
     border-bottom: 2px solid rgba(67, 97, 238, 0.15);
