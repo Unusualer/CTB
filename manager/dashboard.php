@@ -250,6 +250,7 @@ $current_language_name = $available_languages[$current_language] ?? $available_l
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
     <link rel="stylesheet" href="css/dashboard-style.css">
+    <link rel="stylesheet" href="css/colorful-theme.css">
     <style>
     /* Language Switcher Styles */
     .language-switcher {
