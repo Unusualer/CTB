@@ -96,6 +96,7 @@ $page_title = __("View Property");
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
+    <link rel="stylesheet" href="css/colorful-theme.css">
 </head>
 <body>
     <div class="admin-container">
@@ -143,7 +144,6 @@ $page_title = __("View Property");
                         <div class="profile-details">
                             <div class="profile-name-wrapper">
                                 <h2><?php echo ucfirst(htmlspecialchars(__($property['type']))); ?> <?php echo htmlspecialchars($property['identifier']); ?></h2>
-                                <div class="user-id-badge"><?php echo __("ID"); ?>: <?php echo $property['id']; ?></div>
                             </div>
                             <div class="profile-meta">
                                 <span class="user-role"><i class="fas fa-tag"></i> <?php echo ucfirst(htmlspecialchars(__($property['type']))); ?></span>

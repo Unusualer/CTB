@@ -117,16 +117,6 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'true') {
                 <table class="table">
                     <thead>
                         <tr>
-                            <th class="sortable" data-column="id">
-                                <?php echo __("ID"); ?>
-                                <span class="sort-icon">
-                                    <?php if ($sort_column === 'id'): ?>
-                                        <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
-                                    <?php else: ?>
-                                        <i class="fas fa-sort"></i>
-                                    <?php endif; ?>
-                                </span>
-                            </th>
                             <th class="sortable" data-column="name">
                                 <?php echo __("Name"); ?>
                                 <span class="sort-icon">
@@ -173,7 +163,6 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'true') {
                     <tbody>
                         <?php foreach ($users as $user): ?>
                             <tr>
-                                <td><?php echo $user['id']; ?></td>
                                 <td>
                                     <div class="user-cell">
                                         <div class="user-avatar-sm">
@@ -382,6 +371,7 @@ $page_title = __("User Management");
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
+    <link rel="stylesheet" href="css/colorful-theme.css">
     <style>
         .loading-spinner {
             display: flex;
@@ -556,16 +546,6 @@ $page_title = __("User Management");
                                 <table class="table">
                                     <thead>
                                         <tr>
-                                            <th class="sortable" data-column="id">
-                                                <?php echo __("ID"); ?>
-                                                <span class="sort-icon">
-                                                    <?php if ($sort_column === 'id'): ?>
-                                                        <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
-                                                    <?php else: ?>
-                                                        <i class="fas fa-sort"></i>
-                                                    <?php endif; ?>
-                                                </span>
-                                            </th>
                                             <th class="sortable" data-column="name">
                                                 <?php echo __("Name"); ?>
                                                 <span class="sort-icon">
@@ -612,7 +592,6 @@ $page_title = __("User Management");
                                     <tbody>
                                         <?php foreach ($users as $user): ?>
                                             <tr>
-                                                <td><?php echo $user['id']; ?></td>
                                                 <td>
                                                     <div class="user-cell">
                                                         <div class="user-avatar-sm">

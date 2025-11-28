@@ -94,6 +94,7 @@ $page_title = __("My Profile");
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
+    <link rel="stylesheet" href="css/colorful-theme.css">
 </head>
 <body>
     <div class="admin-container">
@@ -138,7 +139,6 @@ $page_title = __("My Profile");
                                 <img src="../assets/img/avatars/<?php echo htmlspecialchars($user['profile_image']); ?>" alt="<?php echo htmlspecialchars($user['name']); ?>">
                             <?php else: ?>
                                 <div class="avatar-placeholder">
-                                    <i class="fas fa-user-circle"></i>
                                     <span class="avatar-initial"><?php echo substr(htmlspecialchars($user['name']), 0, 1); ?></span>
                                 </div>
                             <?php endif; ?>
@@ -146,7 +146,6 @@ $page_title = __("My Profile");
                         <div class="profile-details">
                             <div class="profile-name-wrapper">
                                 <h2><?php echo htmlspecialchars($user['name']); ?></h2>
-                                <div class="user-id-badge"><?php echo __("ID"); ?>: <?php echo $user['id']; ?></div>
                             </div>
                             <div class="profile-meta">
                                 <span class="user-role"><i class="fas fa-user-tag"></i> <?php echo __(ucfirst(htmlspecialchars($user['role']))); ?></span>
@@ -208,7 +207,6 @@ $page_title = __("My Profile");
                                                 <div class="property-details">
                                                     <h4><?php echo __(ucfirst(htmlspecialchars($property['type']))) . ' ' . htmlspecialchars($property['identifier']); ?></h4>
                                                     <div class="property-meta">
-                                                        <span class="property-id"><?php echo __("ID"); ?>: <?php echo $property['id']; ?></span>
                                                         <a href="view-property.php?id=<?php echo $property['id']; ?>" class="view-link">
                                                             <?php echo __("View Property"); ?> <i class="fas fa-arrow-right"></i>
                                                         </a>

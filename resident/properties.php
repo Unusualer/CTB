@@ -126,16 +126,6 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'true') {
                 <table class="table">
                     <thead>
                         <tr>
-                            <th class="sortable" data-column="id">
-                                <?php echo __("ID"); ?>
-                                <span class="sort-icon">
-                                    <?php if ($sort_column === 'id'): ?>
-                                        <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
-                                    <?php else: ?>
-                                        <i class="fas fa-sort"></i>
-                                    <?php endif; ?>
-                                </span>
-                            </th>
                             <th class="sortable" data-column="identifier">
                                 <?php echo __("Identifier"); ?>
                                 <span class="sort-icon">
@@ -156,14 +146,12 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'true') {
                                     <?php endif; ?>
                                 </span>
                             </th>
-                            <th><?php echo __("Assigned to"); ?></th>
                             <th><?php echo __("Actions"); ?></th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($properties as $property): ?>
                             <tr>
-                                <td><?php echo $property['id']; ?></td>
                                 <td>
                                     <div class="property-cell">
                                         <div class="property-icon">
@@ -173,7 +161,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'true') {
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="property-type-badge">
+                                                    <span class="property-type-badge property-type-<?php echo htmlspecialchars($property['type']); ?>">
                                         <?php 
                                             if ($property['type'] === 'apartment') {
                                                 echo __("Apartment");
@@ -184,17 +172,6 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'true') {
                                             }
                                         ?>
                                     </span>
-                                </td>
-                                <td>
-                                    <?php if (!empty($property['user_name'])): ?>
-                                        <span class="resident-tag">
-                                            <i class="fas fa-user"></i> <?php echo htmlspecialchars($property['user_name']); ?>
-                                        </span>
-                                    <?php else: ?>
-                                        <span class="unassigned-tag">
-                                            <i class="fas fa-times-circle"></i> <?php echo __("Unassigned"); ?>
-                                        </span>
-                                    <?php endif; ?>
                                 </td>
                                 <td class="actions">
                                     <a href="view-property.php?id=<?php echo $property['id']; ?>" class="btn-icon" title="<?php echo __("View Property"); ?>">
@@ -374,6 +351,7 @@ $page_title = __("Property Management");
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
+    <link rel="stylesheet" href="css/colorful-theme.css">
     <style>
         .loading-spinner {
             display: flex;
@@ -388,17 +366,338 @@ $page_title = __("Property Management");
             margin-bottom: 1rem;
         }
         
+        /* Colorful Stat Cards for Properties Page */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--card-accent, #4361ee) 0%, var(--card-accent-dark, #3a56e4) 100%);
+        }
+        
+        /* First stat card - Apartments (Green) */
+        .stat-card:nth-child(1) {
+            background: linear-gradient(135deg, #ffffff 0%, #e8f8f5 50%, #f0fdf9 100%);
+            border-color: rgba(37, 198, 133, 0.3);
+            box-shadow: 0 4px 20px rgba(37, 198, 133, 0.15), 0 0 0 1px rgba(37, 198, 133, 0.1);
+        }
+        
+        .stat-card:nth-child(1)::before {
+            background: linear-gradient(180deg, #25c685 0%, #13b571 100%);
+            width: 6px;
+            box-shadow: 0 0 20px rgba(37, 198, 133, 0.5);
+        }
+        
+        .stat-card:nth-child(1):hover {
+            box-shadow: 0 8px 32px rgba(37, 198, 133, 0.25), 0 0 0 2px rgba(37, 198, 133, 0.2);
+            transform: translateY(-4px);
+        }
+        
+        .stat-card:nth-child(1) .stat-number {
+            color: #25c685;
+            text-shadow: 0 2px 8px rgba(37, 198, 133, 0.2);
+        }
+        
+        .stat-card:nth-child(1) .stat-details h3 {
+            color: #0d7a4f;
+        }
+        
+        /* Second stat card - Parking (Yellow) */
+        .stat-card:nth-child(2) {
+            background: linear-gradient(135deg, #ffffff 0%, #fff8e8 50%, #fffbf0 100%);
+            border-color: rgba(248, 184, 48, 0.3);
+            box-shadow: 0 4px 20px rgba(248, 184, 48, 0.15), 0 0 0 1px rgba(248, 184, 48, 0.1);
+        }
+        
+        .stat-card:nth-child(2)::before {
+            background: linear-gradient(180deg, #f8b830 0%, #f6a819 100%);
+            width: 6px;
+            box-shadow: 0 0 20px rgba(248, 184, 48, 0.5);
+        }
+        
+        .stat-card:nth-child(2):hover {
+            box-shadow: 0 8px 32px rgba(248, 184, 48, 0.25), 0 0 0 2px rgba(248, 184, 48, 0.2);
+            transform: translateY(-4px);
+        }
+        
+        .stat-card:nth-child(2) .stat-number {
+            color: #f8b830;
+            text-shadow: 0 2px 8px rgba(248, 184, 48, 0.2);
+        }
+        
+        .stat-card:nth-child(2) .stat-details h3 {
+            color: #b8820f;
+        }
+        
+        /* Third stat card - Total Properties (Cyan) */
+        .stat-card:nth-child(3) {
+            background: linear-gradient(135deg, #ffffff 0%, #e8f7fc 50%, #f0faff 100%);
+            border-color: rgba(76, 201, 240, 0.3);
+            box-shadow: 0 4px 20px rgba(76, 201, 240, 0.15), 0 0 0 1px rgba(76, 201, 240, 0.1);
+        }
+        
+        .stat-card:nth-child(3)::before {
+            background: linear-gradient(180deg, #4cc9f0 0%, #39b8df 100%);
+            width: 6px;
+            box-shadow: 0 0 20px rgba(76, 201, 240, 0.5);
+        }
+        
+        .stat-card:nth-child(3):hover {
+            box-shadow: 0 8px 32px rgba(76, 201, 240, 0.25), 0 0 0 2px rgba(76, 201, 240, 0.2);
+            transform: translateY(-4px);
+        }
+        
+        .stat-card:nth-child(3) .stat-number {
+            color: #4cc9f0;
+            text-shadow: 0 2px 8px rgba(76, 201, 240, 0.2);
+        }
+        
+        .stat-card:nth-child(3) .stat-details h3 {
+            color: #0d6b8a;
+        }
+        
+        .stat-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .stat-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .stat-breakdown span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:nth-child(3) .stat-breakdown span:first-child {
+            background: rgba(37, 198, 133, 0.12);
+            border: 1px solid rgba(37, 198, 133, 0.25);
+            color: #0d7a4f;
+        }
+        
+        .stat-card:nth-child(3) .stat-breakdown span:first-child i {
+            color: #25c685;
+        }
+        
+        .stat-card:nth-child(3) .stat-breakdown span:first-child:hover {
+            background: rgba(37, 198, 133, 0.2);
+            border-color: rgba(37, 198, 133, 0.4);
+            transform: translateX(4px);
+        }
+        
+        .stat-card:nth-child(3) .stat-breakdown span:last-child {
+            background: rgba(248, 184, 48, 0.12);
+            border: 1px solid rgba(248, 184, 48, 0.25);
+            color: #b8820f;
+        }
+        
+        .stat-card:nth-child(3) .stat-breakdown span:last-child i {
+            color: #f8b830;
+        }
+        
+        .stat-card:nth-child(3) .stat-breakdown span:last-child:hover {
+            background: rgba(248, 184, 48, 0.2);
+            border-color: rgba(248, 184, 48, 0.4);
+            transform: translateX(4px);
+        }
+        
+        [data-theme="dark"] .stat-card:nth-child(3) .stat-breakdown span:first-child {
+            background: rgba(28, 200, 138, 0.15);
+            border-color: rgba(28, 200, 138, 0.25);
+            color: #6ee7b7;
+        }
+        
+        [data-theme="dark"] .stat-card:nth-child(3) .stat-breakdown span:first-child i {
+            color: #1cc88a;
+        }
+        
+        [data-theme="dark"] .stat-card:nth-child(3) .stat-breakdown span:last-child {
+            background: rgba(246, 194, 62, 0.15);
+            border-color: rgba(246, 194, 62, 0.25);
+            color: #fcd34d;
+        }
+        
+        [data-theme="dark"] .stat-card:nth-child(3) .stat-breakdown span:last-child i {
+            color: #f6c23e;
+        }
+        
+        [data-theme="dark"] .stat-card {
+            background: #2d3748;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        [data-theme="dark"] .stat-card:nth-child(1) .stat-number,
+        [data-theme="dark"] .stat-card:nth-child(2) .stat-number,
+        [data-theme="dark"] .stat-card:nth-child(3) .stat-number {
+            color: #f8f9fc;
+            text-shadow: none;
+        }
+        
+        [data-theme="dark"] .stat-card:nth-child(1) .stat-details h3,
+        [data-theme="dark"] .stat-card:nth-child(2) .stat-details h3,
+        [data-theme="dark"] .stat-card:nth-child(3) .stat-details h3 {
+            color: #a0aec0;
+        }
+        
+        /* Stat Icon Styling */
+        .stat-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover .stat-icon {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stat-icon.properties {
+            background: linear-gradient(135deg, #25c685 0%, #13b571 100%);
+        }
+        
+        .stat-icon.tickets {
+            background: linear-gradient(135deg, #f8b830 0%, #f6a819 100%);
+        }
+        
+        .stat-icon.payments {
+            background: linear-gradient(135deg, #4cc9f0 0%, #39b8df 100%);
+        }
+        
+        .stat-icon i {
+            font-size: 28px;
+            color: white;
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin: 8px 0;
+        }
+        
+        .stat-details h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Colorful Table Headers */
+        .table thead th {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.12) 0%, rgba(37, 198, 133, 0.08) 100%);
+            color: #2d3748;
+            font-weight: 600;
+            border-bottom: 3px solid rgba(67, 97, 238, 0.2);
+            position: relative;
+            padding: 16px;
+        }
+        
+        .table thead th::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #4361ee 0%, #25c685 50%, #4cc9f0 100%);
+            transition: width 0.3s ease;
+        }
+        
+        .table thead th:hover::after {
+            width: 100%;
+        }
+        
+        .table thead th:nth-child(1) {
+            background: linear-gradient(135deg, rgba(37, 198, 133, 0.12) 0%, rgba(37, 198, 133, 0.05) 100%);
+            border-bottom-color: rgba(37, 198, 133, 0.3);
+        }
+        
+        .table thead th:nth-child(1)::after {
+            background: linear-gradient(90deg, #25c685 0%, #13b571 100%);
+        }
+        
+        .table thead th:nth-child(2) {
+            background: linear-gradient(135deg, rgba(76, 201, 240, 0.12) 0%, rgba(76, 201, 240, 0.05) 100%);
+            border-bottom-color: rgba(76, 201, 240, 0.3);
+        }
+        
+        .table thead th:nth-child(2)::after {
+            background: linear-gradient(90deg, #4cc9f0 0%, #39b8df 100%);
+        }
+        
+        .table thead th:nth-child(3) {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.12) 0%, rgba(67, 97, 238, 0.05) 100%);
+            border-bottom-color: rgba(67, 97, 238, 0.3);
+        }
+        
+        .table thead th:nth-child(3)::after {
+            background: linear-gradient(90deg, #4361ee 0%, #3a56e4 100%);
+        }
+        
+        [data-theme="dark"] .table thead th {
+            background: linear-gradient(135deg, rgba(78, 115, 223, 0.15) 0%, rgba(28, 200, 138, 0.1) 100%);
+            color: #f8f9fc;
+            border-bottom-color: rgba(78, 115, 223, 0.25);
+        }
+        
+        [data-theme="dark"] .table thead th::after {
+            background: linear-gradient(90deg, #4e73df 0%, #1cc88a 50%, #36b9cc 100%);
+        }
+        
         /* Sortable table header styles */
         .table th.sortable {
             cursor: pointer;
             user-select: none;
             position: relative;
             padding-right: 30px;
-            transition: background-color 0.2s;
+            transition: all 0.3s ease;
         }
         
         .table th.sortable:hover {
-            background-color: rgba(0, 0, 0, 0.05);
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.2) 0%, rgba(37, 198, 133, 0.15) 100%);
+            transform: translateY(-2px);
         }
         
         .table th.sortable .sort-icon {
@@ -408,18 +707,114 @@ $page_title = __("Property Management");
             transform: translateY(-50%);
             color: #6c757d;
             font-size: 0.85em;
+            transition: all 0.3s ease;
         }
         
         .table th.sortable:hover .sort-icon {
-            color: #007bff;
+            color: #4361ee;
+            transform: translateY(-50%) scale(1.2);
         }
         
         .table th.sortable[data-sorted="true"] .sort-icon {
-            color: #007bff;
+            color: #4361ee;
+        }
+        
+        .table thead th:nth-child(1).sortable:hover .sort-icon {
+            color: #25c685;
+        }
+        
+        .table thead th:nth-child(2).sortable:hover .sort-icon {
+            color: #4cc9f0;
+        }
+        
+        .table thead th:nth-child(3).sortable:hover .sort-icon {
+            color: #4361ee;
         }
         
         .table th.actions {
             cursor: default;
+        }
+        
+        /* Property Type Badge Styling */
+        .property-type-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: capitalize;
+            background: rgba(67, 97, 238, 0.12);
+            color: #2d3f9e;
+            border: 2px solid rgba(67, 97, 238, 0.25);
+            transition: all 0.3s ease;
+        }
+        
+        /* Apartment badge - Green */
+        .property-type-badge.property-type-apartment {
+            background: rgba(37, 198, 133, 0.12);
+            color: #0d7a4f;
+            border-color: rgba(37, 198, 133, 0.25);
+        }
+        
+        .property-type-badge.property-type-apartment:hover {
+            background: rgba(37, 198, 133, 0.2);
+            border-color: rgba(37, 198, 133, 0.4);
+            box-shadow: 0 4px 12px rgba(37, 198, 133, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* Parking badge - Yellow */
+        .property-type-badge.property-type-parking {
+            background: rgba(248, 184, 48, 0.12);
+            color: #b8820f;
+            border-color: rgba(248, 184, 48, 0.25);
+        }
+        
+        .property-type-badge.property-type-parking:hover {
+            background: rgba(248, 184, 48, 0.2);
+            border-color: rgba(248, 184, 48, 0.4);
+            box-shadow: 0 4px 12px rgba(248, 184, 48, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        [data-theme="dark"] .property-type-badge {
+            background: rgba(78, 115, 223, 0.15);
+            color: #93c5fd;
+            border-color: rgba(78, 115, 223, 0.25);
+        }
+        
+        [data-theme="dark"] .property-type-badge.property-type-apartment {
+            background: rgba(28, 200, 138, 0.15);
+            color: #6ee7b7;
+            border-color: rgba(28, 200, 138, 0.25);
+        }
+        
+        [data-theme="dark"] .property-type-badge.property-type-parking {
+            background: rgba(246, 194, 62, 0.15);
+            color: #fcd34d;
+            border-color: rgba(246, 194, 62, 0.25);
+        }
+        
+        /* Property Icon Styling */
+        .property-icon {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1) 0%, rgba(37, 198, 133, 0.08) 100%);
+            border-radius: 10px;
+            padding: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .property-icon i.fa-home {
+            color: #25c685;
+        }
+        
+        .property-icon i.fa-car {
+            color: #f8b830;
+        }
+        
+        .property-cell:hover .property-icon {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.2) 0%, rgba(37, 198, 133, 0.15) 100%);
+            transform: scale(1.1);
         }
     </style>
 </head>
@@ -482,8 +877,8 @@ $page_title = __("Property Management");
                             <h3><?php echo __("Total Properties"); ?></h3>
                             <div class="stat-number"><?php echo $total; ?></div>
                             <div class="stat-breakdown">
-                                <span><i class="fas fa-circle" style="color: #28a745;"></i> <?php echo __("Apartments"); ?>: <?php echo isset($type_counts['apartment']) ? $type_counts['apartment'] : 0; ?></span>
-                                <span><i class="fas fa-circle" style="color: #ffc107;"></i> <?php echo __("Parking"); ?>: <?php echo isset($type_counts['parking']) ? $type_counts['parking'] : 0; ?></span>
+                                <span><i class="fas fa-circle"></i> <?php echo __("Apartments"); ?>: <?php echo isset($type_counts['apartment']) ? $type_counts['apartment'] : 0; ?></span>
+                                <span><i class="fas fa-circle"></i> <?php echo __("Parking"); ?>: <?php echo isset($type_counts['parking']) ? $type_counts['parking'] : 0; ?></span>
                             </div>
                         </div>
                     </div>
@@ -532,16 +927,6 @@ $page_title = __("Property Management");
                                 <table class="table">
                                     <thead>
                                         <tr>
-                                            <th class="sortable" data-column="id">
-                                                <?php echo __("ID"); ?>
-                                                <span class="sort-icon">
-                                                    <?php if ($sort_column === 'id'): ?>
-                                                        <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
-                                                    <?php else: ?>
-                                                        <i class="fas fa-sort"></i>
-                                                    <?php endif; ?>
-                                                </span>
-                                            </th>
                                             <th class="sortable" data-column="identifier">
                                                 <?php echo __("Identifier"); ?>
                                                 <span class="sort-icon">
@@ -562,14 +947,12 @@ $page_title = __("Property Management");
                                                     <?php endif; ?>
                                                 </span>
                                             </th>
-                                            <th><?php echo __("Assigned to"); ?></th>
                                             <th><?php echo __("Actions"); ?></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php foreach ($properties as $property): ?>
                                             <tr>
-                                                <td><?php echo $property['id']; ?></td>
                                                 <td>
                                                     <div class="property-cell">
                                                         <div class="property-icon">
@@ -579,7 +962,7 @@ $page_title = __("Property Management");
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <span class="property-type-badge">
+                                                    <span class="property-type-badge property-type-<?php echo htmlspecialchars($property['type']); ?>">
                                                         <?php 
                                                             if ($property['type'] === 'apartment') {
                                                                 echo __("Apartment");
@@ -590,17 +973,6 @@ $page_title = __("Property Management");
                                                             }
                                                         ?>
                                                     </span>
-                                                </td>
-                                                <td>
-                                                    <?php if (!empty($property['user_name'])): ?>
-                                                        <span class="resident-tag">
-                                                            <i class="fas fa-user"></i> <?php echo htmlspecialchars($property['user_name']); ?>
-                                                        </span>
-                                                    <?php else: ?>
-                                                        <span class="unassigned-tag">
-                                                            <i class="fas fa-times-circle"></i> <?php echo __("Unassigned"); ?>
-                                                        </span>
-                                                    <?php endif; ?>
                                                 </td>
                                                 <td class="actions">
                                                     <a href="view-property.php?id=<?php echo $property['id']; ?>" class="btn-icon" title="<?php echo __("View Property"); ?>">

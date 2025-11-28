@@ -124,18 +124,356 @@ $page_title = __("Ticket Management");
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
+    <link rel="stylesheet" href="css/colorful-theme.css">
     <style>
+        /* Colorful Stat Cards for Tickets Page */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--card-accent, #4361ee) 0%, var(--card-accent-dark, #3a56e4) 100%);
+        }
+        
+        /* First stat card - Open (Yellow/Orange) */
+        .stat-card:nth-child(1) {
+            background: linear-gradient(135deg, #ffffff 0%, #fff8e8 50%, #fffbf0 100%);
+            border-color: rgba(248, 184, 48, 0.3);
+            box-shadow: 0 4px 20px rgba(248, 184, 48, 0.15), 0 0 0 1px rgba(248, 184, 48, 0.1);
+        }
+        
+        .stat-card:nth-child(1)::before {
+            background: linear-gradient(180deg, #f8b830 0%, #f6a819 100%);
+            width: 6px;
+            box-shadow: 0 0 20px rgba(248, 184, 48, 0.5);
+        }
+        
+        .stat-card:nth-child(1):hover {
+            box-shadow: 0 8px 32px rgba(248, 184, 48, 0.25), 0 0 0 2px rgba(248, 184, 48, 0.2);
+            transform: translateY(-4px);
+        }
+        
+        .stat-card:nth-child(1) .stat-number {
+            color: #f8b830;
+            text-shadow: 0 2px 8px rgba(248, 184, 48, 0.2);
+        }
+        
+        .stat-card:nth-child(1) .stat-details h3 {
+            color: #b8820f;
+        }
+        
+        /* Second stat card - In Progress (Blue) */
+        .stat-card:nth-child(2) {
+            background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 50%, #f0f4ff 100%);
+            border-color: rgba(67, 97, 238, 0.3);
+            box-shadow: 0 4px 20px rgba(67, 97, 238, 0.15), 0 0 0 1px rgba(67, 97, 238, 0.1);
+        }
+        
+        .stat-card:nth-child(2)::before {
+            background: linear-gradient(180deg, #4361ee 0%, #3a56e4 100%);
+            width: 6px;
+            box-shadow: 0 0 20px rgba(67, 97, 238, 0.5);
+        }
+        
+        .stat-card:nth-child(2):hover {
+            box-shadow: 0 8px 32px rgba(67, 97, 238, 0.25), 0 0 0 2px rgba(67, 97, 238, 0.2);
+            transform: translateY(-4px);
+        }
+        
+        .stat-card:nth-child(2) .stat-number {
+            color: #4361ee;
+            text-shadow: 0 2px 8px rgba(67, 97, 238, 0.2);
+        }
+        
+        .stat-card:nth-child(2) .stat-details h3 {
+            color: #2d3f9e;
+        }
+        
+        /* Third stat card - Closed (Green) */
+        .stat-card:nth-child(3) {
+            background: linear-gradient(135deg, #ffffff 0%, #e8f8f5 50%, #f0fdf9 100%);
+            border-color: rgba(37, 198, 133, 0.3);
+            box-shadow: 0 4px 20px rgba(37, 198, 133, 0.15), 0 0 0 1px rgba(37, 198, 133, 0.1);
+        }
+        
+        .stat-card:nth-child(3)::before {
+            background: linear-gradient(180deg, #25c685 0%, #13b571 100%);
+            width: 6px;
+            box-shadow: 0 0 20px rgba(37, 198, 133, 0.5);
+        }
+        
+        .stat-card:nth-child(3):hover {
+            box-shadow: 0 8px 32px rgba(37, 198, 133, 0.25), 0 0 0 2px rgba(37, 198, 133, 0.2);
+            transform: translateY(-4px);
+        }
+        
+        .stat-card:nth-child(3) .stat-number {
+            color: #25c685;
+            text-shadow: 0 2px 8px rgba(37, 198, 133, 0.2);
+        }
+        
+        .stat-card:nth-child(3) .stat-details h3 {
+            color: #0d7a4f;
+        }
+        
+        /* Fourth stat card - Reopened (Cyan) */
+        .stat-card:nth-child(4) {
+            background: linear-gradient(135deg, #ffffff 0%, #e8f7fc 50%, #f0faff 100%);
+            border-color: rgba(76, 201, 240, 0.3);
+            box-shadow: 0 4px 20px rgba(76, 201, 240, 0.15), 0 0 0 1px rgba(76, 201, 240, 0.1);
+        }
+        
+        .stat-card:nth-child(4)::before {
+            background: linear-gradient(180deg, #4cc9f0 0%, #39b8df 100%);
+            width: 6px;
+            box-shadow: 0 0 20px rgba(76, 201, 240, 0.5);
+        }
+        
+        .stat-card:nth-child(4):hover {
+            box-shadow: 0 8px 32px rgba(76, 201, 240, 0.25), 0 0 0 2px rgba(76, 201, 240, 0.2);
+            transform: translateY(-4px);
+        }
+        
+        .stat-card:nth-child(4) .stat-number {
+            color: #4cc9f0;
+            text-shadow: 0 2px 8px rgba(76, 201, 240, 0.2);
+        }
+        
+        .stat-card:nth-child(4) .stat-details h3 {
+            color: #0d6b8a;
+        }
+        
+        [data-theme="dark"] .stat-card {
+            background: #2d3748;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        [data-theme="dark"] .stat-card:nth-child(1) .stat-number,
+        [data-theme="dark"] .stat-card:nth-child(2) .stat-number,
+        [data-theme="dark"] .stat-card:nth-child(3) .stat-number,
+        [data-theme="dark"] .stat-card:nth-child(4) .stat-number {
+            color: #f8f9fc;
+            text-shadow: none;
+        }
+        
+        [data-theme="dark"] .stat-card:nth-child(1) .stat-details h3,
+        [data-theme="dark"] .stat-card:nth-child(2) .stat-details h3,
+        [data-theme="dark"] .stat-card:nth-child(3) .stat-details h3,
+        [data-theme="dark"] .stat-card:nth-child(4) .stat-details h3 {
+            color: #a0aec0;
+        }
+        
+        /* Stat Icon Styling */
+        .stat-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover .stat-icon {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stat-icon.tickets {
+            background: linear-gradient(135deg, #f8b830 0%, #f6a819 100%);
+        }
+        
+        .stat-icon.users {
+            background: linear-gradient(135deg, #4361ee 0%, #3a56e4 100%);
+        }
+        
+        .stat-icon.properties {
+            background: linear-gradient(135deg, #25c685 0%, #13b571 100%);
+        }
+        
+        .stat-icon.payments {
+            background: linear-gradient(135deg, #4cc9f0 0%, #39b8df 100%);
+        }
+        
+        .stat-icon i {
+            font-size: 28px;
+            color: white;
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin: 8px 0;
+        }
+        
+        .stat-details h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .stat-breakdown span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: rgba(76, 201, 240, 0.12);
+            border: 2px solid rgba(76, 201, 240, 0.25);
+            color: #0d6b8a;
+        }
+        
+        .stat-card:nth-child(4) .stat-breakdown span:hover {
+            background: rgba(76, 201, 240, 0.2);
+            border-color: rgba(76, 201, 240, 0.4);
+            transform: translateX(4px);
+        }
+        
+        [data-theme="dark"] .stat-card:nth-child(4) .stat-breakdown span {
+            background: rgba(54, 185, 204, 0.15);
+            border-color: rgba(54, 185, 204, 0.25);
+            color: #7dd3fc;
+        }
+        
+        /* Colorful Table Headers */
+        .table thead th {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.12) 0%, rgba(37, 198, 133, 0.08) 100%);
+            color: #2d3748;
+            font-weight: 600;
+            border-bottom: 3px solid rgba(67, 97, 238, 0.2);
+            position: relative;
+            padding: 16px;
+        }
+        
+        .table thead th::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #4361ee 0%, #25c685 50%, #4cc9f0 100%);
+            transition: width 0.3s ease;
+        }
+        
+        .table thead th:hover::after {
+            width: 100%;
+        }
+        
+        .table thead th:nth-child(1) {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.12) 0%, rgba(67, 97, 238, 0.05) 100%);
+            border-bottom-color: rgba(67, 97, 238, 0.3);
+        }
+        
+        .table thead th:nth-child(1)::after {
+            background: linear-gradient(90deg, #4361ee 0%, #3a56e4 100%);
+        }
+        
+        .table thead th:nth-child(2) {
+            background: linear-gradient(135deg, rgba(37, 198, 133, 0.12) 0%, rgba(37, 198, 133, 0.05) 100%);
+            border-bottom-color: rgba(37, 198, 133, 0.3);
+        }
+        
+        .table thead th:nth-child(2)::after {
+            background: linear-gradient(90deg, #25c685 0%, #13b571 100%);
+        }
+        
+        .table thead th:nth-child(3) {
+            background: linear-gradient(135deg, rgba(248, 184, 48, 0.12) 0%, rgba(248, 184, 48, 0.05) 100%);
+            border-bottom-color: rgba(248, 184, 48, 0.3);
+        }
+        
+        .table thead th:nth-child(3)::after {
+            background: linear-gradient(90deg, #f8b830 0%, #f6a819 100%);
+        }
+        
+        .table thead th:nth-child(4) {
+            background: linear-gradient(135deg, rgba(231, 74, 59, 0.12) 0%, rgba(231, 74, 59, 0.05) 100%);
+            border-bottom-color: rgba(231, 74, 59, 0.3);
+        }
+        
+        .table thead th:nth-child(4)::after {
+            background: linear-gradient(90deg, #e74a3b 0%, #dc3545 100%);
+        }
+        
+        .table thead th:nth-child(5) {
+            background: linear-gradient(135deg, rgba(76, 201, 240, 0.12) 0%, rgba(76, 201, 240, 0.05) 100%);
+            border-bottom-color: rgba(76, 201, 240, 0.3);
+        }
+        
+        .table thead th:nth-child(5)::after {
+            background: linear-gradient(90deg, #4cc9f0 0%, #39b8df 100%);
+        }
+        
+        .table thead th:nth-child(6) {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.12) 0%, rgba(67, 97, 238, 0.05) 100%);
+            border-bottom-color: rgba(67, 97, 238, 0.3);
+        }
+        
+        .table thead th:nth-child(6)::after {
+            background: linear-gradient(90deg, #4361ee 0%, #3a56e4 100%);
+        }
+        
+        [data-theme="dark"] .table thead th {
+            background: linear-gradient(135deg, rgba(78, 115, 223, 0.15) 0%, rgba(28, 200, 138, 0.1) 100%);
+            color: #f8f9fc;
+            border-bottom-color: rgba(78, 115, 223, 0.25);
+        }
+        
+        [data-theme="dark"] .table thead th::after {
+            background: linear-gradient(90deg, #4e73df 0%, #1cc88a 50%, #36b9cc 100%);
+        }
+        
         /* Sortable table header styles */
         .table th.sortable {
             cursor: pointer;
             user-select: none;
             position: relative;
             padding-right: 30px;
-            transition: background-color 0.2s;
+            transition: all 0.3s ease;
         }
         
         .table th.sortable:hover {
-            background-color: rgba(0, 0, 0, 0.05);
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.2) 0%, rgba(37, 198, 133, 0.15) 100%);
+            transform: translateY(-2px);
         }
         
         .table th.sortable .sort-icon {
@@ -145,14 +483,32 @@ $page_title = __("Ticket Management");
             transform: translateY(-50%);
             color: #6c757d;
             font-size: 0.85em;
+            transition: all 0.3s ease;
         }
         
         .table th.sortable:hover .sort-icon {
-            color: #007bff;
+            color: #4361ee;
+            transform: translateY(-50%) scale(1.2);
         }
         
         .table th.sortable[data-sorted="true"] .sort-icon {
-            color: #007bff;
+            color: #4361ee;
+        }
+        
+        .table thead th:nth-child(1).sortable:hover .sort-icon {
+            color: #4361ee;
+        }
+        
+        .table thead th:nth-child(3).sortable:hover .sort-icon {
+            color: #f8b830;
+        }
+        
+        .table thead th:nth-child(4).sortable:hover .sort-icon {
+            color: #e74a3b;
+        }
+        
+        .table thead th:nth-child(5).sortable:hover .sort-icon {
+            color: #4cc9f0;
         }
         
         .table th.actions {
@@ -286,16 +642,6 @@ $page_title = __("Ticket Management");
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th class="sortable" data-column="id">
-                                            <?php echo __("ID"); ?>
-                                            <span class="sort-icon">
-                                                <?php if ($sort_column === 'id'): ?>
-                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
-                                                <?php else: ?>
-                                                    <i class="fas fa-sort"></i>
-                                                <?php endif; ?>
-                                            </span>
-                                        </th>
                                         <th class="sortable" data-column="subject">
                                             <?php echo __("Title"); ?>
                                             <span class="sort-icon">
@@ -306,7 +652,6 @@ $page_title = __("Ticket Management");
                                                 <?php endif; ?>
                                             </span>
                                         </th>
-                                        <th><?php echo __("Property"); ?></th>
                                         <th><?php echo __("Reported By"); ?></th>
                                         <th class="sortable" data-column="status">
                                             <?php echo __("Status"); ?>
@@ -344,14 +689,10 @@ $page_title = __("Ticket Management");
                                 <tbody>
                                     <?php foreach ($tickets as $ticket): ?>
                                         <tr>
-                                            <td><?php echo $ticket['id']; ?></td>
                                             <td>
                                                 <div class="ticket-cell">
                                                     <?php echo htmlspecialchars($ticket['subject']); ?>
                                                 </div>
-                                            </td>
-                                            <td>
-                                                <span class="text-muted"><?php echo __("N/A"); ?></span>
                                             </td>
                                             <td>
                                                 <?php if (isset($ticket['user_name']) && !empty($ticket['user_name'])): ?>

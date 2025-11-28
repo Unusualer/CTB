@@ -137,6 +137,7 @@ $page_title = __("Payment Details");
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
+    <link rel="stylesheet" href="css/colorful-theme.css">
     <style>
         .payment-details {
             display: grid;
@@ -435,11 +436,6 @@ $page_title = __("Payment Details");
                             <h3><i class="fas fa-info-circle"></i> <?php echo __("Payment Information"); ?></h3>
                         </div>
                         <div class="card-body">
-                            <div class="detail-group">
-                                <div class="label"><?php echo __("ID"); ?></div>
-                                <div class="value"><?php echo htmlspecialchars($payment['id']); ?></div>
-                            </div>
-                            
                             <div class="detail-group">
                                 <div class="label"><?php echo __("Amount"); ?></div>
                                 <div class="value">$<?php echo number_format($payment['amount'], 2); ?></div>

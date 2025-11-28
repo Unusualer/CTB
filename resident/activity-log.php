@@ -266,6 +266,7 @@ $page_title = __("Activity Log");
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin-style.css">
+    <link rel="stylesheet" href="css/colorful-theme.css">
     <style>
         /* Sortable table header styles */
         .table th.sortable {
@@ -446,16 +447,6 @@ $page_title = __("Activity Log");
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th class="sortable" data-column="id">
-                                            <?php echo __("ID"); ?>
-                                            <span class="sort-icon">
-                                                <?php if ($sort_column === 'id'): ?>
-                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
-                                                <?php else: ?>
-                                                    <i class="fas fa-sort"></i>
-                                                <?php endif; ?>
-                                            </span>
-                                        </th>
                                         <th><?php echo __("User"); ?></th>
                                         <th class="sortable" data-column="action">
                                             <?php echo __("Action"); ?>
@@ -471,16 +462,6 @@ $page_title = __("Activity Log");
                                             <?php echo __("Entity Type"); ?>
                                             <span class="sort-icon">
                                                 <?php if ($sort_column === 'entity_type'): ?>
-                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
-                                                <?php else: ?>
-                                                    <i class="fas fa-sort"></i>
-                                                <?php endif; ?>
-                                            </span>
-                                        </th>
-                                        <th class="sortable" data-column="entity_id">
-                                            <?php echo __("Entity ID"); ?>
-                                            <span class="sort-icon">
-                                                <?php if ($sort_column === 'entity_id'): ?>
                                                     <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
                                                 <?php else: ?>
                                                     <i class="fas fa-sort"></i>
@@ -503,7 +484,6 @@ $page_title = __("Activity Log");
                                 <tbody>
                                     <?php foreach ($activity_logs as $log): ?>
                                         <tr>
-                                            <td><?php echo $log['id']; ?></td>
                                             <td>
                                                 <?php if (!empty($log['user_name'])): ?>
                                                     <a href="view-user.php?id=<?php echo $log['user_id']; ?>" class="user-link">
@@ -520,47 +500,6 @@ $page_title = __("Activity Log");
                                                 </span>
                                             </td>
                                             <td><?php echo __(ucfirst($log['entity_type'] ?? '')); ?></td>
-                                            <td>
-                                                <?php
-                                                    $entity_link = '';
-                                                    $entity_class = getEntityTypeBadgeClass($log['entity_type']);
-                                                    
-                                                    switch($log['entity_type']) {
-                                                        case 'user':
-                                                            $entity_link = "view-user.php?id={$log['entity_id']}";
-                                                            $icon = "fa-user";
-                                                            break;
-                                                        case 'property':
-                                                            $entity_link = "view-property.php?id={$log['entity_id']}";
-                                                            $icon = "fa-home";
-                                                            break;
-                                                        case 'ticket':
-                                                            $entity_link = "view-ticket.php?id={$log['entity_id']}";
-                                                            $icon = "fa-ticket-alt";
-                                                            break;
-                                                        case 'payment':
-                                                            $entity_link = "view-payment.php?id={$log['entity_id']}";
-                                                            $icon = "fa-credit-card";
-                                                            break;
-                                                        case 'maintenance':
-                                                            $entity_link = "view-maintenance.php?id={$log['entity_id']}";
-                                                            $icon = "fa-tools";
-                                                            break;
-                                                        default:
-                                                            $icon = "fa-circle";
-                                                    }
-                                                    
-                                                    if (!empty($entity_link)) {
-                                                        echo "<a href=\"$entity_link\" class=\"entity-badge status-{$entity_class}\">";
-                                                        echo "<i class=\"fas {$icon}\"></i> {$log['entity_id']}";
-                                                        echo "</a>";
-                                                    } else {
-                                                        echo "<span class=\"entity-badge status-secondary\">";
-                                                        echo "<i class=\"fas {$icon}\"></i> {$log['entity_id']}";
-                                                        echo "</span>";
-                                                    }
-                                                ?>
-                                            </td>
                                             <td class="text-wrap"><?php echo htmlspecialchars($log['details'] ?? ''); ?></td>
                                             <td><?php echo formatDate($log['created_at']); ?></td>
                                         </tr>
