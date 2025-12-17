@@ -36,15 +36,17 @@ if (!function_exists('__')) {
         </a>
     </div>
     
-    <div class="user-info">
-        <div class="user-avatar">
-            <i class="fas fa-user-circle"></i>
+    <a href="view-user.php?id=<?php echo $_SESSION['user_id']; ?>" style="text-decoration: none; color: inherit; display: block;">
+        <div class="user-info" style="cursor: pointer; transition: background-color 0.2s;">
+            <div class="user-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-details">
+                <h4><?php echo htmlspecialchars($_SESSION['name'] ?? 'Admin User'); ?></h4>
+                <p><?php echo __("Administrator"); ?></p>
+            </div>
         </div>
-        <div class="user-details">
-            <h4><?php echo htmlspecialchars($_SESSION['name'] ?? 'Admin User'); ?></h4>
-            <p><?php echo __("Administrator"); ?></p>
-        </div>
-    </div>
+    </a>
     
     <nav class="sidebar-nav">
         <ul>

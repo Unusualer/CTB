@@ -182,19 +182,19 @@ function generateRandomString($length = 10) {
 }
 
 // Log activity
-function logActivity($userId, $action, $entityType, $entityId, $details) {
+function logActivity($userId, $action, $entityType, $entityId, $description) {
     global $pdo;
     
     try {
-        $query = "INSERT INTO activity_log (user_id, action, entity_type, entity_id, details, created_at) 
-                 VALUES (:user_id, :action, :entity_type, :entity_id, :details, NOW())";
+        $query = "INSERT INTO activity_log (user_id, action, entity_type, entity_id, description, created_at) 
+                 VALUES (:user_id, :action, :entity_type, :entity_id, :description, NOW())";
         
         $stmt = $pdo->prepare($query);
         $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
         $stmt->bindParam(':action', $action);
         $stmt->bindParam(':entity_type', $entityType);
         $stmt->bindParam(':entity_id', $entityId);
-        $stmt->bindParam(':details', $details);
+        $stmt->bindParam(':description', $description);
         $stmt->execute();
         
         return true;

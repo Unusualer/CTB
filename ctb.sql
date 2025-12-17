@@ -85,7 +85,6 @@ CREATE TABLE activity_log (
     action VARCHAR(50) NOT NULL,
     entity_type VARCHAR(50) DEFAULT NULL,
     entity_id INT DEFAULT NULL,
-    details TEXT,
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -123,9 +122,9 @@ INSERT INTO tickets (user_id, subject, description, status) VALUES
 (3, 'Parking issues', 'Someone keeps parking in my spot P456', 'closed');
 
 -- Insert sample activity logs
-INSERT INTO activity_log (user_id, action, entity_type, entity_id, details, description) VALUES 
-(1, 'login', 'user', 1, 'Admin login', 'Admin logged into the system'),
-(3, 'payment', 'property', 1, 'Rent payment for January', 'Resident made a rent payment for January 2023');
+INSERT INTO activity_log (user_id, action, entity_type, entity_id, description) VALUES 
+(1, 'login', 'user', 1, 'Admin logged into the system'),
+(3, 'payment', 'property', 1, 'Resident made a rent payment for January 2023');
 
 -- Insert sample maintenance updates
 INSERT INTO maintenance (title, description, location, start_date, end_date, status, priority, created_by) VALUES

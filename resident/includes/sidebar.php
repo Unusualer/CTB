@@ -81,12 +81,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     <span class="sidebar-menu-text">Rapports</span>
                 </a>
             </li>
-            <li class="sidebar-menu-item">
-                <a href="activity-log.php" class="sidebar-menu-link <?php echo $current_page == 'activity-log.php' ? 'active' : ''; ?>">
-                    <i class="fas fa-history sidebar-menu-icon"></i>
-                    <span class="sidebar-menu-text">Journal d'Activité</span>
-                </a>
-            </li>
         </ul>
 
         <div class="sidebar-menu-category">Paramètres</div>

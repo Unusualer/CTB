@@ -170,10 +170,6 @@ $profile_alt = $role_label . ' ' . __("Profile");
                 <span class="menu-text"><?php echo __("Announcements"); ?></span>
             </a>
             
-            <a href="activity-log.php" class="menu-item <?php echo ($current_page == 'activity-log.php') ? 'active' : ''; ?>">
-                <div class="menu-icon"><i class="fas fa-history"></i></div>
-                <span class="menu-text"><?php echo __("Activity Log"); ?></span>
-            </a>
         </div>
         
         <div class="menu-section">

@@ -43,7 +43,7 @@ fputcsv($output, [
     __('Action'),
     __('Entity Type'),
     __('Entity ID'),
-    __('Details'),
+    __('Description'),
     __('IP Address'),
     __('Date & Time')
 ]);
@@ -63,7 +63,7 @@ try {
     
     // Apply filters
     if (!empty($search)) {
-        $query .= " AND (a.details LIKE :search OR u.name LIKE :search)";
+        $query .= " AND (a.description LIKE :search OR u.name LIKE :search)";
         $params[':search'] = "%$search%";
     }
     
@@ -112,7 +112,7 @@ try {
             __(ucfirst($row['action'])),
             __(ucfirst($row['entity_type'])),
             $row['entity_id'],
-            $row['details'],
+            $row['description'],
             $row['ip_address'] ?? __('N/A'),
             date('Y-m-d H:i:s', strtotime($row['created_at']))
         ]);

@@ -53,8 +53,8 @@ try {
     
     // Apply filters
     if (!empty($search)) {
-        $query .= " AND (a.details LIKE :search OR u.name LIKE :search)";
-        $count_query .= " AND (a.details LIKE :search OR u.name LIKE :search)";
+        $query .= " AND (a.description LIKE :search OR u.name LIKE :search)";
+        $count_query .= " AND (a.description LIKE :search OR u.name LIKE :search)";
         $params[':search'] = "%$search%";
     }
     
@@ -485,7 +485,7 @@ $page_title = __("Activity Log");
                                                 <?php endif; ?>
                                             </span>
                                         </th>
-                                        <th><?php echo __("Details"); ?></th>
+                                        <th><?php echo __("Description"); ?></th>
                                         <th class="sortable" data-column="created_at">
                                             <?php echo __("Date & Time"); ?>
                                             <span class="sort-icon">
@@ -559,7 +559,7 @@ $page_title = __("Activity Log");
                                                     }
                                                 ?>
                                             </td>
-                                            <td class="text-wrap"><?php echo htmlspecialchars($log['details'] ?? ''); ?></td>
+                                            <td class="text-wrap"><?php echo htmlspecialchars($log['description'] ?? ''); ?></td>
                                             <td><?php echo formatDate($log['created_at']); ?></td>
                                         </tr>
                                     <?php endforeach; ?>

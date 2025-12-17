@@ -71,12 +71,6 @@ if (!defined('BASE_PATH')) {
             
             <li class="menu-title"><?php echo __('System'); ?></li>
             
-            <li class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'activity-log.php' ? 'active' : ''; ?>">
-                <a href="<?php echo BASE_URL; ?>admin/activity-log.php">
-                    <i class="fas fa-history"></i>
-                    <span><?php echo __('Activity Log'); ?></span>
-                </a>
-            </li>
             
             <li class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'maintenance.php' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>admin/maintenance.php">

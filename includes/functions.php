@@ -214,17 +214,17 @@ function generate_random_string($length = 10) {
  * @param string $action Action performed (create, update, delete, etc.)
  * @param string $entity_type Type of entity (user, property, ticket, etc.)
  * @param int $entity_id ID of the entity
- * @param string $details Optional additional details
+ * @param string $description Optional additional description
  * @return bool Success or failure
  */
-function log_activity($db, $user_id, $action, $entity_type, $entity_id, $details = null) {
+function log_activity($db, $user_id, $action, $entity_type, $entity_id, $description = null) {
     try {
         $stmt = $db->prepare("
-            INSERT INTO activity_log (user_id, action, entity_type, entity_id, details, created_at) 
+            INSERT INTO activity_log (user_id, action, entity_type, entity_id, description, created_at) 
             VALUES (?, ?, ?, ?, ?, NOW())
         ");
         
-        return $stmt->execute([$user_id, $action, $entity_type, $entity_id, $details]);
+        return $stmt->execute([$user_id, $action, $entity_type, $entity_id, $description]);
     } catch (PDOException $e) {
         error_log("Error logging activity: " . $e->getMessage());
         return false;

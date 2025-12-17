@@ -496,7 +496,6 @@ $current_language_name = $available_languages[$current_language] ?? $available_l
                     <div class="content-card">
                         <div class="card-header">
                             <h3><i class="fas fa-history"></i> <?php echo __("Recent Activity"); ?></h3>
-                            <a href="activity-log.php" class="view-all"><?php echo __("View All"); ?></a>
                         </div>
                         <div class="activity-list dashboard-activity">
                             <?php if (!empty($recent_activity)): ?>
@@ -557,8 +556,8 @@ $current_language_name = $available_languages[$current_language] ?? $available_l
                                                 <?php if (!empty($activity['entity_id'])): ?>
                                                     #<?php echo $activity['entity_id']; ?>
                                                 <?php endif; ?>
-                                                <?php if (!empty($activity['details'])): ?>
-                                                    - <?php echo __($activity['details']); ?>
+                                                <?php if (!empty($activity['description'])): ?>
+                                                    - <?php echo __($activity['description']); ?>
                                                 <?php endif; ?>
                                             </p>
                                             <span class="activity-time">

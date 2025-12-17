@@ -227,15 +227,6 @@ try {
                 </a>
             </div>
             
-            <div class="sidebar-menu-category">Activité</div>
-            
-            <div class="sidebar-menu-item">
-                <a href="activity-log.php" class="sidebar-menu-link <?php echo $currentPage === 'activity-log.php' ? 'active' : ''; ?>">
-                    <i class="fas fa-history"></i>
-                    <span class="sidebar-menu-text">Journal d'Activité</span>
-                </a>
-            </div>
-            
             <div class="sidebar-menu-category">Paramètres</div>
             
             <div class="sidebar-menu-item">
@@ -330,7 +321,6 @@ try {
                             </a>
                         <?php endif; ?>
                         
-                        <a class="dropdown-item text-center small text-gray-500" href="activity-log.php">Voir Toutes les Notifications</a>
                     </div>
                 </li>
                 
@@ -353,10 +343,6 @@ try {
                         <a class="dropdown-item" href="settings.php">
                             <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
                             Paramètres
-                        </a>
-                        <a class="dropdown-item" href="activity-log.php">
-                            <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
-                            Journal d'Activité
                         </a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="../logout.php">

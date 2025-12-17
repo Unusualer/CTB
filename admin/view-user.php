@@ -136,14 +136,9 @@ $page_title = __("View User");
                 <div class="profile-header card">
                     <div class="profile-header-content">
                         <div class="profile-avatar">
-                            <?php if (!empty($user['profile_image'])): ?>
-                                <img src="../assets/img/avatars/<?php echo htmlspecialchars($user['profile_image']); ?>" alt="<?php echo htmlspecialchars($user['name']); ?>">
-                            <?php else: ?>
-                                <div class="avatar-placeholder">
-                                    <i class="fas fa-user-circle"></i>
-                                    <span class="avatar-initial"><?php echo substr(htmlspecialchars($user['name']), 0, 1); ?></span>
-                                </div>
-                            <?php endif; ?>
+                            <div class="avatar-placeholder">
+                                <span class="avatar-initial"><?php echo strtoupper(substr(htmlspecialchars($user['name']), 0, 1)); ?></span>
+                            </div>
                         </div>
                         <div class="profile-details">
                             <div class="profile-name-wrapper">
@@ -308,6 +303,102 @@ $page_title = __("View User");
     </script>
 
     <style>
+        /* Activity Card Scrollable */
+        .activity-card {
+            display: flex;
+            flex-direction: column;
+            height: 97%;
+        }
+        
+        .activity-card .card-body {
+            flex: 1;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        
+        .activity-card .card-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .activity-card .card-body::-webkit-scrollbar-track {
+            background: var(--light-color);
+            border-radius: 8px;
+        }
+        
+        .activity-card .card-body::-webkit-scrollbar-thumb {
+            background-color: var(--border-color);
+            border-radius: 8px;
+        }
+        
+        [data-theme="dark"] .activity-card .card-body::-webkit-scrollbar-track {
+            background: var(--dark-card-bg);
+        }
+        
+        [data-theme="dark"] .activity-card .card-body::-webkit-scrollbar-thumb {
+            background-color: #4a5568;
+        }
+        
+        .activity-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            background-color: var(--light-color);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .activity-item:hover {
+            transform: translateX(4px);
+        }
+        
+        .activity-icon {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            color: white;
+        }
+        
+        .activity-icon i {
+            font-size: 10px;
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-text {
+            margin: 0 0 4px 0;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+        
+        .activity-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .activity-item {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+        }
+        
+        [data-theme="dark"] .activity-text {
+            color: #ffffff;
+        }
+        
         /* Enhanced Property List Styling */
         .property-list {
             display: flex;
