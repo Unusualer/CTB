@@ -40,39 +40,55 @@ if (isset($_SESSION['login_success'])) {
     <link rel="manifest" href="site.webmanifest">
 
     <style>
-        /* Root Colors */
+        /* Root Colors - Matching Dashboard Theme */
         :root {
-            --primary-color: #2a9d8f;
-            --secondary-color: #e9c46a;
-            --accent-color: #e76f51;
-            --info-color: #219ebc;
-            --success-color: #50b563;
-            --danger-color: #e63946;
-            --warning-color: #cc8f16;
-            --dark-color: #264653;
-            --light-color: #f1faee;
+            --primary-color: #4e73df;
+            --primary-light: rgba(67, 97, 238, 0.1);
+            --secondary-color: #858796;
+            --success-color: #1cc88a;
+            --info-color: #36b9cc;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+            --light-color: #f8f9fc;
+            --dark-color: #5a5c69;
             --white-color: #ffffff;
             --black-color: #000000;
             --font-primary: 'Poppins', sans-serif;
             --border-radius: 8px;
             --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s ease;
-            --gold: #E6B325;
-            --gold-light: #F7D463;
-            --gold-dark: #C89B1B;
-            --color-2: #244454;
-            --color-2-light: #36677E;
-            --color-2-dark: #19333F;
+            
+            /* Accent colors */
+            --accent-primary: #4e73df;
+            --accent-light: #6b8cef;
+            --accent-dark: #3a5bc7;
+            
+            --white: rgba(255, 255, 255, 0.9);
+            --black: #000;
+            
+            /* Dark colors */
+            --dark-blue: #1a202c;
+            --navy: #2d3748;
+            --slate: #4a5568;
+            --slate-light: #718096;
+            
+            /* Text colors */
+            --text: #5a5c69;
+            --text-light: #858796;
+            
+            /* Shadow colors */
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --shadow-color-dark: rgba(0, 0, 0, 0.2);
         }
         
-        /* Gold Accent Bar */
+        /* Primary Accent Bar */
         .gold-accent-bar {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 5px;
-            background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-light), var(--gold), var(--gold-dark));
+            background: linear-gradient(90deg, var(--accent-dark), var(--primary-color), var(--accent-light), var(--primary-color), var(--accent-dark));
             background-size: 200% 100%;
             animation: shimmer 3s infinite linear;
             z-index: 999;
@@ -81,44 +97,6 @@ if (isset($_SESSION['login_success'])) {
         @keyframes shimmer {
             0% { background-position: 0% 0; }
             100% { background-position: 200% 0; }
-        }
-
-        /* Root variables */
-        :root {
-            --white: rgba(255, 255, 255, 0.9);
-            --black: #000;
-            --info-color: #36b9cc;
-            --success-color: #1cc884;
-            --danger-color: #e74a3b;
-            --gold: #F9A828;
-            --gold-light: hsla(37, 95%, 67%, 1);
-            --gold-dark: hsla(37, 95%, 47%, 1);
-            --color-2: hsla(194, 89%, 26%, 1);
-            --color-2-light: hsla(194, 89%, 36%, 1);
-            --color-2-lighter: hsla(194, 89%, 46%, 1);
-            
-            /* Original gold colors */
-            --gold: #d4af37;
-            --gold-light: #e6c458;
-            --gold-dark: #b38728;
-            
-            /* Dark colors */
-            --dark-blue: #0f172a;
-            --navy: #1e293b;
-            --slate: #334155;
-            --slate-light: #475569;
-            
-            /* Text colors */
-            --text: #1e293b;
-            --text-light: #64748b;
-            
-            /* Status colors */
-            --success: #10b981;
-            --error: #ef4444;
-            
-            /* Shadow colors */
-            --shadow-color: rgba(15, 23, 42, 0.08);
-            --shadow-color-dark: rgba(15, 23, 42, 0.16);
         }
 
         /* Reset & Base Styles */
@@ -150,7 +128,7 @@ if (isset($_SESSION['login_success'])) {
             height: 100%;
             z-index: -2;
             overflow: hidden;
-            background: linear-gradient(125deg, #0f172a 0%, #1e293b 100%);
+            background: linear-gradient(125deg, #1a202c 0%, #2d3748 100%);
         }
 
         .animated-bg::before {
@@ -160,7 +138,7 @@ if (isset($_SESSION['login_success'])) {
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, rgba(212, 175, 55, 0) 70%);
+            background: radial-gradient(circle, rgba(78, 115, 223, 0.08) 0%, rgba(78, 115, 223, 0) 70%);
             animation: rotate 50s linear infinite;
             z-index: -1;
         }
@@ -291,22 +269,17 @@ if (isset($_SESSION['login_success'])) {
             }
         }
 
-        /* Gold Accent */
+        /* Primary Accent */
         .gold-accent {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 4px;
-            background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-light), var(--gold), var(--gold-dark));
+            background: linear-gradient(90deg, var(--accent-dark), var(--primary-color), var(--accent-light), var(--primary-color), var(--accent-dark));
             background-size: 200% 100%;
             animation: shimmer 3s infinite linear;
             z-index: 2;
-        }
-
-        @keyframes shimmer {
-            0% { background-position: 0% 0; }
-            100% { background-position: 200% 0; }
         }
 
         /* Branding Section */
@@ -521,7 +494,7 @@ if (isset($_SESSION['login_success'])) {
             display: block;
             width: 60px;
             height: 3px;
-            background: linear-gradient(90deg, var(--primary-color), var(--primary-color), var(--info-color));
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-light), var(--info-color));
             margin: 15px auto 0;
             border-radius: 2px;
         }
@@ -667,7 +640,7 @@ if (isset($_SESSION['login_success'])) {
         }
 
         .input-field:focus + .input-icon {
-            color: var(--primary-color);
+            color: var(--accent-light);
         }
 
         .input-field::placeholder {
@@ -702,7 +675,7 @@ if (isset($_SESSION['login_success'])) {
         }
 
         .password-toggle:hover {
-            color: rgba(78, 115, 223, 0.8);
+            color: var(--info-color);
         }
 
         .form-options {
@@ -749,14 +722,14 @@ if (isset($_SESSION['login_success'])) {
         }
         
         .custom-checkbox:hover .checkmark {
-            border-color: rgba(78, 115, 223, 0.3);
-            box-shadow: 0 0 0 2px rgba(78, 115, 223, 0.05);
+            border-color: rgba(78, 115, 223, 0.4);
+            box-shadow: 0 0 0 2px rgba(78, 115, 223, 0.1);
         }
 
         .custom-checkbox input:checked ~ .checkmark {
             background: var(--primary-color);
             border-color: var(--primary-color);
-            box-shadow: 0 0 10px rgba(78, 115, 223, 0.3);
+            box-shadow: 0 0 10px rgba(78, 115, 223, 0.4);
         }
 
         .checkmark:after {
@@ -791,7 +764,7 @@ if (isset($_SESSION['login_success'])) {
 
         .forgot-link {
             font-size: 15px;
-            color: var(--info-color);
+            color: var(--primary-color);
             text-decoration: none;
             transition: all 0.3s ease;
             position: relative;
@@ -806,12 +779,12 @@ if (isset($_SESSION['login_success'])) {
             height: 1px;
             bottom: 2px;
             left: 5px;
-            background-color: var(--primary-color);
+            background-color: var(--accent-light);
             transition: width 0.3s ease;
         }
         
         .forgot-link:hover {
-            color: var(--primary-color);
+            color: var(--accent-light);
         }
         
         .forgot-link:hover::after {
@@ -821,7 +794,7 @@ if (isset($_SESSION['login_success'])) {
         .submit-btn {
             width: 100%;
             padding: 16px;
-            background: linear-gradient(90deg, var(--color-2), var(--gold));
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-light));
             border: none;
             border-radius: 10px;
             color: var(--white);
@@ -833,7 +806,7 @@ if (isset($_SESSION['login_success'])) {
             overflow: hidden;
             font-family: 'Inter', sans-serif;
             letter-spacing: 0.5px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(7, 97, 125, 0.1);
+            box-shadow: 0 5px 15px rgba(78, 115, 223, 0.3), 0 0 0 2px rgba(78, 115, 223, 0.1);
             text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
@@ -853,12 +826,12 @@ if (isset($_SESSION['login_success'])) {
 
         .submit-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 0 2px rgba(249, 168, 40, 0.2);
+            box-shadow: 0 8px 25px rgba(78, 115, 223, 0.4), 0 0 0 2px rgba(78, 115, 223, 0.2);
         }
         
         .submit-btn:active {
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(7, 97, 125, 0.2);
+            box-shadow: 0 4px 12px rgba(78, 115, 223, 0.3), 0 0 0 2px rgba(78, 115, 223, 0.2);
         }
 
         .submit-btn:hover::before {
@@ -898,7 +871,7 @@ if (isset($_SESSION['login_success'])) {
         }
 
         .support-link {
-            color: var(--info-color);
+            color: var(--primary-color);
             text-decoration: none;
             transition: all 0.3s ease;
             font-weight: 500;
@@ -912,12 +885,12 @@ if (isset($_SESSION['login_success'])) {
             height: 1px;
             bottom: -2px;
             left: 0;
-            background-color: var(--primary-color);
+            background-color: var(--accent-light);
             transition: width 0.3s ease;
         }
         
         .support-link:hover {
-            color: var(--primary-color);
+            color: var(--accent-light);
         }
         
         .support-link:hover::after {
@@ -953,59 +926,59 @@ if (isset($_SESSION['login_success'])) {
 
         /* Email field specific styling */
         .input-group:has(#email) .input-field {
-            border: 1px solid rgba(7, 97, 125, 0.2);
-            border-left: 5px solid var(--color-2-lighter); 
+            border: 1px solid rgba(78, 115, 223, 0.2);
+            border-left: 5px solid var(--primary-color); 
             padding-left: 75px;
-            box-shadow: inset 0 0 10px rgba(7, 97, 125, 0.05), 0 4px 12px rgba(0, 0, 0, 0.08);
+            box-shadow: inset 0 0 10px rgba(78, 115, 223, 0.05), 0 4px 12px rgba(0, 0, 0, 0.08);
         }
 
         .input-group:has(#email) .input-icon {
             left: 35px;
-            color: var(--color-2);
+            color: var(--primary-color);
         }
 
         .input-group:has(#email) .input-field:focus {
-            border: 1px solid var(--color-2-light);
-            border-left: 5px solid var(--color-2);
-            box-shadow: inset 0 0 10px rgba(7, 97, 125, 0.08), 0 0 0 3px rgba(7, 97, 125, 0.1), 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--accent-light);
+            border-left: 5px solid var(--primary-color);
+            box-shadow: inset 0 0 10px rgba(78, 115, 223, 0.08), 0 0 0 3px rgba(78, 115, 223, 0.1), 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         
         .input-group:has(#email) .input-field:focus + .input-icon {
-            color: var(--color-2);
+            color: var(--primary-color);
         }
 
         .input-group:has(#email) label::before {
-            background-color: var(--color-2);
-            box-shadow: 0 0 8px var(--color-2-light);
+            background-color: var(--primary-color);
+            box-shadow: 0 0 8px var(--accent-light);
         }
 
         /* Password field specific styling */
         .input-group:has(#password) .input-field {
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            border-left: 5px solid var(--gold);
+            border: 1px solid rgba(54, 185, 204, 0.2);
+            border-left: 5px solid var(--info-color);
             padding-right: 60px;
             padding-left: 75px;
-            box-shadow: inset 0 0 10px rgba(212, 175, 55, 0.05), 0 4px 12px rgba(0, 0, 0, 0.08);
+            box-shadow: inset 0 0 10px rgba(54, 185, 204, 0.05), 0 4px 12px rgba(0, 0, 0, 0.08);
         }
         
         .input-group:has(#password) .input-icon {
             left: 35px;
-            color: var(--gold);
+            color: var(--info-color);
         }
 
         .input-group:has(#password) .input-field:focus {
-            border: 1px solid var(--gold-light);
-            border-left: 5px solid var(--gold);
-            box-shadow: inset 0 0 10px rgba(212, 175, 55, 0.08), 0 0 0 3px rgba(212, 175, 55, 0.1), 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--info-color);
+            border-left: 5px solid var(--info-color);
+            box-shadow: inset 0 0 10px rgba(54, 185, 204, 0.08), 0 0 0 3px rgba(54, 185, 204, 0.1), 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         
         .input-group:has(#password) .input-field:focus + .input-icon {
-            color: var(--gold-dark);
+            color: var(--info-color);
         }
 
         .input-group:has(#password) label::before {
-            background-color: var(--gold);
-            box-shadow: 0 0 8px var(--gold-light);
+            background-color: var(--info-color);
+            box-shadow: 0 0 8px rgba(54, 185, 204, 0.5);
         }
     </style>
 </head>
@@ -1122,7 +1095,12 @@ if (isset($_SESSION['login_success'])) {
                         </button>
                         
                         <div class="form-footer">
-                            Besoin d'aide? <a class="support-link">Contactez notre équipe d'assistance</a>
+                            Besoin d'aide? <a class="support-link" id="support-toggle" style="cursor: pointer;">Contactez notre équipe d'assistance</a>
+                            <div id="support-info" style="display: none; margin-top: 10px;">
+                                <a href="mailto:syndictangerbvd@gmail.com" class="support-link"><i class="fas fa-envelope"></i> syndictangerbvd@gmail.com</a>
+                                <span style="margin: 0 8px; color: rgba(255,255,255,0.4);">|</span>
+                                <a href="https://wa.me/212664463957" target="_blank" class="support-link"><i class="fab fa-whatsapp"></i> +212 664 463 957</a>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -1142,11 +1120,11 @@ if (isset($_SESSION['login_success'])) {
             const rememberCheckbox = document.getElementById('remember-me');
             
             // Cookie functions
-            function setCookie(name, value, days) {
+            function setCookie(name, value, hours) {
                 let expires = "";
-                if (days) {
+                if (hours) {
                     const date = new Date();
-                    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                    date.setTime(date.getTime() + (hours * 60 * 60 * 1000));
                     expires = "; expires=" + date.toUTCString();
                 }
                 document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Strict";
@@ -1178,8 +1156,8 @@ if (isset($_SESSION['login_success'])) {
             const loginForm = document.querySelector('.login-form');
             loginForm.addEventListener('submit', function(e) {
                 if (rememberCheckbox.checked) {
-                    // Save email for 30 days
-                    setCookie('ctb_email', emailField.value, 30);
+                    // Save email for 12 hours
+                    setCookie('ctb_email', emailField.value, 12);
                 } else {
                     // Remove saved email if remember me is unchecked
                     eraseCookie('ctb_email');
@@ -1232,6 +1210,13 @@ if (isset($_SESSION['login_success'])) {
                     });
                 }, 5000);
             }
+
+            // Support toggle
+            const supportToggle = document.getElementById('support-toggle');
+            const supportInfo = document.getElementById('support-info');
+            supportToggle.addEventListener('click', function() {
+                supportInfo.style.display = supportInfo.style.display === 'none' ? 'block' : 'none';
+            });
         });
     </script>
 </body>
