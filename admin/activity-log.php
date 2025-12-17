@@ -656,39 +656,39 @@ $page_title = __("Activity Log");
         }
         
         .entity-badge.status-primary {
-            background-color: rgba(var(--primary-rgb), 0.15);
-            color: var(--primary-color);
-            border: 1px solid rgba(var(--primary-rgb), 0.3);
+            background: linear-gradient(135deg, #4361ee 0%, #3a51d4 100%);
+            color: #ffffff;
+            border: 1px solid #3a51d4;
         }
         
         .entity-badge.status-success {
-            background-color: rgba(25, 135, 84, 0.15);
-            color: #198754;
-            border: 1px solid rgba(25, 135, 84, 0.3);
+            background: linear-gradient(135deg, #25c685 0%, #1fa76e 100%);
+            color: #ffffff;
+            border: 1px solid #1fa76e;
         }
         
         .entity-badge.status-warning {
-            background-color: rgba(255, 193, 7, 0.15);
-            color: #704b02;
-            border: 1px solid rgba(255, 193, 7, 0.3);
+            background: linear-gradient(135deg, #f8b830 0%, #e5a61c 100%);
+            color: #ffffff;
+            border: 1px solid #e5a61c;
         }
         
         .entity-badge.status-danger {
-            background-color: rgba(220, 53, 69, 0.15);
-            color: #dc3545;
-            border: 1px solid rgba(220, 53, 69, 0.3);
+            background: linear-gradient(135deg, #e74a3b 0%, #c0392b 100%);
+            color: #ffffff;
+            border: 1px solid #c0392b;
         }
         
         .entity-badge.status-info {
-            background-color: rgba(13, 202, 240, 0.15);
-            color: #0a6ebd;
-            border: 1px solid rgba(13, 202, 240, 0.3);
+            background: linear-gradient(135deg, #4cc9f0 0%, #36b5db 100%);
+            color: #ffffff;
+            border: 1px solid #36b5db;
         }
         
         .entity-badge.status-secondary {
-            background-color: rgba(108, 117, 125, 0.15);
-            color: #6c757d;
-            border: 1px solid rgba(108, 117, 125, 0.3);
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+            color: #ffffff;
+            border: 1px solid #5a6268;
         }
         
         .entity-badge:hover {
@@ -703,39 +703,39 @@ $page_title = __("Activity Log");
         }
         
         [data-theme="dark"] .entity-badge.status-primary {
-            background-color: rgba(var(--primary-rgb), 0.25);
-            border-color: rgba(var(--primary-rgb), 0.5);
-            color: var(--primary-color-light);
+            background: linear-gradient(135deg, #4e73df 0%, #3d5fc7 100%);
+            color: #ffffff;
+            border: 1px solid #3d5fc7;
         }
         
         [data-theme="dark"] .entity-badge.status-success {
-            background-color: rgba(25, 135, 84, 0.25);
-            border-color: rgba(25, 135, 84, 0.5);
-            color: #25c274;
+            background: linear-gradient(135deg, #1cc88a 0%, #16a085 100%);
+            color: #ffffff;
+            border: 1px solid #16a085;
         }
         
         [data-theme="dark"] .entity-badge.status-warning {
-            background-color: rgba(255, 193, 7, 0.25);
-            border-color: rgba(255, 193, 7, 0.5);
-            color: #ffda6a;
+            background: linear-gradient(135deg, #f6c23e 0%, #e5a61c 100%);
+            color: #ffffff;
+            border: 1px solid #e5a61c;
         }
         
         [data-theme="dark"] .entity-badge.status-danger {
-            background-color: rgba(220, 53, 69, 0.25);
-            border-color: rgba(220, 53, 69, 0.5);
-            color: #ff8085;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: #ffffff;
+            border: 1px solid #dc2626;
         }
         
         [data-theme="dark"] .entity-badge.status-info {
-            background-color: rgba(13, 202, 240, 0.25);
-            border-color: rgba(13, 202, 240, 0.5);
-            color: #6edbf7;
+            background: linear-gradient(135deg, #36b9cc 0%, #2a9db0 100%);
+            color: #ffffff;
+            border: 1px solid #2a9db0;
         }
         
         [data-theme="dark"] .entity-badge.status-secondary {
-            background-color: rgba(108, 117, 125, 0.25);
-            border-color: rgba(108, 117, 125, 0.5);
-            color: #a1a8ae;
+            background: linear-gradient(135deg, #858796 0%, #6c757d 100%);
+            color: #ffffff;
+            border: 1px solid #6c757d;
         }
     </style>
     <script>

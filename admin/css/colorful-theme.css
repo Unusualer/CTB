@@ -1349,33 +1349,33 @@ html:not([data-theme="dark"]) .sidebar-nav a[href*="activity"] i {
 }
 
 .status-success {
-    background: linear-gradient(135deg, rgba(37, 198, 133, 0.15) 0%, rgba(37, 198, 133, 0.1) 100%);
-    color: #0d7a4f;
-    border-color: rgba(37, 198, 133, 0.3);
+    background: linear-gradient(135deg, #25c685 0%, #1fa76e 100%);
+    color: #ffffff;
+    border-color: #1fa76e;
 }
 
 .status-warning {
-    background: linear-gradient(135deg, rgba(248, 184, 48, 0.15) 0%, rgba(248, 184, 48, 0.1) 100%);
-    color: #b8820f;
-    border-color: rgba(248, 184, 48, 0.3);
+    background: linear-gradient(135deg, #f8b830 0%, #e5a61c 100%);
+    color: #ffffff;
+    border-color: #e5a61c;
 }
 
 .status-danger {
-    background: linear-gradient(135deg, rgba(231, 74, 59, 0.15) 0%, rgba(231, 74, 59, 0.1) 100%);
-    color: #c0392b;
-    border-color: rgba(231, 74, 59, 0.3);
+    background: linear-gradient(135deg, #e74a3b 0%, #c0392b 100%);
+    color: #ffffff;
+    border-color: #c0392b;
 }
 
 .status-primary {
-    background: linear-gradient(135deg, rgba(67, 97, 238, 0.15) 0%, rgba(67, 97, 238, 0.1) 100%);
-    color: #2d3f9e;
-    border-color: rgba(67, 97, 238, 0.3);
+    background: linear-gradient(135deg, #4361ee 0%, #3a51d4 100%);
+    color: #ffffff;
+    border-color: #3a51d4;
 }
 
 .status-info {
-    background: linear-gradient(135deg, rgba(76, 201, 240, 0.15) 0%, rgba(76, 201, 240, 0.1) 100%);
-    color: #0d6b8a;
-    border-color: rgba(76, 201, 240, 0.3);
+    background: linear-gradient(135deg, #4cc9f0 0%, #36b5db 100%);
+    color: #ffffff;
+    border-color: #36b5db;
 }
 
 [data-theme="dark"] .status-success {
