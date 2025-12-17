@@ -60,7 +60,7 @@ try {
 }
 
 // Default page title - will be overridden by page specific titles
-$pageTitle = isset($page_title) ? $page_title . ' - CTB Admin' : 'CTB Admin Dashboard';
+$pageTitle = isset($page_title) ? $page_title . ' - ' . __("Complexe Tanger Boulevard") : __("Dashboard") . ' - ' . __("Complexe Tanger Boulevard");
 
 // Default active menu - can be overridden by the page
 $activeMenu = isset($activeMenu) ? $activeMenu : '';
@@ -139,7 +139,7 @@ try {
         <div class="sidebar-header">
             <a href="dashboard.php" class="sidebar-brand">
                 <i class="fas fa-building"></i>
-                <span>CTB Admin</span>
+                <span><?php echo __("Complexe Tanger Boulevard"); ?></span>
             </a>
             <button id="sidebarToggle" class="sidebar-toggle">
                 <i class="fas fa-chevron-left"></i>
@@ -159,12 +159,12 @@ try {
         
         <!-- Sidebar Menu -->
         <div class="sidebar-menu">
-            <div class="sidebar-menu-category">Tableau de Bord</div>
+            <div class="sidebar-menu-category"><?php echo __("Dashboard"); ?></div>
             
             <div class="sidebar-menu-item">
                 <a href="dashboard.php" class="sidebar-menu-link <?php echo $currentPage === 'dashboard.php' ? 'active' : ''; ?>">
                     <i class="fas fa-tachometer-alt"></i>
-                    <span class="sidebar-menu-text">Tableau de Bord</span>
+                    <span class="sidebar-menu-text"><?php echo __("Dashboard"); ?></span>
                 </a>
             </div>
             
@@ -281,7 +281,7 @@ try {
             </button>
             
             <!-- Page title -->
-            <h1 class="page-title"><?php echo isset($page_title) ? htmlspecialchars($page_title) : 'Tableau de Bord'; ?></h1>
+            <h1 class="page-title"><?php echo isset($page_title) ? htmlspecialchars($page_title) : __("Dashboard"); ?></h1>
             
             <!-- Topbar Navbar -->
             <ul class="navbar-nav ml-auto">
@@ -395,7 +395,7 @@ try {
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-6">
-                    <p>&copy; <?php echo date('Y'); ?> CTB Property Management</p>
+                    <p>&copy; <?php echo date('Y'); ?> <?php echo __("Complexe Tanger Boulevard"); ?></p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <p>Version 1.0.0</p>

@@ -5,6 +5,7 @@ session_start();
 // Include database connection file
 require_once 'includes/config.php';
 require_once 'includes/role_access.php';
+require_once 'includes/translations.php';
 
 // Enable debugging (REMOVE THIS IN PRODUCTION)
 $debug = false;
@@ -37,23 +38,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     // Basic validation
     if (empty($email) || empty($password)) {
-        $_SESSION['login_error'] = "All fields are required.";
+        $_SESSION['login_error'] = __("All fields are required.");
         if (!$debug) {
             header("Location: login.php");
             exit();
         } else {
-            debugOutput("Error: All fields are required.");
+            debugOutput("Error: " . __("All fields are required."));
         }
     }
     
     // Validate email format
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $_SESSION['login_error'] = "Invalid email format.";
+        $_SESSION['login_error'] = __("Invalid email format.");
         if (!$debug) {
             header("Location: login.php");
             exit();
         } else {
-            debugOutput("Error: Invalid email format.");
+            debugOutput("Error: " . __("Invalid email format."));
         }
     }
     
@@ -173,7 +174,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
                 
                 // Log the successful login
-                logActivity($user['id'], 'login', 'user', $user['id'], 'User logged in successfully');
+                logActivity($user['id'], 'login', 'user', $user['id'], __("User logged in successfully"));
                 
                 // Redirect to appropriate dashboard
                 debugOutput("Redirecting to: " . $redirect);
@@ -184,7 +185,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             } else {
                 // Password is incorrect
                 debugOutput("Password verification failed!");
-                $_SESSION['login_error'] = "Invalid email or password.";
+                $_SESSION['login_error'] = __("Invalid email or password.");
                 if (!$debug) {
                     header("Location: login.php");
                     exit();
@@ -193,7 +194,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             // User does not exist
             debugOutput("User not found with email: " . $email);
-            $_SESSION['login_error'] = "Invalid email or password.";
+            $_SESSION['login_error'] = __("Invalid email or password.");
             if (!$debug) {
                 header("Location: login.php");
                 exit();
@@ -201,7 +202,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     } catch (PDOException $e) {
         // Database error
-        $errorMessage = "Database error: " . $e->getMessage();
+        $errorMessage = __("Database error:") . " " . $e->getMessage();
         debugOutput("Exception caught: " . $errorMessage);
         $_SESSION['login_error'] = $errorMessage;
         if (!$debug) {

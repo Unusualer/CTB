@@ -8,6 +8,11 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/role_access.php';
 
+// Include translation function if not already included
+if (!function_exists('__')) {
+    require_once __DIR__ . '/translations.php';
+}
+
 // Set default active page
 $active_page = basename($_SERVER['PHP_SELF'], '.php');
 
@@ -17,25 +22,25 @@ $currentRole = getCurrentRole();
 // Common menu items for all roles
 $common_menu_items = [
     [
-        'name' => 'Dashboard',
+        'name' => __("Dashboard"),
         'icon' => 'fa-tachometer-alt',
         'url' => 'dashboard.php',
         'page' => 'dashboard'
     ],
     [
-        'name' => 'My Profile',
+        'name' => __("My Profile"),
         'icon' => 'fa-user',
         'url' => 'view-user.php?id=' . $_SESSION['user_id'],
         'page' => 'view-user'
     ],
     [
-        'name' => 'Tickets',
+        'name' => __("Tickets"),
         'icon' => 'fa-ticket-alt',
         'url' => 'tickets.php',
         'page' => 'tickets'
     ],
     [
-        'name' => 'Maintenance',
+        'name' => __("Maintenance"),
         'icon' => 'fa-tools',
         'url' => 'maintenance.php',
         'page' => 'maintenance'
@@ -45,25 +50,25 @@ $common_menu_items = [
 // Admin-specific menu items
 $admin_menu_items = [
     [
-        'name' => 'User Management',
+        'name' => __("User Management"),
         'icon' => 'fa-users',
         'url' => 'users.php',
         'page' => 'users'
     ],
     [
-        'name' => 'Properties',
+        'name' => __("Properties"),
         'icon' => 'fa-building',
         'url' => 'properties.php',
         'page' => 'properties'
     ],
     [
-        'name' => 'Payments',
+        'name' => __("Payments"),
         'icon' => 'fa-credit-card',
         'url' => 'payments.php',
         'page' => 'payments'
     ],
     [
-        'name' => 'Activity Log',
+        'name' => __("Activity Log"),
         'icon' => 'fa-history',
         'url' => 'activity-log.php',
         'page' => 'activity-log'
@@ -73,13 +78,13 @@ $admin_menu_items = [
 // Manager-specific menu items
 $manager_menu_items = [
     [
-        'name' => 'Properties',
+        'name' => __("Properties"),
         'icon' => 'fa-building',
         'url' => 'properties.php',
         'page' => 'properties'
     ],
     [
-        'name' => 'Payments',
+        'name' => __("Payments"),
         'icon' => 'fa-credit-card',
         'url' => 'payments.php',
         'page' => 'payments'
@@ -89,13 +94,13 @@ $manager_menu_items = [
 // Resident-specific menu items
 $resident_menu_items = [
     [
-        'name' => 'My Property',
+        'name' => __("My Property"),
         'icon' => 'fa-home',
         'url' => 'view-property.php?id=' . ($_SESSION['property_id'] ?? ''),
         'page' => 'view-property'
     ],
     [
-        'name' => 'My Payments',
+        'name' => __("My Payments"),
         'icon' => 'fa-credit-card',
         'url' => 'payments.php',
         'page' => 'payments'
@@ -116,7 +121,7 @@ if ($currentRole === 'admin') {
 
 <aside class="sidebar">
     <div class="sidebar-header">
-        <h2><i class="fas fa-building"></i> CTB</h2>
+        <h2><i class="fas fa-building"></i> <?php echo __("Complexe Tanger Boulevard"); ?></h2>
         <span class="close-sidebar" id="close-sidebar"><i class="fas fa-times"></i></span>
     </div>
     
@@ -125,8 +130,8 @@ if ($currentRole === 'admin') {
             <i class="fas fa-user-circle"></i>
         </div>
         <div class="user-details">
-            <h3><?php echo htmlspecialchars($_SESSION['name'] ?? ($_SESSION['user_name'] ?? 'User')); ?></h3>
-            <span class="user-role"><?php echo ucfirst(htmlspecialchars($currentRole ?? 'Unknown')); ?></span>
+            <h3><?php echo htmlspecialchars($_SESSION['name'] ?? ($_SESSION['user_name'] ?? __("User"))); ?></h3>
+            <span class="user-role"><?php echo htmlspecialchars($currentRole ? __(ucfirst($currentRole)) : __("Unknown")); ?></span>
         </div>
     </div>
     
@@ -136,7 +141,7 @@ if ($currentRole === 'admin') {
                 <li class="<?php echo ($active_page === $item['page']) ? 'active' : ''; ?>">
                     <a href="<?php echo htmlspecialchars($item['url']); ?>">
                         <i class="fas <?php echo htmlspecialchars($item['icon']); ?>"></i>
-                        <span><?php echo htmlspecialchars($item['name']); ?></span>
+                        <span><?php echo $item['name']; ?></span>
                     </a>
                 </li>
             <?php endforeach; ?>
@@ -145,14 +150,14 @@ if ($currentRole === 'admin') {
             <li>
                 <a href="../logout.php">
                     <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
+                    <span><?php echo __("Logout"); ?></span>
                 </a>
             </li>
         </ul>
     </nav>
     
     <div class="sidebar-footer">
-        <p>© <?php echo date('Y'); ?> Community Trust Bank</p>
+        <p>© <?php echo date('Y'); ?> <?php echo __("Complexe Tanger Boulevard"); ?></p>
     </div>
 </aside>
 

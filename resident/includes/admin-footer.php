@@ -3,7 +3,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-6 text-start">
-                <span class="text-muted">&copy; <?php echo date('Y'); ?> CTB Gestion Immobilière</span>
+                <span class="text-muted">&copy; <?php echo date('Y'); ?> <?php echo __("Complexe Tanger Boulevard"); ?></span>
             </div>
             <div class="col-md-6 text-end">
                 <span class="text-muted">Version <?php echo APP_VERSION; ?></span>

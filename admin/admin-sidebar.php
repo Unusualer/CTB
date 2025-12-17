@@ -71,7 +71,7 @@ $new_messages = 0;  // This would be populated from a database query
 
 <div class="admin-sidebar">
     <div class="sidebar-brand">
-        <h2><?php echo __("CTB Admin"); ?></h2>
+        <h2><?php echo __("Complexe Tanger Boulevard"); ?></h2>
     </div>
     
     <div class="admin-profile">

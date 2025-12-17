@@ -1,6 +1,6 @@
-# Community Trust Bank (CTB) Role-Based Access Control
+# Complexe Tanger Boulevard (CTB) Role-Based Access Control
 
-This document provides a comprehensive guide to the role-based access control (RBAC) system implemented in the CTB application.
+This document provides a comprehensive guide to the role-based access control (RBAC) system implemented in the Complexe Tanger Boulevard application.
 
 ## Overview
 

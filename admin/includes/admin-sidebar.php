@@ -31,8 +31,8 @@ if (!function_exists('__')) {
 <aside class="sidebar">
     <div class="sidebar-header">
         <a href="dashboard.php" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px;">
-            <img src="../images/logo.png" alt="Logo CTB" class="logo">
-            <h2>CTB Admin</h2>
+            <img src="../images/logo.png" alt="<?php echo __("Logo"); ?> CTB" class="logo">
+            <h2><?php echo __("Complexe Tanger Boulevard"); ?></h2>
         </a>
     </div>
     
@@ -42,7 +42,7 @@ if (!function_exists('__')) {
                 <i class="fas fa-user-circle"></i>
             </div>
             <div class="user-details">
-                <h4><?php echo htmlspecialchars($_SESSION['name'] ?? 'Admin User'); ?></h4>
+                <h4><?php echo htmlspecialchars($_SESSION['name'] ?? __("Admin User")); ?></h4>
                 <p><?php echo __("Administrator"); ?></p>
             </div>
         </div>

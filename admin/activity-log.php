@@ -257,7 +257,7 @@ $page_title = __("Activity Log");
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?> - <?php echo __("Community Trust Bank"); ?></title>
+    <title><?php echo $page_title; ?> - <?php echo __("Complexe Tanger Boulevard"); ?></title>
     <!-- Favicon -->
     <?php favicon_links(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -736,6 +736,33 @@ $page_title = __("Activity Log");
             background: linear-gradient(135deg, #858796 0%, #6c757d 100%);
             color: #ffffff;
             border: 1px solid #6c757d;
+        }
+        
+        /* Export Log button styling */
+        .btn.btn-secondary[onclick*="exportActivityLog"] {
+            background: linear-gradient(135deg, #4361ee 0%, #3a51d4 100%);
+            color: #ffffff;
+            border: none;
+        }
+        
+        .btn.btn-secondary[onclick*="exportActivityLog"]:hover {
+            background: linear-gradient(135deg, #3a51d4 0%, #2e42b8 100%);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
+        
+        [data-theme="dark"] .btn.btn-secondary[onclick*="exportActivityLog"] {
+            background: linear-gradient(135deg, #4e73df 0%, #3d5fc7 100%);
+            color: #ffffff;
+            border: none;
+        }
+        
+        [data-theme="dark"] .btn.btn-secondary[onclick*="exportActivityLog"]:hover {
+            background: linear-gradient(135deg, #3d5fc7 0%, #2d4fb0 100%);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(78, 115, 223, 0.4);
         }
     </style>
     <script>

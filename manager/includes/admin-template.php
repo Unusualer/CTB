@@ -23,6 +23,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
 // Get user details for display in sidebar
 require_once '../includes/config.php';
+require_once '../includes/translations.php';
 
 // Establish database connection if not already established
 if (!isset($pdo)) {
@@ -60,7 +61,7 @@ try {
 }
 
 // Default page title - will be overridden by page specific titles
-$pageTitle = isset($page_title) ? $page_title . ' - CTB Admin' : 'CTB Admin Dashboard';
+$pageTitle = isset($page_title) ? $page_title . ' - ' . __("Complexe Tanger Boulevard") : __("Dashboard") . ' - ' . __("Complexe Tanger Boulevard");
 
 // Default active menu - can be overridden by the page
 $activeMenu = isset($activeMenu) ? $activeMenu : '';
@@ -139,7 +140,7 @@ try {
         <div class="sidebar-header">
             <a href="dashboard.php" class="sidebar-brand">
                 <i class="fas fa-building"></i>
-                <span>CTB Admin</span>
+                <span><?php echo __("Complexe Tanger Boulevard"); ?></span>
             </a>
             <button id="sidebarToggle" class="sidebar-toggle">
                 <i class="fas fa-chevron-left"></i>
@@ -159,49 +160,49 @@ try {
         
         <!-- Sidebar Menu -->
         <div class="sidebar-menu">
-            <div class="sidebar-menu-category">Tableau de Bord</div>
+            <div class="sidebar-menu-category"><?php echo __("Dashboard"); ?></div>
             
             <div class="sidebar-menu-item">
                 <a href="dashboard.php" class="sidebar-menu-link <?php echo $currentPage === 'dashboard.php' ? 'active' : ''; ?>">
                     <i class="fas fa-tachometer-alt"></i>
-                    <span class="sidebar-menu-text">Tableau de Bord</span>
+                    <span class="sidebar-menu-text"><?php echo __("Dashboard"); ?></span>
                 </a>
             </div>
             
-            <div class="sidebar-menu-category">Résidents</div>
+            <div class="sidebar-menu-category"><?php echo __("Residents"); ?></div>
             
             <div class="sidebar-menu-item">
                 <a href="residents.php" class="sidebar-menu-link <?php echo in_array($currentPage, ['residents.php', 'resident-details.php', 'add-resident.php', 'edit-resident.php']) ? 'active' : ''; ?>">
                     <i class="fas fa-users"></i>
-                    <span class="sidebar-menu-text">Gérer les Résidents</span>
+                    <span class="sidebar-menu-text"><?php echo __("Manage Residents"); ?></span>
                     <?php if (isset($systemNotifications) && !empty($systemNotifications)): ?>
-                    <span class="sidebar-badge">Nouveau</span>
+                    <span class="sidebar-badge"><?php echo __("New"); ?></span>
                     <?php endif; ?>
                 </a>
             </div>
             
-            <div class="sidebar-menu-category">Propriétés</div>
+            <div class="sidebar-menu-category"><?php echo __("Properties"); ?></div>
             
             <div class="sidebar-menu-item">
                 <a href="properties.php" class="sidebar-menu-link <?php echo in_array($currentPage, ['properties.php', 'property-details.php', 'add-property.php', 'edit-property.php']) ? 'active' : ''; ?>">
                     <i class="fas fa-building"></i>
-                    <span class="sidebar-menu-text">Gérer les Propriétés</span>
+                    <span class="sidebar-menu-text"><?php echo __("Manage Properties"); ?></span>
                 </a>
             </div>
             
             <div class="sidebar-menu-item">
                 <a href="units.php" class="sidebar-menu-link <?php echo in_array($currentPage, ['units.php', 'unit-details.php', 'add-unit.php', 'edit-unit.php']) ? 'active' : ''; ?>">
                     <i class="fas fa-door-open"></i>
-                    <span class="sidebar-menu-text">Gérer les Unités</span>
+                    <span class="sidebar-menu-text"><?php echo __("Manage Units"); ?></span>
                 </a>
             </div>
             
-            <div class="sidebar-menu-category">Finances</div>
+            <div class="sidebar-menu-category"><?php echo __("Finances"); ?></div>
             
             <div class="sidebar-menu-item">
                 <a href="payments.php" class="sidebar-menu-link <?php echo in_array($currentPage, ['payments.php', 'payment-details.php', 'add-payment.php']) ? 'active' : ''; ?>">
                     <i class="fas fa-credit-card"></i>
-                    <span class="sidebar-menu-text">Paiements</span>
+                    <span class="sidebar-menu-text"><?php echo __("Payments"); ?></span>
                     <?php if (isset($pendingPayments) && $pendingPayments > 0): ?>
                     <span class="sidebar-badge"><?php echo $pendingPayments; ?></span>
                     <?php endif; ?>
@@ -211,28 +212,28 @@ try {
             <div class="sidebar-menu-item">
                 <a href="invoices.php" class="sidebar-menu-link <?php echo in_array($currentPage, ['invoices.php', 'invoice-details.php', 'create-invoice.php']) ? 'active' : ''; ?>">
                     <i class="fas fa-file-invoice-dollar"></i>
-                    <span class="sidebar-menu-text">Factures</span>
+                    <span class="sidebar-menu-text"><?php echo __("Invoices"); ?></span>
                 </a>
             </div>
             
-            <div class="sidebar-menu-category">Support</div>
+            <div class="sidebar-menu-category"><?php echo __("Support"); ?></div>
             
             <div class="sidebar-menu-item">
                 <a href="tickets.php" class="sidebar-menu-link <?php echo in_array($currentPage, ['tickets.php', 'view-ticket.php']) ? 'active' : ''; ?>">
                     <i class="fas fa-ticket-alt"></i>
-                    <span class="sidebar-menu-text">Tickets Support</span>
+                    <span class="sidebar-menu-text"><?php echo __("Support Tickets"); ?></span>
                     <?php if (isset($openTickets) && $openTickets > 0): ?>
                     <span class="sidebar-badge"><?php echo $openTickets; ?></span>
                     <?php endif; ?>
                 </a>
             </div>
             
-            <div class="sidebar-menu-category">Paramètres</div>
+            <div class="sidebar-menu-category"><?php echo __("Settings"); ?></div>
             
             <div class="sidebar-menu-item">
                 <a href="profile.php" class="sidebar-menu-link <?php echo $currentPage === 'profile.php' ? 'active' : ''; ?>">
                     <i class="fas fa-user-cog"></i>
-                    <span class="sidebar-menu-text">Profil</span>
+                    <span class="sidebar-menu-text"><?php echo __("Profile"); ?></span>
                 </a>
             </div>
             
@@ -272,7 +273,7 @@ try {
             </button>
             
             <!-- Page title -->
-            <h1 class="page-title"><?php echo isset($page_title) ? htmlspecialchars($page_title) : 'Tableau de Bord'; ?></h1>
+            <h1 class="page-title"><?php echo isset($page_title) ? htmlspecialchars($page_title) : __("Dashboard"); ?></h1>
             
             <!-- Topbar Navbar -->
             <ul class="navbar-nav ml-auto">
@@ -381,7 +382,7 @@ try {
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-6">
-                    <p>&copy; <?php echo date('Y'); ?> CTB Property Management</p>
+                    <p>&copy; <?php echo date('Y'); ?> <?php echo __("Complexe Tanger Boulevard"); ?></p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <p>Version 1.0.0</p>

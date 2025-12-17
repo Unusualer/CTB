@@ -66,7 +66,7 @@ define('UPLOAD_DIR', BASE_PATH . 'uploads/');
 
 // Email settings
 define('MAIL_FROM', 'noreply@ctbproperties.com');
-define('MAIL_FROM_NAME', 'CTB Property Management');
+define('MAIL_FROM_NAME', 'Complexe Tanger Boulevard');
 
 // Application version
 define('APP_VERSION', '1.0.0');
@@ -81,7 +81,7 @@ define('PASSWORD_MIN_LENGTH', 8);
 $system_notifications = [];
 
 // Application constants
-define('SITE_NAME', 'CTB Property Management');
+define('SITE_NAME', 'Complexe Tanger Boulevard');
 define('EMAIL_FROM', 'noreply@ctb.com');
 define('UPLOADS_DIR', 'uploads/');
 define('ADMIN_ROLE', 'admin');

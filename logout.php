@@ -1,4 +1,9 @@
 <?php
+// Include translation function
+if (!function_exists('__')) {
+    require_once 'includes/translations.php';
+}
+
 // Start session if not already started
 session_start();
 
@@ -15,7 +20,7 @@ session_destroy();
 
 // Set success message for the login page
 session_start();
-$_SESSION['login_success'] = "You have been successfully logged out.";
+$_SESSION['login_success'] = __("You have been successfully logged out.");
 
 // Redirect to login page
 header("Location: login.php");

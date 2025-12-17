@@ -1,12 +1,18 @@
+<?php
+// Start session
+session_start();
+// Include translation system
+require_once 'includes/translations.php';
+?>
 <!DOCTYPE html>
-<html lang="en" class="no-js" >
+<html lang="<?php echo isset($_SESSION['language']) ? substr($_SESSION['language'], 0, 2) : 'en'; ?>" class="no-js" >
 <head>
 
     <!--- basic page needs
     ================================================== -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Complexe Tanger Boulevard - Residential Management System</title>
+    <title><?php echo __("Complexe Tanger Boulevard"); ?> - <?php echo __("Residential Management System"); ?></title>
 
     <script>
         document.documentElement.classList.remove('no-js');
@@ -56,25 +62,25 @@
             </div>
 
             <a class="s-header__menu-toggle" href="#0" class="">
-                <span class="s-header__menu-text">Menu</span>
+                <span class="s-header__menu-text"><?php echo __("Menu"); ?></span>
                 <span class="s-header__menu-icon"></span>
             </a>
 
             <nav class="s-header__nav">
 
-                <a href="#0" class="s-header__nav-close-btn" title="close"><span>Close</span></a>
+                <a href="#0" class="s-header__nav-close-btn" title="<?php echo __("close"); ?>"><span><?php echo __("Close"); ?></span></a>
                 <h3>CTB</h3>
 
                 <ul class="s-header__nav-list">
-                    <li><a href="#intro" class="smoothscroll">Home</a></li>
-                    <li><a href="#about" class="smoothscroll">About</a></li>
-                    <li><a href="#services" class="smoothscroll">Services</a></li>
-                    <li><a href="#portfolio" class="smoothscroll">Facilities</a></li>
-                    <li><a href="#contact" class="smoothscroll">Contact</a></li>
+                    <li><a href="#intro" class="smoothscroll"><?php echo __("Home"); ?></a></li>
+                    <li><a href="#about" class="smoothscroll"><?php echo __("About"); ?></a></li>
+                    <li><a href="#services" class="smoothscroll"><?php echo __("Services"); ?></a></li>
+                    <li><a href="#portfolio" class="smoothscroll"><?php echo __("Facilities"); ?></a></li>
+                    <li><a href="#contact" class="smoothscroll"><?php echo __("Contact"); ?></a></li>
                 </ul>
 
                 <p>
-                Welcome to the Syndicate of the complexe of Tanger Boulevard.
+                <?php echo __("Welcome to the Syndicate of the complexe of Tanger Boulevard."); ?>
                 </p>
 
                 <ul class="s-header__social">
@@ -117,18 +123,18 @@
                 <div class="row s-intro__content">
 
                     <div class="column lg-12 s-intro__content-inner">
-                        <h3 class="s-intro__pretitle">Welcome to Complexe Tanger Boulevard</h3>
+                        <h3 class="s-intro__pretitle"><?php echo __("Welcome to Complexe Tanger Boulevard"); ?></h3>
                         <h1 class="s-intro__title">
-                        Residential Management <br>
-                        System
+                        <?php echo __("Residential Management"); ?> <br>
+                        <?php echo __("System"); ?>
                         </h1>	
 
                         <div class="s-intro__more">
                             <a class="smoothscroll btn btn--stroke s-intro__more-btn" href="#about">
-                                Learn More
+                                <?php echo __("Learn More"); ?>
                             </a>
                             <a class="btn btn--primary s-intro__more-btn" href="login.php">
-                                Login
+                                <?php echo __("Login"); ?>
                             </a>
                         </div>	
                     </div> <!-- s-intro__content-inner -->
@@ -158,7 +164,7 @@
 
                 <div class="s-intro__scroll">
                     <a href="#about" class="smoothscroll">
-                        <span>Scroll Down</span>
+                        <span><?php echo __("Scroll Down"); ?></span>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: rotate(180deg);msFilter:progid:DXImageTransform.Microsoft.BasicImage(rotation=2);"><path d="M21 11H6.414l5.293-5.293-1.414-1.414L2.586 12l7.707 7.707 1.414-1.414L6.414 13H21z"></path></svg>
                     </a>
                 </div> <!-- s-intro__scroll -->
@@ -182,9 +188,9 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 0c-4.198 0-8 3.403-8 7.602 0 4.198 3.469 9.21 8 16.398 4.531-7.188 8-12.2 8-16.398 0-4.199-3.801-7.602-8-7.602zm0 11c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z"/></svg>
                         </span>
                         <div class="service-content">
-                            <h3 class="h4">Luxurious Location</h3>
+                            <h3 class="h4"><?php echo __("Luxurious Location"); ?></h3>
                             <p>
-                                <span>Tangier Boulevard complex</span> is a fantastic and luxurious project in Tangier, offering a range of amenities and features that would surely attract residents looking for a comfortable and convenient living experience. With direct access from Boulevard Mohamed V, the complex combines accessibility with prominence.
+                                <span><?php echo __("Tangier Boulevard complex"); ?></span> <?php echo __("is a fantastic and luxurious project in Tangier, offering a range of amenities and features that would surely attract residents looking for a comfortable and convenient living experience. With direct access from Boulevard Mohamed V, the complex combines accessibility with prominence."); ?>
                             </p>
                         </div>
                     </div>
@@ -194,9 +200,9 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 2h-14c-1.104 0-2 .896-2 2v14c0 1.104.896 2.001 2 2.001h4v2.999l4.5-3 4.5 3v-2.999h1c1.104 0 2-.897 2-2.001v-14c0-1.104-.896-2-2-2zm-14 16.001v-14.001h14v14.001h-14z"/></svg>
                         </span>
                         <div class="service-content">
-                            <h3 class="h4">Diverse Living Options</h3>
+                            <h3 class="h4"><?php echo __("Diverse Living Options"); ?></h3>
                             <p>
-                                The variety of apartment sizes, from 50 to 150 square meters, allows for a diverse range of living options to cater to different needs and preferences. Having private parking is a valuable addition, especially in urban areas where parking can be a challenge.
+                                <?php echo __("The variety of apartment sizes, from 50 to 150 square meters, allows for a diverse range of living options to cater to different needs and preferences. Having private parking is a valuable addition, especially in urban areas where parking can be a challenge."); ?>
                             </p>
                         </div>
                     </div>
@@ -206,9 +212,9 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M10.644 17.08c2.866-.662 4.539-1.241 3.246-3.682-3.932-7.427-1.042-11.398 3.111-11.398 4.235 0 7.054 4.124 3.11 11.398-1.332 2.455.437 3.034 3.242 3.682 2.483.574 2.647 1.787 2.647 3.889v1.031h-18c0-2.745-.22-4.258 2.644-4.92zm-12.644 4.92h7.809c-.035-8.177 3.436-5.313 3.436-11.127 0-2.511-1.639-3.873-3.748-3.873-3.115 0-5.282 2.979-2.333 8.549.969 1.83-1.031 2.265-3.181 2.761-1.862.43-1.983 1.34-1.983 2.917v.773z"/></svg>
                         </span>
                         <div class="service-content">
-                            <h3 class="h4">Premium Amenities</h3>
+                            <h3 class="h4"><?php echo __("Premium Amenities"); ?></h3>
                             <p>
-                                The communal swimming pool provides a great opportunity for residents to relax and enjoy leisure time without leaving the complex. The presence of a shopping mall within the complex adds to the overall lifestyle convenience for residents.
+                                <?php echo __("The communal swimming pool provides a great opportunity for residents to relax and enjoy leisure time without leaving the complex. The presence of a shopping mall within the complex adds to the overall lifestyle convenience for residents."); ?>
                             </p>
                         </div>
                     </div>
@@ -218,9 +224,9 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M6 1v3h-2c-1.105 0-2 .895-2 2v3c0 1.105.895 2 2 2h3v3h-3c-1.105 0-2 .895-2 2v3c0 1.105.895 2 2 2h2v3h12v-3h2c1.105 0 2-.895 2-2v-3c0-1.105-.895-2-2-2h-3v-3h3c1.105 0 2-.895 2-2v-3c0-1.105-.895-2-2-2h-2v-3h-12zm2 2h8v1.634c1.142.363 2 1.422 2 2.716 0 1.555-1.255 2.769-2.811 2.769-1.862 0-2.917-2.38-1.182-3.833 0 0-.438-.387-.438-1.683h-3.239c0 1.296-.438 1.683-.438 1.683 1.735 1.453.681 3.833-1.182 3.833-1.555 0-2.81-1.214-2.81-2.769 0-1.295.858-2.353 2-2.717v-1.633zm4 2c-.552 0-1 .448-1 1s.448 1 1 1 1-.448 1-1-.448-1-1-1zm-7 2.25c-.414 0-.75.336-.75.75s.336.75.75.75.75-.336.75-.75-.336-.75-.75-.75zm14 0c-.414 0-.75.336-.75.75s.336.75.75.75.75-.336.75-.75-.336-.75-.75-.75zm-7 2.25c-.552 0-1 .448-1 1s.448 1 1 1 1-.448 1-1-.448-1-1-1zm0 4h3.239c0-1.296.438-1.683.438-1.683-1.735-1.453-.681-3.833 1.182-3.833 1.555 0 2.811 1.214 2.811 2.769 0 1.295-.858 2.353-2 2.717v1.63h-8v-1.634c-1.142-.363-2-1.422-2-2.716 0-1.555 1.255-2.769 2.811-2.769 1.862 0 2.916 2.38 1.182 3.833 0 0 .438.387.438 1.683h3.239zm3.5.25c.414 0 .75-.336.75-.75s-.336-.75-.75-.75-.75.336-.75.75.336.75.75.75zm-14 0c.414 0 .75-.336.75-.75s-.336-.75-.75-.75-.75.336-.75.75.336.75.75.75zm7-2.25c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/></svg>
                         </span>
                         <div class="service-content">
-                            <h3 class="h4">Natural Environment</h3>
+                            <h3 class="h4"><?php echo __("Natural Environment"); ?></h3>
                             <p>
-                                The complex is surrounded by beautiful green areas, providing a sense of tranquility within the urban environment. These thoughtfully designed green spaces create a peaceful atmosphere and contribute to the overall wellbeing of residents.
+                                <?php echo __("The complex is surrounded by beautiful green areas, providing a sense of tranquility within the urban environment. These thoughtfully designed green spaces create a peaceful atmosphere and contribute to the overall wellbeing of residents."); ?>
                         </p>
                         </div>
                     </div>
@@ -230,9 +236,9 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M23 10.826v2.349c-1.562 0-3 1.312-3 2.857 0 2.181 1.281 5.968-6 5.968-4.837 0-5.389-3.644-6.5-3.644-.957 0-1.5.615-1.5 1.528v.316h-2v-12.678h2v.645c0 1.371.953 1.83 1.732 1.83 1.574 0 2.174-3.646 6.268-3.646 7.281 0 6 4.536 6 6.063 0 1.327 1.38 2.412 3 2.412z"/></svg>
                         </span>
                         <div class="service-content">
-                            <h3 class="h4">Management & Governance</h3>
+                            <h3 class="h4"><?php echo __("Management & Governance"); ?></h3>
                             <p>
-                                The syndicate of the complexe of Tanger Boulevard plays a critical role in managing and governing the residential community. Its primary function is to oversee the administration, maintenance, and governance of the community and its shared spaces.
+                                <?php echo __("The syndicate of the complexe of Tanger Boulevard plays a critical role in managing and governing the residential community. Its primary function is to oversee the administration, maintenance, and governance of the community and its shared spaces."); ?>
                             </p>
                         </div>
                     </div>
@@ -250,10 +256,10 @@
                 <div class="row narrow section-header section-header--dark has-bottom-sep">
                     <div class="column lg-12">
                         
-                        <h3 class="text-pretitle">Services</h3>
-                        <h1 class="text-display-title">What We Do.</h1>
+                        <h3 class="text-pretitle"><?php echo __("Services"); ?></h3>
+                        <h1 class="text-display-title"><?php echo __("What We Do."); ?></h1>
                         
-                        <p class="lead">The syndicate handles all aspects of complex management, from maintenance to security, ensuring a comfortable living environment for all residents.</p>
+                        <p class="lead"><?php echo __("The syndicate handles all aspects of complex management, from maintenance to security, ensuring a comfortable living environment for all residents."); ?></p>
                         
                     </div> <!-- end column -->
                 </div> <!-- end section header -->
@@ -269,10 +275,10 @@
                             </span>
 
                             <div class="service-content">
-                                <h3 class="h4">Maintenance</h3>
+                                <h3 class="h4"><?php echo __("Maintenance"); ?></h3>
 
                                 <p>
-                                Complex, pool and lift maintenance is a key service provided by the syndicate. We ensure all common areas and facilities are well-maintained and functioning properly for all residents. Regular inspections and timely repairs keep the property in excellent condition.
+                                <?php echo __("Complex, pool and lift maintenance is a key service provided by the syndicate. We ensure all common areas and facilities are well-maintained and functioning properly for all residents. Regular inspections and timely repairs keep the property in excellent condition."); ?>
                                 </p>
                             </div>
 
@@ -285,10 +291,10 @@
                             </span>
 
                             <div class="service-content">
-                                <h3 class="h4">Security & Surveillance</h3>
+                                <h3 class="h4"><?php echo __("Security & Surveillance"); ?></h3>
 
                                 <p>
-                                Security and surveillance services are provided 24/7 to ensure the safety of all residents. Our network video cameras monitor activity in parking areas and common spaces, allowing efficient management of visitor flow and enhanced security throughout the complex.
+                                <?php echo __("Security and surveillance services are provided 24/7 to ensure the safety of all residents. Our network video cameras monitor activity in parking areas and common spaces, allowing efficient management of visitor flow and enhanced security throughout the complex."); ?>
                                 </p>
                             </div>
 
@@ -301,10 +307,10 @@
                             </span>
 
                             <div class="service-content">
-                                <h3 class="h4">Cleaning Services</h3>
+                                <h3 class="h4"><?php echo __("Cleaning Services"); ?></h3>
 
                                 <p>
-                                Regular cleaning of communal areas ensures a pleasant environment for all residents. Our dedicated cleaning staff maintains the highest standards of cleanliness in hallways, staircases, entrance areas, and other shared spaces. We've also installed recycling bins for better environmental protection.
+                                <?php echo __("Regular cleaning of communal areas ensures a pleasant environment for all residents. Our dedicated cleaning staff maintains the highest standards of cleanliness in hallways, staircases, entrance areas, and other shared spaces. We've also installed recycling bins for better environmental protection."); ?>
                                 </p>
                             </div>
 
@@ -317,10 +323,10 @@
                             </span>
 
                             <div class="service-content">
-                                <h3 class="h4">Support & Management</h3>
+                                <h3 class="h4"><?php echo __("Support & Management"); ?></h3>
 
                                 <p>
-                                Our team handles parking space maintenance, renovations/improvements, gardening and grounds maintenance, electricity, lights and water services, and provides ongoing support and help to all residents. We also organize syndicate meetings to keep everyone informed about complex affairs.
+                                <?php echo __("Our team handles parking space maintenance, renovations/improvements, gardening and grounds maintenance, electricity, lights and water services, and provides ongoing support and help to all residents. We also organize syndicate meetings to keep everyone informed about complex affairs."); ?>
                                 </p>
                             </div>
 
@@ -342,11 +348,11 @@
                     <div class="row narrow section-header section-header--dark has-bottom-sep">
                         <div class="column lg-12">
                             
-                            <h3 class="text-pretitle">Updates & News</h3>
-                            <h1 class="text-display-title">Latest Complex Updates.</h1>
+                            <h3 class="text-pretitle"><?php echo __("Updates & News"); ?></h3>
+                            <h1 class="text-display-title"><?php echo __("Latest Complex Updates."); ?></h1>
                             
                             <p class="lead">
-                            Stay informed about the latest developments, meetings, and improvements happening within the Complexe Tanger Boulevard community.
+                            <?php echo __("Stay informed about the latest developments, meetings, and improvements happening within the Complexe Tanger Boulevard community."); ?>
                             </p>
                             
                         </div> <!-- end column -->
@@ -368,14 +374,14 @@
                                     </a>
                                 </div>
                                 <div class="folio-item__info">
-                                    <div class="folio-item__cat">Community Event</div>
-                                    <h4 class="folio-item__title">Syndicate Meetup 2023</h4>
+                                    <div class="folio-item__cat"><?php echo __("Community Event"); ?></div>
+                                    <h4 class="folio-item__title"><?php echo __("Syndicate Meetup 2023"); ?></h4>
                                 </div>
-                                <a href="#0" title="Event Details" class="folio-item__project-link">
+                                <a href="#0" title="<?php echo __("Event Details"); ?>" class="folio-item__project-link">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;"><path d="M4.222 19.778a4.983 4.983 0 0 0 3.535 1.462 4.986 4.986 0 0 0 3.536-1.462l2.828-2.829-1.414-1.414-2.828 2.829a3.007 3.007 0 0 1-4.243 0 3.005 3.005 0 0 1 0-4.243l2.829-2.828-1.414-1.414-2.829 2.828a5.006 5.006 0 0 0 0 7.071zm15.556-8.485a5.008 5.008 0 0 0 0-7.071 5.006 5.006 0 0 0-7.071 0L9.879 7.051l1.414 1.414 2.828-2.829a3.007 3.007 0 0 1 4.243 0 3.005 3.005 0 0 1 0 4.243l-2.829 2.828 1.414 1.414 2.829-2.828z"></path><path d="m8.464 16.95-1.415-1.414 8.487-8.486 1.414 1.415z"></path></svg>
                                 </a>
                                 <div class="folio-item__caption">
-                                    <p>Ladies; Gentlemen Co-owners, we are pleased to invite you to the general meeting of the Co-owners of the Tanger Boulevard Residence: December 23, 2023 at 11:00 a.m. for AGM of the Residence and at 1:00 p.m. for AGO of the Parking at the Flandria hotel.</p>
+                                    <p><?php echo __("Ladies; Gentlemen Co-owners, we are pleased to invite you to the general meeting of the Co-owners of the Tanger Boulevard Residence: December 23, 2023 at 11:00 a.m. for AGM of the Residence and at 1:00 p.m. for AGO of the Parking at the Flandria hotel."); ?></p>
                                 </div>
                                 
                              </div> <!-- end brick-->
@@ -383,7 +389,7 @@
                             <div class="brick folio-item" data-animate-el>
 
                                 <div class="folio-item__thumb">
-                                    <a class="folio-item__thumb-link" href="images/portfolio/gallery/g-yellowwall.jpg" Title="Parking Security & Surveillance" data-size="1050x700">
+                                    <a class="folio-item__thumb-link" href="images/portfolio/gallery/g-yellowwall.jpg" title="<?php echo __("Parking Security & Surveillance"); ?>" data-size="1050x700">
                                         <img src="images/portfolio/yellowwall.jpg" 
                                              srcset="images/portfolio/yellowwall.jpg 1x, images/portfolio/yellowwall@2x.jpg 2x" alt="">
                                     </a>
@@ -396,7 +402,7 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;"><path d="M4.222 19.778a4.983 4.983 0 0 0 3.535 1.462 4.986 4.986 0 0 0 3.536-1.462l2.828-2.829-1.414-1.414-2.828 2.829a3.007 3.007 0 0 1-4.243 0 3.005 3.005 0 0 1 0-4.243l2.829-2.828-1.414-1.414-2.829 2.828a5.006 5.006 0 0 0 0 7.071zm15.556-8.485a5.008 5.008 0 0 0 0-7.071 5.006 5.006 0 0 0-7.071 0L9.879 7.051l1.414 1.414 2.828-2.829a3.007 3.007 0 0 1 4.243 0 3.005 3.005 0 0 1 0 4.243l-2.829 2.828 1.414 1.414 2.829-2.828z"></path><path d="m8.464 16.95-1.415-1.414 8.487-8.486 1.414 1.415z"></path></svg>
                                 </a>
                                 <div class="folio-item__caption">
-                                    <p>Network video cameras can be used to monitor the activity and capacity in parking areas effectively, allowing officials to support the flow of visitors and residents.</p>
+                                    <p><?php echo __("Network video cameras can be used to monitor the activity and capacity in parking areas effectively, allowing officials to support the flow of visitors and residents."); ?></p>
                                 </div>
 
                             </div> <!-- end brick-->
@@ -417,7 +423,7 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;"><path d="M4.222 19.778a4.983 4.983 0 0 0 3.535 1.462 4.986 4.986 0 0 0 3.536-1.462l2.828-2.829-1.414-1.414-2.828 2.829a3.007 3.007 0 0 1-4.243 0 3.005 3.005 0 0 1 0-4.243l2.829-2.828-1.414-1.414-2.829 2.828a5.006 5.006 0 0 0 0 7.071zm15.556-8.485a5.008 5.008 0 0 0 0-7.071 5.006 5.006 0 0 0-7.071 0L9.879 7.051l1.414 1.414 2.828-2.829a3.007 3.007 0 0 1 4.243 0 3.005 3.005 0 0 1 0 4.243l-2.829 2.828 1.414 1.414 2.829-2.828z"></path><path d="m8.464 16.95-1.415-1.414 8.487-8.486 1.414 1.415z"></path></svg>
                                 </a>
                                 <div class="folio-item__caption">
-                                    <p>Recycling bins installed for better environment protection. Recycling is very important as waste has a huge negative impact on the natural environment. By correctly recycling items, it would have a hugely positive impact on the environment.</p>
+                                    <p><?php echo __("Recycling bins installed for better environment protection. Recycling is very important as waste has a huge negative impact on the natural environment. By correctly recycling items, it would have a hugely positive impact on the environment."); ?></p>
                                 </div>
 
                             </div> <!-- end brick-->
@@ -425,16 +431,16 @@
                             <div class="brick folio-item" data-animate-el>
 
                                 <div class="folio-item__thumb">
-                                    <a class="folio-item__thumb-link" href="images/portfolio/gallery/g-minimalismo.jpg" Title="Entrance Re-design" data-size="1050x700">
+                                    <a class="folio-item__thumb-link" href="images/portfolio/gallery/g-minimalismo.jpg" title="<?php echo __("Entrance Re-design"); ?>" data-size="1050x700">
                                         <img src="images/portfolio/minimalismo.jpg" 
                                              srcset="images/portfolio/minimalismo.jpg 1x, images/portfolio/minimalismo@2x.jpg 2x" alt="">
                                     </a>
                                 </div>
                                 <div class="folio-item__info">
-                                    <div class="folio-item__cat">Renovations</div>
-                                    <h4 class="folio-item__title">Entrance Re-design</h4>
+                                    <div class="folio-item__cat"><?php echo __("Renovations"); ?></div>
+                                    <h4 class="folio-item__title"><?php echo __("Entrance Re-design"); ?></h4>
                                 </div>
-                                <a href="#0" title="Renovation Details" class="folio-item__project-link">
+                                <a href="#0" title="<?php echo __("Renovation Details"); ?>" class="folio-item__project-link">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;"><path d="M4.222 19.778a4.983 4.983 0 0 0 3.535 1.462 4.986 4.986 0 0 0 3.536-1.462l2.828-2.829-1.414-1.414-2.828 2.829a3.007 3.007 0 0 1-4.243 0 3.005 3.005 0 0 1 0-4.243l2.829-2.828-1.414-1.414-2.829 2.828a5.006 5.006 0 0 0 0 7.071zm15.556-8.485a5.008 5.008 0 0 0 0-7.071 5.006 5.006 0 0 0-7.071 0L9.879 7.051l1.414 1.414 2.828-2.829a3.007 3.007 0 0 1 4.243 0 3.005 3.005 0 0 1 0 4.243l-2.829 2.828 1.414 1.414 2.829-2.828z"></path><path d="m8.464 16.95-1.415-1.414 8.487-8.486 1.414 1.415z"></path></svg>
                                 </a>
                                 <div class="folio-item__caption">
@@ -452,10 +458,10 @@
                                     </a>
                                 </div>
                                 <div class="folio-item__info">
-                                    <div class="folio-item__cat">Maintenance</div>
-                                    <h4 class="folio-item__title">Complex Cleaning</h4>
+                                    <div class="folio-item__cat"><?php echo __("Maintenance"); ?></div>
+                                    <h4 class="folio-item__title"><?php echo __("Complex Cleaning"); ?></h4>
                                 </div>
-                                <a href="#0" title="Maintenance Details" class="folio-item__project-link">
+                                <a href="#0" title="<?php echo __("Maintenance Details"); ?>" class="folio-item__project-link">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;"><path d="M4.222 19.778a4.983 4.983 0 0 0 3.535 1.462 4.986 4.986 0 0 0 3.536-1.462l2.828-2.829-1.414-1.414-2.828 2.829a3.007 3.007 0 0 1-4.243 0 3.005 3.005 0 0 1 0-4.243l2.829-2.828-1.414-1.414-2.829 2.828a5.006 5.006 0 0 0 0 7.071zm15.556-8.485a5.008 5.008 0 0 0 0-7.071 5.006 5.006 0 0 0-7.071 0L9.879 7.051l1.414 1.414 2.828-2.829a3.007 3.007 0 0 1 4.243 0 3.005 3.005 0 0 1 0 4.243l-2.829 2.828 1.414 1.414 2.829-2.828z"></path><path d="m8.464 16.95-1.415-1.414 8.487-8.486 1.414 1.415z"></path></svg>
                                 </a>
                                 <div class="folio-item__caption">
@@ -467,16 +473,16 @@
                             <div class="brick folio-item" data-animate-el>
 
                                 <div class="folio-item__thumb">
-                                    <a class="folio-item__thumb-link" href="images/portfolio/gallery/g-salad.jpg" Title="Electricity Fix" data-size="1050x700">
+                                    <a class="folio-item__thumb-link" href="images/portfolio/gallery/g-salad.jpg" title="<?php echo __("Electricity Fix"); ?>" data-size="1050x700">
                                         <img src="images/portfolio/salad.jpg" 
                                              srcset="images/portfolio/salad.jpg 1x, images/portfolio/salad@2x.jpg 2x" alt="">
                                     </a>
                                 </div>
                                 <div class="folio-item__info">
-                                    <div class="folio-item__cat">Infrastructure</div>
-                                    <h4 class="folio-item__title">Electricity Fix</h4>
+                                    <div class="folio-item__cat"><?php echo __("Infrastructure"); ?></div>
+                                    <h4 class="folio-item__title"><?php echo __("Electricity Fix"); ?></h4>
                                 </div>
-                                <a href="#0" title="Infrastructure Details" class="folio-item__project-link">
+                                <a href="#0" title="<?php echo __("Infrastructure Details"); ?>" class="folio-item__project-link">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;"><path d="M4.222 19.778a4.983 4.983 0 0 0 3.535 1.462 4.986 4.986 0 0 0 3.536-1.462l2.828-2.829-1.414-1.414-2.828 2.829a3.007 3.007 0 0 1-4.243 0 3.005 3.005 0 0 1 0-4.243l2.829-2.828-1.414-1.414-2.829 2.828a5.006 5.006 0 0 0 0 7.071zm15.556-8.485a5.008 5.008 0 0 0 0-7.071 5.006 5.006 0 0 0-7.071 0L9.879 7.051l1.414 1.414 2.828-2.829a3.007 3.007 0 0 1 4.243 0 3.005 3.005 0 0 1 0 4.243l-2.829 2.828 1.414 1.414 2.829-2.828z"></path><path d="m8.464 16.95-1.415-1.414 8.487-8.486 1.414 1.415z"></path></svg>
                                 </a>
                                 <div class="folio-item__caption">
@@ -493,7 +499,7 @@
                 <div class="row testimonials">
                     <div class="column lg-12" data-animate-block>
 
-                        <h2 class="text-pretitle" data-animate-el>What They Say About Our Complex</h2>
+                        <h2 class="text-pretitle" data-animate-el><?php echo __("What They Say About Our Complex"); ?></h2>
         
                         <div class="swiper-container testimonial-slider" data-animate-el>
         
@@ -501,39 +507,39 @@
     
                                 <div class="testimonial-slider__slide swiper-slide">
                                     <p>
-                                    The Tangier Boulevard complex is a fantastic place to live with excellent amenities and a well-managed community. The syndicate does a great job maintaining all common areas and responding to resident needs.
+                                    <?php echo __("The Tangier Boulevard complex is a fantastic place to live with excellent amenities and a well-managed community. The syndicate does a great job maintaining all common areas and responding to resident needs."); ?>
                                     </p>
                                     <div class="testimonial-slider__author">
-                                        <img src="images/avatars/user-02.jpg" alt="Author image" class="testimonial-slider__avatar">
+                                        <img src="images/avatars/user-02.jpg" alt="<?php echo __("Author image"); ?>" class="testimonial-slider__avatar">
                                         <cite class="testimonial-slider__cite">
                                             <strong>Ahmed Benali</strong>
-                                            <span>Resident since 2020</span>
+                                            <span><?php echo __("Resident since 2020"); ?></span>
                                         </cite>
                                     </div>
                                 </div> <!-- end testimonial-slider__slide -->
                 
                                 <div class="testimonial-slider__slide swiper-slide">
                                     <p>
-                                    I appreciate the security measures implemented in our complex, especially the new surveillance system in the parking area. It gives me peace of mind knowing my vehicle and property are well protected.
+                                    <?php echo __("I appreciate the security measures implemented in our complex, especially the new surveillance system in the parking area. It gives me peace of mind knowing my vehicle and property are well protected."); ?>
                                     </p>
                                     <div class="testimonial-slider__author">
-                                        <img src="images/avatars/user-03.jpg" alt="Author image" class="testimonial-slider__avatar">
+                                        <img src="images/avatars/user-03.jpg" alt="<?php echo __("Author image"); ?>" class="testimonial-slider__avatar">
                                         <cite class="testimonial-slider__cite">
                                             <strong>Fatima Zahra</strong>
-                                            <span>Resident since 2021</span>
+                                            <span><?php echo __("Resident since 2021"); ?></span>
                                         </cite>
                                     </div>
                                 </div> <!-- end testimonial-slider__slide -->
                 
                                 <div class="testimonial-slider__slide swiper-slide">
                                     <p>
-                                    The swimming pool and green areas are what sold me on this complex. The maintenance team does an excellent job keeping these facilities in pristine condition throughout the year.
+                                    <?php echo __("The swimming pool and green areas are what sold me on this complex. The maintenance team does an excellent job keeping these facilities in pristine condition throughout the year."); ?>
                                     </p>
                                     <div class="testimonial-slider__author">
-                                        <img src="images/avatars/user-01.jpg" alt="Author image" class="testimonial-slider__avatar">
+                                        <img src="images/avatars/user-01.jpg" alt="<?php echo __("Author image"); ?>" class="testimonial-slider__avatar">
                                         <cite class="testimonial-slider__cite">
                                             <strong>Karim Moussaoui</strong>
-                                            <span>Resident since 2019</span>
+                                            <span><?php echo __("Resident since 2019"); ?></span>
                                         </cite>
                                     </div>
                                 </div> <!-- end testimonial-slider__slide -->
@@ -556,11 +562,11 @@
                 <div class="row section-header section-header--dark">
                     <div class="column lg-12">
                         
-                        <h3 class="text-pretitle">Get In Touch</h3>
+                        <h3 class="text-pretitle"><?php echo __("Get In Touch"); ?></h3>
                         <h1 class="text-display-title">
-                            Have a question or need assistance? Contact us. 
-                            We're here to help with all your residential needs.
-                            Drop us a line at <a href="mailto:info@complexe-tanger-boulevard.com">info@complexe-tanger-boulevard.com</a>.
+                            <?php echo __("Have a question or need assistance? Contact us."); ?> 
+                            <?php echo __("We're here to help with all your residential needs."); ?>
+                            <?php echo __("Drop us a line at"); ?> <a href="mailto:info@complexe-tanger-boulevard.com">info@complexe-tanger-boulevard.com</a>.
                         </h1>
                         
                     </div> <!-- end column -->
@@ -569,26 +575,26 @@
                 <div class="row s-contact__infos">
 
                     <div class="column lg-5 md-6 stack-on-900 s-contact__block-address">
-                        <h5 class="with-top-line">Where to Find Us</h5>
+                        <h5 class="with-top-line"><?php echo __("Where to Find Us"); ?></h5>
         
                         <p>
-                        Ave Mohammed V <br>
-                        Tangier, Morocco <br>
+                        <?php echo __("Ave Mohammed V"); ?> <br>
+                        <?php echo __("Tangier, Morocco"); ?> <br>
                         </p>
                     </div>
         
                     <div class="column lg-3 md-6 stack-on-900 s-contact__block-social">
-                        <h5 class="with-top-line">Follow Us</h5>
+                        <h5 class="with-top-line"><?php echo __("Follow Us"); ?></h5>
         
                         <ul class="s-contact__list">
-                            <li><a href="#0">Pinterest</a></li>
-                            <li><a href="#0">Twitter</a></li>
-                            <li><a href="#0">Instagram</a></li>
+                            <li><a href="#0"><?php echo __("Pinterest"); ?></a></li>
+                            <li><a href="#0"><?php echo __("Twitter"); ?></a></li>
+                            <li><a href="#0"><?php echo __("Instagram"); ?></a></li>
                         </ul>
                     </div>
         
                     <div class="column lg-4 md-12 stack-on-900 s-contact__block-number">
-                        <h5 class="with-top-line">Contact Us</h5>
+                        <h5 class="with-top-line"><?php echo __("Contact Us"); ?></h5>
         
                         <ul class="s-contact__list">
                             <li><a href="mailto:info@complexe-tanger-boulevard.com">info@complexe-tanger-boulevard.com</a></li>
@@ -602,17 +608,17 @@
     
                     <div class="column lg-5 tab-12 s-contact__mail-block">
                         <a href="mailto:info@complexe-tanger-boulevard.com" class="btn btn--stroke btn--mail">
-                            Let's Talk 
+                            <?php echo __("Let's Talk"); ?> 
                         </a>
                     </div>
         
                     <div class="column lg-7 tab-12 s-contact__subscribe">
-                        <h5>Subscribe</h5>
+                        <h5><?php echo __("Subscribe"); ?></h5>
         
                         <div class="subscribe-form">
                             <form id="mc-form" class="mc-form" novalidate="true">
-                                <input type="email" name="EMAIL" id="mce-EMAIL" class="u-fullwidth text-center" placeholder="Your Email Address" title="The domain portion of the email address is invalid (the portion after the @)." pattern="^([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22))*\x40([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d))*(\.\w{2,})+$" required="">
-                                <input type="submit" name="subscribe" value="Subscribe" class="btn btn--primary u-fullwidth">
+                                <input type="email" name="EMAIL" id="mce-EMAIL" class="u-fullwidth text-center" placeholder="<?php echo __("Your Email Address"); ?>" title="<?php echo __("The domain portion of the email address is invalid (the portion after the @)."); ?>" pattern="^([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22))*\x40([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d))*(\.\w{2,})+$" required="">
+                                <input type="submit" name="subscribe" value="<?php echo __("Subscribe"); ?>" class="btn btn--primary u-fullwidth">
                                 <!-- <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_cdb7b577e41181934ed6a6a44_9a91cfe7b3" tabindex="-1" value=""></div> -->
                                 <div class="mc-status"></div>
                             </form>
@@ -633,13 +639,13 @@
         <footer id="colophon" class="s-footer">
             <div class="row">
                 <div class="column lg-12 ss-copyright">
-                    <span>© Copyright Complexe Tanger Boulevard 2023</span>
-                    <span>Welcome to the Syndicate of the complexe of Tanger Boulevard</span>
+                    <span>© <?php echo __("Copyright"); ?> <?php echo __("Complexe Tanger Boulevard"); ?> 2023</span>
+                    <span><?php echo __("Welcome to the Syndicate of the complexe of Tanger Boulevard"); ?></span>
                 </div>
             </div>
 
             <div class="ss-go-top">
-                <a class="smoothscroll" title="Back to Top" href="#top">
+                <a class="smoothscroll" title="<?php echo __("Back to Top"); ?>" href="#top">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;"><path d="M6 4h12v2H6zm5 10v6h2v-6h5l-6-6-6 6z"></path></svg>
                 </a>
             </div> <!-- end ss-go-top -->

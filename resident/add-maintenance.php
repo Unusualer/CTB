@@ -140,7 +140,7 @@ $page_title = __("Add Maintenance");
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?> - <?php echo __("Community Trust Bank"); ?></title>
+    <title><?php echo $page_title; ?> - <?php echo __("Complexe Tanger Boulevard"); ?></title>
     <!-- Favicon -->
     <?php favicon_links(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -397,7 +397,7 @@ $page_title = __("Add Maintenance");
                         <div class="form-row">
                             <div class="form-group">
                                     <label for="title"><?php echo __("Title"); ?> <span class="text-danger">*</span></label>
-                                    <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($maintenance['title']); ?>" placeholder="e.g. Elevator Maintenance" required>
+                                    <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($maintenance['title']); ?>" placeholder="<?php echo __("e.g. Elevator Maintenance"); ?>" required>
                                     <small class="form-text"><?php echo __("Required field"); ?></small>
                                 </div>
                         </div>
@@ -405,7 +405,7 @@ $page_title = __("Add Maintenance");
                         <div class="form-row">
                             <div class="form-group">
                                     <label for="location"><?php echo __("Location"); ?> <span class="text-danger">*</span></label>
-                                    <input type="text" id="location" name="location" value="<?php echo htmlspecialchars($maintenance['location']); ?>" placeholder="e.g. Building A, Floor 3" required>
+                                    <input type="text" id="location" name="location" value="<?php echo htmlspecialchars($maintenance['location']); ?>" placeholder="<?php echo __("e.g. Building A, Floor 3"); ?>" required>
                                     <small class="form-text"><?php echo __("Required field"); ?></small>
                             </div>
                         </div>
@@ -413,7 +413,7 @@ $page_title = __("Add Maintenance");
                         <div class="form-row">
                             <div class="form-group">
                                     <label for="description"><?php echo __("Description"); ?> <span class="text-danger">*</span></label>
-                                    <textarea id="description" name="description" rows="6" placeholder="Provide detailed information about the maintenance update..." required><?php echo htmlspecialchars($maintenance['description']); ?></textarea>
+                                    <textarea id="description" name="description" rows="6" placeholder="<?php echo __("Provide detailed information about the maintenance update..."); ?>" required><?php echo htmlspecialchars($maintenance['description']); ?></textarea>
                                     <small class="form-text"><?php echo __("Required field"); ?></small>
                             </div>
                         </div>
@@ -479,10 +479,13 @@ $page_title = __("Add Maintenance");
     <script src="js/dark-mode.js"></script>
     <script>
         // Date validation
+        // Translation for JavaScript
+        const dateErrorMsg = <?php echo json_encode(__("End date cannot be before start date.")); ?>;
+        
         document.getElementById('end_date').addEventListener('change', function() {
             const startDate = document.getElementById('start_date').value;
             if (startDate && this.value && new Date(this.value) < new Date(startDate)) {
-                alert('End date cannot be before start date.');
+                alert(dateErrorMsg);
                 this.value = startDate;
             }
         });

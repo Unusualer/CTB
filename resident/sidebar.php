@@ -12,7 +12,7 @@ $profileLink = $userId ? BASE_URL . "resident/view-user.php?id=" . urlencode((st
     <div class="sidebar-header">
         <div class="logo">
             <a href="<?php echo BASE_URL; ?>resident/dashboard.php">
-                <img src="<?php echo BASE_URL; ?>images/logo.png" alt="<?php echo __('CTB Property Management'); ?>" class="logo-lg">
+                <img src="<?php echo BASE_URL; ?>images/logo.png" alt="<?php echo __('Complexe Tanger Boulevard'); ?>" class="logo-lg">
                 <img src="<?php echo BASE_URL; ?>images/logo.png" alt="<?php echo __('CTB'); ?>" class="logo-sm">
             </a>
         </div>

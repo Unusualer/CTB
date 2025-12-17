@@ -1,4 +1,10 @@
 <?php
+// Start session and include translation function
+session_start();
+if (!function_exists('__')) {
+    require_once 'includes/translations.php';
+}
+
 // Database connection parameters
 $host = 'localhost';
 $user = 'ctb';
@@ -41,9 +47,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             if ($stmt->execute()) {
                 $success = true;
-                $message = 'Admin password has been updated successfully.';
+                $message = __("Admin password has been updated successfully.");
             } else {
-                $message = 'Failed to update password: ' . $conn->error;
+                $message = __("Failed to update password:") . ' ' . $conn->error;
             }
             
             // Close the statement and connection
@@ -61,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Admin Password</title>
+    <title><?php echo __("Update Admin Password"); ?> - <?php echo __("Complexe Tanger Boulevard"); ?></title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -132,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
-    <h1>Update Admin Password</h1>
+    <h1><?php echo __("Update Admin Password"); ?></h1>
     
     <?php if ($message): ?>
         <div class="message <?php echo $success ? 'success' : 'error'; ?>">
@@ -142,23 +148,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     <form method="POST" action="">
         <div class="form-group">
-            <label for="password">New Password:</label>
+            <label for="password"><?php echo __("New Password"); ?>:</label>
             <input type="password" id="password" name="password" required>
         </div>
         
         <div class="form-group">
-            <label for="confirm_password">Confirm Password:</label>
+            <label for="confirm_password"><?php echo __("Confirm Password"); ?>:</label>
             <input type="password" id="confirm_password" name="confirm_password" required>
         </div>
         
-        <button type="submit">Update Password</button>
+        <button type="submit"><?php echo __("Update Password"); ?></button>
     </form>
     
     <div class="note">
-        <strong>Note:</strong> This page is for debugging/testing purposes only. 
-        It updates the password for the user with email <strong>admin@ctb.com</strong>. 
-        In a production environment, this should be protected by authentication 
-        and stronger security measures.
+        <strong><?php echo __("Note"); ?>:</strong> <?php echo __("This page is for debugging/testing purposes only."); ?> 
+        <?php echo __("It updates the password for the user with email"); ?> <strong>admin@ctb.com</strong>. 
+        <?php echo __("In a production environment, this should be protected by authentication and stronger security measures."); ?>
     </div>
 </body>
 </html> 

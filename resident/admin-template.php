@@ -16,7 +16,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo isset($pageTitle) ? __($pageTitle) : __('Admin Dashboard'); ?> - <?php echo __("CTB Property Management"); ?></title>
+    <title><?php echo isset($pageTitle) ? __($pageTitle) : __('Admin Dashboard'); ?> - <?php echo __("Complexe Tanger Boulevard"); ?></title>
     
     <!-- Favicon -->
     <?php favicon_links(); ?>
@@ -70,7 +70,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             <div class="admin-sidebar">
                 <div class="sidebar-brand">
                     <img src="../images/logo.png" alt="<?php echo __('Logo'); ?>">
-                    <h2><?php echo __('CTB Admin'); ?></h2>
+                    <h2><?php echo __('Complexe Tanger Boulevard'); ?></h2>
                 </div>
                 <div class="sidebar-menu">
                     <ul>

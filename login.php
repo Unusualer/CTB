@@ -2,6 +2,9 @@
 // Start session - must be at the very top before any output
 session_start();
 
+// Include translation system
+require_once 'includes/translations.php';
+
 // Check if there's an error message
 $error_message = '';
 if (isset($_SESSION['login_error'])) {
@@ -21,7 +24,7 @@ if (isset($_SESSION['login_success'])) {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Connexion - Complexe Tanger Boulevard</title>
+    <title><?php echo __("Login"); ?> - <?php echo __("Complexe Tanger Boulevard"); ?></title>
 
     <script>
         document.documentElement.classList.remove('no-js');
@@ -1044,8 +1047,8 @@ if (isset($_SESSION['login_success'])) {
                     <div class="form-decor form-decor-3"></div>
                     
                     <div class="form-header">
-                        <h2 class="form-title">Bienvenue</h2>
-                        <p class="form-subtitle">Connectez-vous pour accéder à votre compte exclusif</p>
+                        <h2 class="form-title"><?php echo __("Welcome"); ?></h2>
+                        <p class="form-subtitle"><?php echo __("Log in to access your exclusive account"); ?></p>
             </div>
                             
                             <?php if (!empty($error_message)): ?>
@@ -1064,17 +1067,17 @@ if (isset($_SESSION['login_success'])) {
                             
                     <form action="auth.php" method="post" class="login-form">
                         <div class="input-group">
-                            <label for="email">Adresse Email</label>
+                            <label for="email"><?php echo __("Email Address"); ?></label>
                             <div class="input-wrapper">
-                                <input type="email" id="email" name="email" class="input-field" placeholder="Entrez votre email" required>
+                                <input type="email" id="email" name="email" class="input-field" placeholder="<?php echo __("Enter your email"); ?>" required>
                                 <i class="fas fa-envelope input-icon"></i>
                             </div>
                                 </div>
                                 
                         <div class="input-group">
-                                    <label for="password">Mot de passe</label>
+                                    <label for="password"><?php echo __("Password"); ?></label>
                             <div class="input-wrapper">
-                                <input type="password" id="password" name="password" class="input-field" placeholder="Entrez votre mot de passe" required>
+                                <input type="password" id="password" name="password" class="input-field" placeholder="<?php echo __("Enter your password"); ?>" required>
                                 <i class="fas fa-lock input-icon"></i>
                                 <i class="fas fa-eye password-toggle" id="passwordToggle"></i>
                             </div>
@@ -1086,16 +1089,16 @@ if (isset($_SESSION['login_success'])) {
                                     <input type="checkbox" name="remember_me" id="remember-me" value="1">
                                     <span class="checkmark"></span>
                                 </div>
-                                <span class="remember-text">Se souvenir de moi</span>
+                                <span class="remember-text"><?php echo __("Remember me"); ?></span>
                             </label>
                         </div>
                         
                         <button type="submit" class="submit-btn">
-                            <i class="fas fa-sign-in-alt"></i> Se Connecter
+                            <i class="fas fa-sign-in-alt"></i> <?php echo __("Log In"); ?>
                         </button>
                         
                         <div class="form-footer">
-                            Besoin d'aide? <a class="support-link" id="support-toggle" style="cursor: pointer;">Contactez notre équipe d'assistance</a>
+                            <?php echo __("Need help?"); ?> <a class="support-link" id="support-toggle" style="cursor: pointer;"><?php echo __("Contact our support team"); ?></a>
                             <div id="support-info" style="display: none; margin-top: 10px;">
                                 <a href="mailto:syndictangerbvd@gmail.com" class="support-link"><i class="fas fa-envelope"></i> syndictangerbvd@gmail.com</a>
                                 <span style="margin: 0 8px; color: rgba(255,255,255,0.4);">|</span>
@@ -1164,7 +1167,7 @@ if (isset($_SESSION['login_success'])) {
                 }
                 
                 const submitBtn = this.querySelector('.submit-btn');
-                submitBtn.innerHTML = '<div style="display: flex; align-items: center; justify-content: center;"><i class="fas fa-spinner fa-spin"></i><span style="margin-left: 8px;">Connexion en cours...</span></div>';
+                submitBtn.innerHTML = '<div style="display: flex; align-items: center; justify-content: center;"><i class="fas fa-spinner fa-spin"></i><span style="margin-left: 8px;"><?php echo __("Logging in..."); ?></span></div>';
                 submitBtn.disabled = true;
                 // Form submission continues normally
             });
