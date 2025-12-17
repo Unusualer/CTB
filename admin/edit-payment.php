@@ -61,8 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $property_id = !empty($_POST['property_id']) ? intval($_POST['property_id']) : null;
         $amount = !empty($_POST['amount']) ? floatval($_POST['amount']) : 0;
         $payment_method = !empty($_POST['payment_method']) ? $_POST['payment_method'] : 'credit_card';
-        $month = !empty($_POST['month']) ? $_POST['month'] : date('Y-m-d');
-        $status = !empty($_POST['status']) ? $_POST['status'] : 'completed';
+        $payment_date = !empty($_POST['payment_date']) ? $_POST['payment_date'] : date('Y-m-d');
+        $status = !empty($_POST['status']) ? $_POST['status'] : 'paid';
         $description = !empty($_POST['description']) ? $_POST['description'] : null;
         
         // Validate required fields
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $query = "UPDATE payments SET 
                     property_id = :property_id, 
                     amount = :amount, 
-                    month = :month, 
+                    payment_date = :payment_date, 
                     status = :status, 
                     type = :payment_method
                   WHERE id = :id";
@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $db->prepare($query);
         $stmt->bindParam(':property_id', $property_id);
         $stmt->bindParam(':amount', $amount);
-        $stmt->bindParam(':month', $month);
+        $stmt->bindParam(':payment_date', $payment_date);
         $stmt->bindParam(':status', $status);
         $stmt->bindParam(':payment_method', $payment_method);
         $stmt->bindParam(':id', $payment_id);
@@ -404,6 +404,13 @@ $page_title = __("Edit Payment");
                         <form action="edit-payment.php?id=<?php echo $payment_id; ?>" method="POST">
                             <div class="form-row">
                                 <div class="form-group">
+                                    <label for="payment_id_display"><?php echo __("Payment ID"); ?></label>
+                                    <input type="text" id="payment_id_display" value="#<?php echo $payment_id; ?>" disabled readonly style="background-color: var(--secondary-bg); cursor: not-allowed;">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
                                     <label for="property_id"><?php echo __("Property"); ?> <span class="text-danger">*</span></label>
                                     <select name="property_id" id="property_id" required>
                                         <option value=""><?php echo __("-- Select a Property --"); ?></option>
@@ -435,8 +442,8 @@ $page_title = __("Edit Payment");
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="month"><?php echo __("Payment Month"); ?> <span class="text-danger">*</span></label>
-                                    <input type="date" name="month" id="month" value="<?php echo htmlspecialchars($payment['month']); ?>" required>
+                                    <label for="payment_date"><?php echo __("Payment Date"); ?> <span class="text-danger">*</span></label>
+                                    <input type="date" name="payment_date" id="payment_date" value="<?php echo htmlspecialchars($payment['payment_date']); ?>" required>
                                 </div>
                             </div>
                             

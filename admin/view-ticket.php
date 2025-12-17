@@ -258,6 +258,12 @@ $page_title = __("Ticket Details") . " #$ticket_id";
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 1rem 1.25rem;
+        }
+        
+        .card-header h3 {
+            font-size: 1rem;
+            margin: 0;
         }
         
         .form-group {
@@ -297,12 +303,16 @@ $page_title = __("Ticket Details") . " #$ticket_id";
         }
         
         select.form-control {
+            -webkit-appearance: none;
+            -moz-appearance: none;
             appearance: none;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 0.75rem center;
+            background: #fff url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") no-repeat right 0.75rem center;
             background-size: 16px 12px;
             padding-right: 2.5rem;
+        }
+        
+        select.form-control::-ms-expand {
+            display: none;
         }
         
         small {
@@ -331,7 +341,8 @@ $page_title = __("Ticket Details") . " #$ticket_id";
         }
         
         [data-theme="dark"] select.form-control {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23adb5bd' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background: #2a2e35 url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23adb5bd' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") no-repeat right 0.75rem center;
+            background-size: 16px 12px;
         }
         
         [data-theme="dark"] small {
@@ -926,7 +937,20 @@ $page_title = __("Ticket Details") . " #$ticket_id";
         @media (min-width: 992px) {
             .card-grid {
                 grid-template-columns: 1fr 1fr;
+                align-items: stretch;
             }
+        }
+        
+        .card-grid > .card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card-grid > .card > .card-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
         
         .info-grid {
@@ -1119,15 +1143,6 @@ $page_title = __("Ticket Details") . " #$ticket_id";
                                     </div>
                                 </div>
                                 
-                                <?php if (!empty($ticket['response'])): ?>
-                                <div class="detail-group">
-                                    <div class="label"><?php echo __("Response"); ?></div>
-                                    <div class="description-box">
-                                        <?php echo nl2br(htmlspecialchars($ticket['response'])); ?>
-                                    </div>
-                                </div>
-                                <?php endif; ?>
-                                
                                 <div class="info-grid">
                                     <div class="info-group">
                                         <label><i class="fas fa-user"></i> <?php echo __("Submitted by"); ?>:</label>
@@ -1143,105 +1158,53 @@ $page_title = __("Ticket Details") . " #$ticket_id";
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="info-group">
-                                        <label><i class="fas fa-check-circle"></i> <?php echo __("Status"); ?>:</label>
-                                        <span class="status-badge <?php echo $ticket['status']; ?>">
-                                            <?php echo __($ticket['status']); ?>
-                                        </span>
-                                    </div>
-                                    <?php if (isset($ticket['priority']) && !empty($ticket['priority'])): ?>
-                                    <div class="info-group">
-                                        <label><i class="fas fa-exclamation-triangle"></i> <?php echo __("Priority"); ?>:</label>
-                                        <span class="status-badge <?php echo htmlspecialchars($ticket['priority']); ?>">
-                                            <?php echo __($ticket['priority']); ?>
-                                        </span>
-                                    </div>
-                                    <?php endif; ?>
                                     <?php if (isset($ticket['category']) && !empty($ticket['category'])): ?>
                                     <div class="info-group">
                                         <label><i class="fas fa-tag"></i> <?php echo __("Category"); ?>:</label>
                                         <span class="info-value"><?php echo htmlspecialchars($ticket['category']); ?></span>
                                     </div>
                                     <?php endif; ?>
-                                    <div class="info-group">
-                                        <label><i class="fas fa-calendar-plus"></i> <?php echo __("Created on"); ?>:</label>
-                                        <span class="info-value"><?php echo date('d F Y', strtotime($ticket['created_at'])); ?></span>
-                                    </div>
-                                    <div class="info-group">
-                                        <label><i class="fas fa-edit"></i> <?php echo __("Last updated"); ?>:</label>
-                                        <span class="info-value"><?php echo date('d F Y', strtotime($ticket['updated_at'])); ?></span>
-                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="card-column">
-                            <!-- User Information Card - Compact version -->
-                            <div class="card compact-user-card">
-                                <div class="card-header">
-                                    <h3><i class="fas fa-user"></i> <?php echo __("User Information"); ?></h3>
-                                </div>
-                                <div class="card-body">
-                                    <div class="compact-user-info">
-                                        <div class="user-info-header">
-                                            <div class="user-avatar">
-                                                <i class="fas fa-user"></i>
-                                            </div>
-                                            <div>
-                                                <h4><?php echo htmlspecialchars($ticket['username'] ?? __("Unknown User")); ?></h4>
-                                                <div class="user-meta">
-                                                    <span><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($ticket['email'] ?? __("Unknown Email")); ?></span>
-                                                    <?php if (!empty($ticket['phone'])): ?>
-                                                    <span><i class="fas fa-phone"></i> <?php echo htmlspecialchars($ticket['phone']); ?></span>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <a href="view-user.php?id=<?php echo $ticket['user_id']; ?>" class="btn btn-sm btn-primary mt-2">
-                                            <i class="fas fa-eye"></i> <?php echo __("View User"); ?>
-                                        </a>
-                                    </div>
-                                </div>
+                        <!-- Update Status Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-reply"></i> <?php echo __("Update Ticket"); ?></h3>
                             </div>
-
-                            <!-- Update Status Card - Now placed below User Info -->
-                            <div class="card mt-3">
-                                <div class="card-header">
-                                    <h3><i class="fas fa-reply"></i> <?php echo __("Update Ticket"); ?></h3>
-                                </div>
-                                <div class="card-body">
-                                    <form action="view-ticket.php?id=<?php echo $ticket_id; ?>" method="post">
-                                        <div class="form-group">
-                                            <label for="status"><?php echo __("Update Status"); ?></label>
-                                            <select id="status" name="status" class="form-control">
-                                                <option value="open" <?php echo $ticket['status'] === 'open' ? 'selected' : ''; ?>><?php echo __("Open"); ?></option>
-                                                <option value="in_progress" <?php echo $ticket['status'] === 'in_progress' ? 'selected' : ''; ?>><?php echo __("In Progress"); ?></option>
-                                                <option value="closed" <?php echo $ticket['status'] === 'closed' ? 'selected' : ''; ?>><?php echo __("Closed"); ?></option>
-                                                <option value="reopened" <?php echo $ticket['status'] === 'reopened' ? 'selected' : ''; ?>><?php echo __("Reopened"); ?></option>
-                                            </select>
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label for="priority"><?php echo __("Priority"); ?></label>
-                                            <select id="priority" name="priority" class="form-control">
-                                                <option value="low" <?php echo $ticket['priority'] === 'low' ? 'selected' : ''; ?>><?php echo __("Low"); ?></option>
-                                                <option value="medium" <?php echo $ticket['priority'] === 'medium' ? 'selected' : ''; ?>><?php echo __("Medium"); ?></option>
-                                                <option value="high" <?php echo $ticket['priority'] === 'high' ? 'selected' : ''; ?>><?php echo __("High"); ?></option>
-                                                <option value="urgent" <?php echo $ticket['priority'] === 'urgent' ? 'selected' : ''; ?>><?php echo __("Urgent"); ?></option>
-                                            </select>
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label for="response"><?php echo __("Response"); ?></label>
-                                            <textarea id="response" name="response" class="form-control" rows="5"><?php echo htmlspecialchars($ticket['response'] ?? ''); ?></textarea>
-                                            <small><?php echo __("Your response will be visible to the ticket submitter."); ?></small>
-                                        </div>
-                                        
-                                        <button type="submit" name="update_status" class="btn btn-primary">
-                                            <i class="fas fa-save"></i> <?php echo __("Save Changes"); ?>
-                                        </button>
-                                    </form>
-                                </div>
+                            <div class="card-body">
+                                <form action="view-ticket.php?id=<?php echo $ticket_id; ?>" method="post">
+                                    <div class="form-group">
+                                        <label for="status"><?php echo __("Update Status"); ?></label>
+                                        <select id="status" name="status" class="form-control">
+                                            <option value="open" <?php echo $ticket['status'] === 'open' ? 'selected' : ''; ?>><?php echo __("Open"); ?></option>
+                                            <option value="in_progress" <?php echo $ticket['status'] === 'in_progress' ? 'selected' : ''; ?>><?php echo __("In Progress"); ?></option>
+                                            <option value="closed" <?php echo $ticket['status'] === 'closed' ? 'selected' : ''; ?>><?php echo __("Closed"); ?></option>
+                                            <option value="reopened" <?php echo $ticket['status'] === 'reopened' ? 'selected' : ''; ?>><?php echo __("Reopened"); ?></option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="priority"><?php echo __("Priority"); ?></label>
+                                        <select id="priority" name="priority" class="form-control">
+                                            <option value="low" <?php echo $ticket['priority'] === 'low' ? 'selected' : ''; ?>><?php echo __("Low"); ?></option>
+                                            <option value="medium" <?php echo $ticket['priority'] === 'medium' ? 'selected' : ''; ?>><?php echo __("Medium"); ?></option>
+                                            <option value="high" <?php echo $ticket['priority'] === 'high' ? 'selected' : ''; ?>><?php echo __("High"); ?></option>
+                                            <option value="urgent" <?php echo $ticket['priority'] === 'urgent' ? 'selected' : ''; ?>><?php echo __("Urgent"); ?></option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="response"><?php echo __("Response"); ?></label>
+                                        <textarea id="response" name="response" class="form-control" rows="5"><?php echo htmlspecialchars($ticket['response'] ?? ''); ?></textarea>
+                                        <small><?php echo __("Your response will be visible to the ticket submitter."); ?></small>
+                                    </div>
+                                    
+                                    <button type="submit" name="update_status" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> <?php echo __("Save Changes"); ?>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>

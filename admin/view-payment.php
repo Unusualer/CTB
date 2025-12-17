@@ -88,7 +88,7 @@ try {
 function getStatusBadgeClass($status) {
     switch($status) {
         case 'paid':
-        case 'completed':
+        case 'paid':
             return 'success';
         case 'pending':
             return 'warning';
@@ -517,7 +517,7 @@ $page_title = __("Payment Details");
                             
                             <div class="detail-group">
                                 <div class="label"><?php echo __("Payment Date"); ?></div>
-                                <div class="value"><?php echo formatDate($payment['month']); ?></div>
+                                <div class="value"><?php echo formatDate($payment['payment_date']); ?></div>
                             </div>
                             
                             <div class="detail-group">
@@ -605,7 +605,7 @@ $page_title = __("Payment Details");
                             <div class="form-group">
                                 <label for="status"><?php echo __("Status"); ?></label>
                                 <select id="status" name="status" class="form-control">
-                                    <option value="completed" <?php echo $payment['status'] === 'completed' ? 'selected' : ''; ?>><?php echo __("Completed"); ?></option>
+                                    <option value="paid" <?php echo $payment['status'] === 'paid' ? 'selected' : ''; ?>><?php echo __("Paid"); ?></option>
                                     <option value="pending" <?php echo $payment['status'] === 'pending' ? 'selected' : ''; ?>><?php echo __("Pending"); ?></option>
                                     <option value="failed" <?php echo $payment['status'] === 'failed' ? 'selected' : ''; ?>><?php echo __("Failed"); ?></option>
                                     <option value="refunded" <?php echo $payment['status'] === 'refunded' ? 'selected' : ''; ?>><?php echo __("Refunded"); ?></option>

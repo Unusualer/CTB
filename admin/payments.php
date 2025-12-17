@@ -57,19 +57,19 @@ try {
     }
     
     if (!empty($date_from)) {
-        $query .= " AND p.month >= :date_from";
-        $count_query .= " AND p.month >= :date_from";
+        $query .= " AND p.payment_date >= :date_from";
+        $count_query .= " AND p.payment_date >= :date_from";
         $params[':date_from'] = $date_from;
     }
     
     if (!empty($date_to)) {
-        $query .= " AND p.month <= :date_to";
-        $count_query .= " AND p.month <= :date_to";
+        $query .= " AND p.payment_date <= :date_to";
+        $count_query .= " AND p.payment_date <= :date_to";
         $params[':date_to'] = $date_to;
     }
     
     // Add ordering
-    $query .= " ORDER BY p.month DESC LIMIT :offset, :limit";
+    $query .= " ORDER BY p.payment_date DESC LIMIT :offset, :limit";
     
     // Get total count
     $count_stmt = $db->prepare($count_query);
@@ -246,10 +246,10 @@ $page_title = __("Payment Management");
                         <i class="fas fa-check-circle"></i>
                     </div>
                     <div class="stat-details">
-                        <h3><?php echo __("Completed"); ?></h3>
-                        <div class="stat-number"><?php echo isset($status_stats['completed']['count']) ? $status_stats['completed']['count'] : 0; ?></div>
+                        <h3><?php echo __("Paid"); ?></h3>
+                        <div class="stat-number"><?php echo isset($status_stats['paid']['count']) ? $status_stats['paid']['count'] : 0; ?></div>
                         <div class="stat-breakdown">
-                            <span><?php echo isset($status_stats['completed']['total']) ? number_format($status_stats['completed']['total'], 2) : '0.00'; ?> €</span>
+                            <span><?php echo isset($status_stats['paid']['total']) ? number_format($status_stats['paid']['total'], 2) : '0.00'; ?> €</span>
                         </div>
                     </div>
                 </div>
@@ -339,7 +339,6 @@ $page_title = __("Payment Management");
                                 <thead>
                                     <tr>
                                         <th><?php echo __("ID"); ?></th>
-                                        <th><?php echo __("Resident"); ?></th>
                                         <th><?php echo __("Property"); ?></th>
                                         <th><?php echo __("Amount"); ?></th>
                                         <th><?php echo __("Method"); ?></th>
@@ -352,15 +351,6 @@ $page_title = __("Payment Management");
                                     <?php foreach ($payments as $payment): ?>
                                         <tr>
                                             <td><?php echo $payment['payment_id'] ?? $payment['id']; ?></td>
-                                            <td>
-                                                <?php if (isset($payment['user_id']) && $payment['user_id']): ?>
-                                                    <a href="view-user.php?id=<?php echo $payment['user_id']; ?>" class="user-link">
-                                                        <?php echo htmlspecialchars($payment['user_name']); ?>
-                                                    </a>
-                                                <?php else: ?>
-                                                    <span class="text-muted">N/A</span>
-                                                <?php endif; ?>
-                                            </td>
                                             <td>
                                                 <?php if (isset($payment['property_id']) && $payment['property_id']): ?>
                                                     <a href="view-property.php?id=<?php echo $payment['property_id']; ?>" class="property-link">
@@ -400,7 +390,7 @@ $page_title = __("Payment Management");
                                                     $statusClass = 'secondary';
                                                     switch (strtolower($payment['status'])) {
                                                         case 'paid': 
-                                                        case 'completed': $statusClass = 'success'; break;
+                                                        case 'paid': $statusClass = 'success'; break;
                                                         case 'pending': $statusClass = 'warning'; break;
                                                         case 'failed': $statusClass = 'danger'; break;
                                                         case 'refunded': $statusClass = 'primary'; break;
@@ -412,7 +402,7 @@ $page_title = __("Payment Management");
                                                     <?php echo __($payment['status']); ?>
                                                 </span>
                                             </td>
-                                            <td><?php echo date('d M Y', strtotime($payment['month'])); ?></td>
+                                            <td><?php echo date('d M Y', strtotime($payment['payment_date'])); ?></td>
                                             <td class="actions">
                                                 <a href="view-payment.php?id=<?php echo $payment['id']; ?>" class="btn-icon" title="<?php echo __("View Payment"); ?>">
                                                     <i class="fas fa-eye"></i>

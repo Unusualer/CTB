@@ -21,13 +21,13 @@ $items_per_page = 10;
 $offset = ($page - 1) * $items_per_page;
 
 // Handle sorting
-$sort_column = $_GET['sort'] ?? 'month';
+$sort_column = $_GET['sort'] ?? 'payment_date';
 $sort_direction = $_GET['dir'] ?? 'desc';
 
 // Validate sort column (whitelist allowed columns)
-$allowed_columns = ['id', 'amount', 'type', 'status', 'month'];
+$allowed_columns = ['id', 'amount', 'type', 'status', 'payment_date'];
 if (!in_array($sort_column, $allowed_columns)) {
-    $sort_column = 'month';
+    $sort_column = 'payment_date';
 }
 
 // Validate sort direction
@@ -72,14 +72,14 @@ try {
     }
     
     if (!empty($date_from)) {
-        $query .= " AND p.month >= :date_from";
-        $count_query .= " AND p.month >= :date_from";
+        $query .= " AND p.payment_date >= :date_from";
+        $count_query .= " AND p.payment_date >= :date_from";
         $params[':date_from'] = $date_from;
     }
     
     if (!empty($date_to)) {
-        $query .= " AND p.month <= :date_to";
-        $count_query .= " AND p.month <= :date_to";
+        $query .= " AND p.payment_date <= :date_to";
+        $count_query .= " AND p.payment_date <= :date_to";
         $params[':date_to'] = $date_to;
     }
     
@@ -433,10 +433,10 @@ $page_title = __("Payment Management");
                                                 <?php endif; ?>
                                             </span>
                                         </th>
-                                        <th class="sortable" data-column="month">
+                                        <th class="sortable" data-column="payment_date">
                                             <?php echo __("Date"); ?>
                                             <span class="sort-icon">
-                                                <?php if ($sort_column === 'month'): ?>
+                                                <?php if ($sort_column === 'payment_date'): ?>
                                                     <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
                                                 <?php else: ?>
                                                     <i class="fas fa-sort"></i>
@@ -510,7 +510,7 @@ $page_title = __("Payment Management");
                                                     <?php echo __($payment['status']); ?>
                                                 </span>
                                             </td>
-                                            <td><?php echo date('d M Y', strtotime($payment['month'])); ?></td>
+                                            <td><?php echo date('d M Y', strtotime($payment['payment_date'])); ?></td>
                                             <td class="actions">
                                                 <a href="view-payment.php?id=<?php echo $payment['id']; ?>" class="btn-icon" title="<?php echo __("View Payment"); ?>">
                                                     <i class="fas fa-eye"></i>
@@ -584,7 +584,7 @@ $page_title = __("Payment Management");
         // Track current sort state - get from URL params or use defaults
         const urlParams = new URLSearchParams(window.location.search);
         let currentSort = {
-            column: urlParams.get('sort') || 'month',
+            column: urlParams.get('sort') || 'payment_date',
             direction: urlParams.get('dir') || 'desc'
         };
         

@@ -477,7 +477,7 @@ $page_title = __("Payment Details");
                             
                             <div class="detail-group">
                                 <div class="label"><?php echo __("Payment Date"); ?></div>
-                                <div class="value"><?php echo formatDate($payment['month']); ?></div>
+                                <div class="value"><?php echo formatDate($payment['payment_date']); ?></div>
                             </div>
                             
                             <div class="detail-group">

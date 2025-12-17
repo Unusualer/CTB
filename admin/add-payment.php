@@ -18,8 +18,8 @@ $payment = [
     'property_id' => '',
     'amount' => '',
     'payment_method' => 'credit_card',
-    'month' => date('Y-m-d'),
-    'status' => 'completed',
+    'payment_date' => date('Y-m-d'),
+    'status' => 'paid',
     'transaction_id' => '',
     'description' => ''
 ];
@@ -35,8 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $property_id = !empty($_POST['property_id']) ? intval($_POST['property_id']) : null;
         $amount = !empty($_POST['amount']) ? floatval($_POST['amount']) : 0;
         $payment_method = !empty($_POST['payment_method']) ? $_POST['payment_method'] : 'credit_card';
-        $month = !empty($_POST['month']) ? $_POST['month'] : date('Y-m-d');
-        $status = !empty($_POST['status']) ? $_POST['status'] : 'completed';
+        $payment_date = !empty($_POST['payment_date']) ? $_POST['payment_date'] : date('Y-m-d');
+        $status = !empty($_POST['status']) ? $_POST['status'] : 'paid';
         $transaction_id = !empty($_POST['transaction_id']) ? $_POST['transaction_id'] : null;
         $description = !empty($_POST['description']) ? $_POST['description'] : null;
         
@@ -52,14 +52,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $query = "INSERT INTO payments (
                     property_id, 
                     amount, 
-                    month, 
+                    payment_date, 
                     status, 
                     type, 
                     created_at
                 ) VALUES (
                     :property_id, 
                     :amount, 
-                    :month, 
+                    :payment_date, 
                     :status, 
                     :payment_method, 
                     NOW()
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $db->prepare($query);
         $stmt->bindParam(':property_id', $property_id);
         $stmt->bindParam(':amount', $amount);
-        $stmt->bindParam(':month', $month);
+        $stmt->bindParam(':payment_date', $payment_date);
         $stmt->bindParam(':status', $status);
         $stmt->bindParam(':payment_method', $payment_method);
         
@@ -86,8 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'property_id' => '',
                 'amount' => '',
                 'payment_method' => 'credit_card',
-                'month' => date('Y-m-d'),
-                'status' => 'completed',
+                'payment_date' => date('Y-m-d'),
+                'status' => 'paid',
                 'transaction_id' => '',
                 'description' => ''
             ];
@@ -104,8 +104,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'property_id' => $_POST['property_id'] ?? '',
             'amount' => $_POST['amount'] ?? '',
             'payment_method' => $_POST['payment_method'] ?? 'credit_card',
-            'month' => $_POST['month'] ?? date('Y-m-d'),
-            'status' => $_POST['status'] ?? 'completed',
+            'payment_date' => $_POST['payment_date'] ?? date('Y-m-d'),
+            'status' => $_POST['status'] ?? 'paid',
             'transaction_id' => $_POST['transaction_id'] ?? '',
             'description' => $_POST['description'] ?? ''
         ];
@@ -118,8 +118,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'property_id' => $_POST['property_id'] ?? '',
             'amount' => $_POST['amount'] ?? '',
             'payment_method' => $_POST['payment_method'] ?? 'credit_card',
-            'month' => $_POST['month'] ?? date('Y-m-d'),
-            'status' => $_POST['status'] ?? 'completed',
+            'payment_date' => $_POST['payment_date'] ?? date('Y-m-d'),
+            'status' => $_POST['status'] ?? 'paid',
             'transaction_id' => $_POST['transaction_id'] ?? '',
             'description' => $_POST['description'] ?? ''
         ];
@@ -472,8 +472,8 @@ $page_title = __("Add Payment");
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="month"><?php echo __("Payment Date"); ?> <span class="text-danger">*</span></label>
-                                    <input type="date" name="month" id="month" value="<?php echo htmlspecialchars($payment['month']); ?>" required>
+                                    <label for="payment_date"><?php echo __("Payment Date"); ?> <span class="text-danger">*</span></label>
+                                    <input type="date" name="payment_date" id="payment_date" value="<?php echo htmlspecialchars($payment['payment_date']); ?>" required>
                                 </div>
                             </div>
                             
@@ -481,7 +481,7 @@ $page_title = __("Add Payment");
                                 <div class="form-group">
                                     <label for="status"><?php echo __("Status"); ?> <span class="text-danger">*</span></label>
                                     <select name="status" id="status" required>
-                                        <option value="completed" <?php echo $payment['status'] === 'completed' ? 'selected' : ''; ?>><?php echo __("Completed"); ?></option>
+                                        <option value="paid" <?php echo $payment['status'] === 'paid' ? 'selected' : ''; ?>><?php echo __("Paid"); ?></option>
                                         <option value="pending" <?php echo $payment['status'] === 'pending' ? 'selected' : ''; ?>><?php echo __("Pending"); ?></option>
                                         <option value="failed" <?php echo $payment['status'] === 'failed' ? 'selected' : ''; ?>><?php echo __("Failed"); ?></option>
                                         <option value="refunded" <?php echo $payment['status'] === 'refunded' ? 'selected' : ''; ?>><?php echo __("Refunded"); ?></option>

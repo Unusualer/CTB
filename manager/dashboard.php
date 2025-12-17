@@ -155,14 +155,14 @@ try {
     // Get monthly payment data for chart (last 6 months)
     $stmt = $db->prepare("
         SELECT 
-            DATE_FORMAT(month, '%Y-%m') as month,
+            DATE_FORMAT(payment_date, '%Y-%m') as month,
             SUM(amount) as total_amount
         FROM 
             payments
         WHERE 
-            month >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+            payment_date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
         GROUP BY 
-            DATE_FORMAT(month, '%Y-%m')
+            DATE_FORMAT(payment_date, '%Y-%m')
         ORDER BY 
             month ASC
     ");

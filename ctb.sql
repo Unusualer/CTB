@@ -40,7 +40,7 @@ CREATE TABLE payments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     property_id INT NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
-    month DATE NOT NULL,
+    payment_date DATE NOT NULL,
     status ENUM('paid', 'pending', 'cancelled', 'failed', 'refunded') DEFAULT 'pending' COMMENT 'paid=Payé, pending=En Attente, cancelled=Annulé, failed=Échoué, refunded=Remboursé',
     type ENUM('transfer', 'cheque') DEFAULT 'transfer' COMMENT 'transfer=Virement, cheque=Chèque',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -111,7 +111,7 @@ INSERT INTO properties (type, identifier, user_id) VALUES
 ('parking', 'P456', 3);
 
 -- Insert sample payments
-INSERT INTO payments (property_id, amount, month, status, type) VALUES 
+INSERT INTO payments (property_id, amount, payment_date, status, type) VALUES 
 (1, 1000.00, '2023-01-01', 'paid', 'transfer'),
 (1, 1000.00, '2023-02-01', 'paid', 'transfer'),
 (3, 250.00, '2023-01-01', 'paid', 'cheque');

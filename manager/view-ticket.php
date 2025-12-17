@@ -258,6 +258,12 @@ $page_title = __("Ticket Details") . " #$ticket_id";
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 1rem 1.25rem;
+        }
+        
+        .card-header h3 {
+            font-size: 1rem;
+            margin: 0;
         }
         
         .form-group {
@@ -939,15 +945,16 @@ $page_title = __("Ticket Details") . " #$ticket_id";
             }
         }
         
-        .card-grid .card,
-        .card-column .card {
+        .card-grid > .card,
+        .card-grid > .card-column,
+        .card-grid > .card-column > .card {
             height: 100%;
             display: flex;
             flex-direction: column;
         }
         
-        .card-grid .card .card-body,
-        .card-column .card .card-body {
+        .card-grid > .card > .card-body,
+        .card-grid > .card-column > .card > .card-body {
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -956,7 +963,6 @@ $page_title = __("Ticket Details") . " #$ticket_id";
         .card-column {
             display: flex;
             flex-direction: column;
-            height: 100%;
         }
         
         .info-grid {
@@ -1177,45 +1183,43 @@ $page_title = __("Ticket Details") . " #$ticket_id";
                             </div>
                         </div>
 
-                        <div class="card-column">
-                            <!-- Update Status Card -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <h3><i class="fas fa-reply"></i> <?php echo __("Update Ticket"); ?></h3>
-                                </div>
-                                <div class="card-body">
-                                    <form action="view-ticket.php?id=<?php echo $ticket_id; ?>" method="post">
-                                        <div class="form-group">
-                                            <label for="status"><?php echo __("Update Status"); ?></label>
-                                            <select id="status" name="status" class="form-control">
-                                                <option value="open" <?php echo $ticket['status'] === 'open' ? 'selected' : ''; ?>><?php echo __("Open"); ?></option>
-                                                <option value="in_progress" <?php echo $ticket['status'] === 'in_progress' ? 'selected' : ''; ?>><?php echo __("In Progress"); ?></option>
-                                                <option value="closed" <?php echo $ticket['status'] === 'closed' ? 'selected' : ''; ?>><?php echo __("Closed"); ?></option>
-                                                <option value="reopened" <?php echo $ticket['status'] === 'reopened' ? 'selected' : ''; ?>><?php echo __("Reopened"); ?></option>
-                                            </select>
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label for="priority"><?php echo __("Priority"); ?></label>
-                                            <select id="priority" name="priority" class="form-control">
-                                                <option value="low" <?php echo $ticket['priority'] === 'low' ? 'selected' : ''; ?>><?php echo __("Low"); ?></option>
-                                                <option value="medium" <?php echo $ticket['priority'] === 'medium' ? 'selected' : ''; ?>><?php echo __("Medium"); ?></option>
-                                                <option value="high" <?php echo $ticket['priority'] === 'high' ? 'selected' : ''; ?>><?php echo __("High"); ?></option>
-                                                <option value="urgent" <?php echo $ticket['priority'] === 'urgent' ? 'selected' : ''; ?>><?php echo __("Urgent"); ?></option>
-                                            </select>
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label for="response"><?php echo __("Response"); ?></label>
-                                            <textarea id="response" name="response" class="form-control" rows="5"><?php echo htmlspecialchars($ticket['response'] ?? ''); ?></textarea>
-                                            <small><?php echo __("Your response will be visible to the ticket submitter."); ?></small>
-                                        </div>
-                                        
-                                        <button type="submit" name="update_status" class="btn btn-primary">
-                                            <i class="fas fa-save"></i> <?php echo __("Save Changes"); ?>
-                                        </button>
-                                    </form>
-                                </div>
+                        <!-- Update Status Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-reply"></i> <?php echo __("Update Ticket"); ?></h3>
+                            </div>
+                            <div class="card-body">
+                                <form action="view-ticket.php?id=<?php echo $ticket_id; ?>" method="post">
+                                    <div class="form-group">
+                                        <label for="status"><?php echo __("Update Status"); ?></label>
+                                        <select id="status" name="status" class="form-control">
+                                            <option value="open" <?php echo $ticket['status'] === 'open' ? 'selected' : ''; ?>><?php echo __("Open"); ?></option>
+                                            <option value="in_progress" <?php echo $ticket['status'] === 'in_progress' ? 'selected' : ''; ?>><?php echo __("In Progress"); ?></option>
+                                            <option value="closed" <?php echo $ticket['status'] === 'closed' ? 'selected' : ''; ?>><?php echo __("Closed"); ?></option>
+                                            <option value="reopened" <?php echo $ticket['status'] === 'reopened' ? 'selected' : ''; ?>><?php echo __("Reopened"); ?></option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="priority"><?php echo __("Priority"); ?></label>
+                                        <select id="priority" name="priority" class="form-control">
+                                            <option value="low" <?php echo $ticket['priority'] === 'low' ? 'selected' : ''; ?>><?php echo __("Low"); ?></option>
+                                            <option value="medium" <?php echo $ticket['priority'] === 'medium' ? 'selected' : ''; ?>><?php echo __("Medium"); ?></option>
+                                            <option value="high" <?php echo $ticket['priority'] === 'high' ? 'selected' : ''; ?>><?php echo __("High"); ?></option>
+                                            <option value="urgent" <?php echo $ticket['priority'] === 'urgent' ? 'selected' : ''; ?>><?php echo __("Urgent"); ?></option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="response"><?php echo __("Response"); ?></label>
+                                        <textarea id="response" name="response" class="form-control" rows="5"><?php echo htmlspecialchars($ticket['response'] ?? ''); ?></textarea>
+                                        <small><?php echo __("Your response will be visible to the ticket submitter."); ?></small>
+                                    </div>
+                                    
+                                    <button type="submit" name="update_status" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> <?php echo __("Save Changes"); ?>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
