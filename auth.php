@@ -108,9 +108,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     }
             }
             
-            // Verify the user is active
-            if ($user['status'] !== 'active') {
-                // Instead of showing an error, update the user status to active
+            // If user status is inactive, set it to active
+            if ($user['status'] === 'inactive') {
                 try {
                     $updateStmt = $conn->prepare("UPDATE users SET status = 'active' WHERE id = :user_id");
                     $updateStmt->bindParam(':user_id', $user['id']);
