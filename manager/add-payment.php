@@ -491,6 +491,7 @@ $page_title = __("Add Payment");
                                     <select name="payment_method" id="payment_method" required>
                                         <option value="transfer" <?php echo $payment['payment_method'] === 'transfer' ? 'selected' : ''; ?>><?php echo __("Transfer"); ?></option>
                                         <option value="cheque" <?php echo $payment['payment_method'] === 'cheque' ? 'selected' : ''; ?>><?php echo __("Check"); ?></option>
+                                        <option value="cash" <?php echo $payment['payment_method'] === 'cash' ? 'selected' : ''; ?>><?php echo __("Cash"); ?></option>
                                     </select>
                                 </div>
                             </div>
