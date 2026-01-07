@@ -406,7 +406,8 @@ $page_title = __("Ticket Management");
             gap: 10px;
         }
         
-        .user-avatar {
+        /* Scope styles to only affect user-info-cell, not sidebar */
+        .user-info-cell .user-avatar {
             width: 32px;
             height: 32px;
             border-radius: 50%;
@@ -418,17 +419,17 @@ $page_title = __("Ticket Management");
             flex-shrink: 0;
         }
         
-        .user-avatar.unknown {
+        .user-info-cell .user-avatar.unknown {
             background: linear-gradient(135deg, #6c757d, #495057);
         }
         
-        .user-details {
+        .user-info-cell .user-details {
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
         
-        .user-name {
+        .user-info-cell .user-name {
             font-weight: 500;
             color: var(--text-primary);
             white-space: nowrap;
@@ -437,12 +438,13 @@ $page_title = __("Ticket Management");
             text-decoration: none;
         }
         
-        .user-name:hover {
+        .user-info-cell .user-name:hover {
             color: var(--primary-color);
             text-decoration: underline;
         }
         
-        .user-email, .user-unknown {
+        .user-info-cell .user-email, 
+        .user-info-cell .user-unknown {
             font-size: 0.8rem;
             color: var(--text-muted);
             white-space: nowrap;
@@ -451,11 +453,11 @@ $page_title = __("Ticket Management");
         }
         
         /* Style pour le mode sombre */
-        [data-theme="dark"] .user-name {
+        [data-theme="dark"] .user-info-cell .user-name {
             color: #f0f0f0;
         }
         
-        [data-theme="dark"] .user-name:hover {
+        [data-theme="dark"] .user-info-cell .user-name:hover {
             color: var(--primary-color-light);
         }
         

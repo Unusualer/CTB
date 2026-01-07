@@ -403,6 +403,7 @@ $page_title = __("Payment Management");
                                         </th>
                                         <th><?php echo __("Resident"); ?></th>
                                         <th><?php echo __("Property"); ?></th>
+                                        <th><?php echo __("Year"); ?></th>
                                         <th class="sortable" data-column="amount">
                                             <?php echo __("Amount"); ?>
                                             <span class="sort-icon">
@@ -468,6 +469,7 @@ $page_title = __("Payment Management");
                                                     <span class="text-muted">N/A</span>
                                                 <?php endif; ?>
                                             </td>
+                                            <td><strong><?php echo isset($payment['year']) ? $payment['year'] : 'N/A'; ?></strong></td>
                                             <td>$<?php echo number_format($payment['amount'], 2); ?></td>
                                             <td>
                                                 <?php 

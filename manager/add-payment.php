@@ -19,6 +19,7 @@ $payment = [
     'amount' => '',
     'payment_method' => 'credit_card',
     'payment_date' => date('Y-m-d'),
+    'year' => date('Y'),
     'status' => 'completed',
     'transaction_id' => '',
     'description' => ''
@@ -48,11 +49,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception(__("User and amount are required fields. Amount must be greater than zero."));
         }
         
+        // Get year from form or use payment_date year
+        $year = !empty($_POST['year']) ? intval($_POST['year']) : intval(date('Y', strtotime($payment_date)));
+        
+        if ($year < 2000 || $year > 2100) {
+            throw new Exception(__("Year must be between 2000 and 2100."));
+        }
+        
         // Insert payment record
         $query = "INSERT INTO payments (
                     property_id, 
                     amount, 
                     payment_date, 
+                    year,
                     status, 
                     type, 
                     created_at
@@ -60,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     :property_id, 
                     :amount, 
                     :payment_date, 
+                    :year,
                     :status, 
                     :payment_method, 
                     NOW()
@@ -69,6 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bindParam(':property_id', $property_id);
         $stmt->bindParam(':amount', $amount);
         $stmt->bindParam(':payment_date', $payment_date);
+        $stmt->bindParam(':year', $year);
         $stmt->bindParam(':status', $status);
         $stmt->bindParam(':payment_method', $payment_method);
         
@@ -87,6 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'amount' => '',
                 'payment_method' => 'credit_card',
                 'payment_date' => date('Y-m-d'),
+                'year' => date('Y'),
                 'status' => 'completed',
                 'transaction_id' => '',
                 'description' => ''
@@ -105,6 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'amount' => $_POST['amount'] ?? '',
             'payment_method' => $_POST['payment_method'] ?? 'credit_card',
             'payment_date' => $_POST['payment_date'] ?? date('Y-m-d'),
+            'year' => $_POST['year'] ?? date('Y'),
             'status' => $_POST['status'] ?? 'completed',
             'transaction_id' => $_POST['transaction_id'] ?? '',
             'description' => $_POST['description'] ?? ''
@@ -119,6 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'amount' => $_POST['amount'] ?? '',
             'payment_method' => $_POST['payment_method'] ?? 'credit_card',
             'payment_date' => $_POST['payment_date'] ?? date('Y-m-d'),
+            'year' => $_POST['year'] ?? date('Y'),
             'status' => $_POST['status'] ?? 'completed',
             'transaction_id' => $_POST['transaction_id'] ?? '',
             'description' => $_POST['description'] ?? ''
@@ -445,7 +459,7 @@ $page_title = __("Add Payment");
                                         <option value=""><?php echo __("Select a property"); ?> (<?php echo __("Optional"); ?>)</option>
                                         <?php foreach ($properties as $property): ?>
                                             <option value="<?php echo $property['id']; ?>" <?php echo $payment['property_id'] == $property['id'] ? 'selected' : ''; ?>>
-                                                <?php echo htmlspecialchars($property['identifier']); ?> - <?php echo htmlspecialchars($property['type']); ?>
+                                                <?php echo htmlspecialchars($property['identifier']); ?> - <?php echo ucfirst(htmlspecialchars($property['type'])); ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
@@ -467,6 +481,14 @@ $page_title = __("Add Payment");
                                         <option value="transfer" <?php echo $payment['payment_method'] === 'transfer' ? 'selected' : ''; ?>><?php echo __("Transfer"); ?></option>
                                         <option value="cheque" <?php echo $payment['payment_method'] === 'cheque' ? 'selected' : ''; ?>><?php echo __("Check"); ?></option>
                                     </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="year"><?php echo __("Year"); ?> <span class="text-danger">*</span></label>
+                                    <input type="number" name="year" id="year" min="2000" max="2100" value="<?php echo isset($payment['year']) ? htmlspecialchars($payment['year']) : date('Y'); ?>" required>
+                                    <small class="form-text text-muted"><?php echo __("Year this payment is for (e.g., 2025, 2026)."); ?></small>
                                 </div>
                             </div>
                             

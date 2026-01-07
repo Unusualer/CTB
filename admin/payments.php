@@ -340,6 +340,7 @@ $page_title = __("Payment Management");
                                     <tr>
                                         <th><?php echo __("ID"); ?></th>
                                         <th><?php echo __("Property"); ?></th>
+                                        <th><?php echo __("Year"); ?></th>
                                         <th><?php echo __("Amount"); ?></th>
                                         <th><?php echo __("Method"); ?></th>
                                         <th><?php echo __("Status"); ?></th>
@@ -360,6 +361,7 @@ $page_title = __("Payment Management");
                                                     <span class="text-muted">N/A</span>
                                                 <?php endif; ?>
                                             </td>
+                                            <td><strong><?php echo isset($payment['year']) ? $payment['year'] : 'N/A'; ?></strong></td>
                                             <td>$<?php echo number_format($payment['amount'], 2); ?></td>
                                             <td>
                                                 <?php 

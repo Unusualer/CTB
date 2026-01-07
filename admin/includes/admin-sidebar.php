@@ -80,6 +80,12 @@ if (!function_exists('__')) {
                     <span><?php echo __("Payments"); ?></span>
                 </a>
             </li>
+            <li <?php echo isActive('cotisations.php') ? 'class="active"' : ''; ?>>
+                <a href="cotisations.php">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span><?php echo __("Cotisations"); ?></span>
+                </a>
+            </li>
             <li <?php echo isActive('activity-log.php'); ?>>
                 <a href="activity-log.php">
                     <i class="fas fa-history"></i>

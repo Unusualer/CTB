@@ -684,22 +684,44 @@ html:not([data-theme="dark"]) .sidebar-nav li.active a[href*="profile"] {
     box-shadow: 0 2px 8px rgba(155, 89, 182, 0.15);
 }
 
-html:not([data-theme="dark"]) .sidebar-nav a[href*="activity"]::before {
-    background: linear-gradient(180deg, #4cc9f0 0%, #39b8df 100%);
+html:not([data-theme="dark"]) .sidebar-nav a[href*="cotisations"]::before {
+    background: linear-gradient(180deg, #ff6b6b 0%, #ee5a52 100%);
 }
 
-html:not([data-theme="dark"]) .sidebar-nav a[href*="activity"]:hover {
-    background: linear-gradient(90deg, rgba(76, 201, 240, 0.12) 0%, rgba(76, 201, 240, 0.05) 100%);
-    color: #4cc9f0;
+html:not([data-theme="dark"]) .sidebar-nav a[href*="cotisations"]:hover {
+    background: linear-gradient(90deg, rgba(255, 107, 107, 0.12) 0%, rgba(255, 107, 107, 0.05) 100%);
+    color: #ff6b6b;
     transform: translateX(4px);
 }
 
-html:not([data-theme="dark"]) .sidebar-nav li.active a[href*="activity"] {
-    background: linear-gradient(90deg, rgba(76, 201, 240, 0.15) 0%, rgba(76, 201, 240, 0.08) 100%);
-    color: #4cc9f0;
-    border-left: 4px solid #4cc9f0;
+html:not([data-theme="dark"]) .sidebar-nav li.active a[href*="cotisations"],
+html:not([data-theme="dark"]) .sidebar-nav li.active a[href*="cotisations.php"],
+html:not([data-theme="dark"]) .sidebar-nav li.active a[href*="add-cotisation"],
+html:not([data-theme="dark"]) .sidebar-nav li.active a[href*="edit-cotisation"] {
+    background: linear-gradient(90deg, rgba(255, 107, 107, 0.15) 0%, rgba(255, 107, 107, 0.08) 100%);
+    color: #ff6b6b;
+    border-left: 4px solid #ff6b6b;
     font-weight: 600;
-    box-shadow: 0 2px 8px rgba(76, 201, 240, 0.15);
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.15);
+}
+
+html:not([data-theme="dark"]) .sidebar-nav a[href*="activity"]::before {
+    background: linear-gradient(180deg, #6c757d 0%, #5a6268 100%);
+}
+
+html:not([data-theme="dark"]) .sidebar-nav a[href*="activity"]:hover {
+    background: linear-gradient(90deg, rgba(108, 117, 125, 0.12) 0%, rgba(108, 117, 125, 0.05) 100%);
+    color: #6c757d;
+    transform: translateX(4px);
+}
+
+html:not([data-theme="dark"]) .sidebar-nav li.active a[href*="activity"],
+html:not([data-theme="dark"]) .sidebar-nav li.active a[href*="activity-log"] {
+    background: linear-gradient(90deg, rgba(108, 117, 125, 0.15) 0%, rgba(108, 117, 125, 0.08) 100%);
+    color: #6c757d;
+    border-left: 4px solid #6c757d;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.15);
 }
 
 html:not([data-theme="dark"]) .sidebar-footer {
@@ -734,8 +756,12 @@ html:not([data-theme="dark"]) .sidebar-nav a[href*="profile"] i {
     color: #9b59b6;
 }
 
+html:not([data-theme="dark"]) .sidebar-nav a[href*="cotisations"] i {
+    color: #ff6b6b;
+}
+
 html:not([data-theme="dark"]) .sidebar-nav a[href*="activity"] i {
-    color: #4cc9f0;
+    color: #6c757d;
 }
 
 /* ========== DARK THEME SIDEBAR ENHANCEMENTS ========== */
@@ -939,22 +965,44 @@ html:not([data-theme="dark"]) .sidebar-nav a[href*="activity"] i {
     box-shadow: 0 2px 8px rgba(155, 89, 182, 0.3);
 }
 
-[data-theme="dark"] .sidebar-nav a[href*="activity"]::before {
-    background: linear-gradient(180deg, #36b9cc 0%, #39b8df 100%);
+[data-theme="dark"] .sidebar-nav a[href*="cotisations"]::before {
+    background: linear-gradient(180deg, #ff6b6b 0%, #ee5a52 100%);
 }
 
-[data-theme="dark"] .sidebar-nav a[href*="activity"]:hover {
-    background: linear-gradient(90deg, rgba(54, 185, 204, 0.2) 0%, rgba(54, 185, 204, 0.1) 100%);
-    color: #7dd3fc;
+[data-theme="dark"] .sidebar-nav a[href*="cotisations"]:hover {
+    background: linear-gradient(90deg, rgba(255, 107, 107, 0.2) 0%, rgba(255, 107, 107, 0.1) 100%);
+    color: #ff8787;
     transform: translateX(4px);
 }
 
-[data-theme="dark"] .sidebar-nav li.active a[href*="activity"] {
-    background: linear-gradient(90deg, rgba(54, 185, 204, 0.25) 0%, rgba(54, 185, 204, 0.15) 100%);
-    color: #7dd3fc;
-    border-left: 4px solid #36b9cc;
+[data-theme="dark"] .sidebar-nav li.active a[href*="cotisations"],
+[data-theme="dark"] .sidebar-nav li.active a[href*="cotisations.php"],
+[data-theme="dark"] .sidebar-nav li.active a[href*="add-cotisation"],
+[data-theme="dark"] .sidebar-nav li.active a[href*="edit-cotisation"] {
+    background: linear-gradient(90deg, rgba(255, 107, 107, 0.25) 0%, rgba(255, 107, 107, 0.15) 100%);
+    color: #ff8787;
+    border-left: 4px solid #ff6b6b;
     font-weight: 600;
-    box-shadow: 0 2px 8px rgba(54, 185, 204, 0.3);
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+[data-theme="dark"] .sidebar-nav a[href*="activity"]::before {
+    background: linear-gradient(180deg, #9ca3af 0%, #6b7280 100%);
+}
+
+[data-theme="dark"] .sidebar-nav a[href*="activity"]:hover {
+    background: linear-gradient(90deg, rgba(156, 163, 175, 0.2) 0%, rgba(156, 163, 175, 0.1) 100%);
+    color: #d1d5db;
+    transform: translateX(4px);
+}
+
+[data-theme="dark"] .sidebar-nav li.active a[href*="activity"],
+[data-theme="dark"] .sidebar-nav li.active a[href*="activity-log"] {
+    background: linear-gradient(90deg, rgba(156, 163, 175, 0.25) 0%, rgba(156, 163, 175, 0.15) 100%);
+    color: #d1d5db;
+    border-left: 4px solid #9ca3af;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(156, 163, 175, 0.3);
 }
 
 [data-theme="dark"] .sidebar-footer {
@@ -989,8 +1037,12 @@ html:not([data-theme="dark"]) .sidebar-nav a[href*="activity"] i {
     color: #c084fc;
 }
 
+[data-theme="dark"] .sidebar-nav a[href*="cotisations"] i {
+    color: #ff8787;
+}
+
 [data-theme="dark"] .sidebar-nav a[href*="activity"] i {
-    color: #7dd3fc;
+    color: #d1d5db;
 }
 
 /* ============================================================

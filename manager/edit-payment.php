@@ -70,11 +70,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception(__("Property and amount are required. Amount must be greater than zero."));
         }
         
+        // Get year from form or use payment_date year
+        $year = !empty($_POST['year']) ? intval($_POST['year']) : intval(date('Y', strtotime($payment_date)));
+        
+        if ($year < 2000 || $year > 2100) {
+            throw new Exception(__("Year must be between 2000 and 2100."));
+        }
+        
         // Update payment record
         $query = "UPDATE payments SET 
                     property_id = :property_id, 
                     amount = :amount, 
                     payment_date = :payment_date, 
+                    year = :year,
                     status = :status, 
                     type = :payment_method
                   WHERE id = :id";
@@ -83,6 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bindParam(':property_id', $property_id);
         $stmt->bindParam(':amount', $amount);
         $stmt->bindParam(':payment_date', $payment_date);
+        $stmt->bindParam(':year', $year);
         $stmt->bindParam(':status', $status);
         $stmt->bindParam(':payment_method', $payment_method);
         $stmt->bindParam(':id', $payment_id);
@@ -416,7 +425,7 @@ $page_title = __("Edit Payment");
                                         <option value=""><?php echo __("-- Select a Property --"); ?></option>
                                         <?php foreach ($properties as $property): ?>
                                             <option value="<?php echo $property['id']; ?>" <?php echo $payment['property_id'] == $property['id'] ? 'selected' : ''; ?>>
-                                                <?php echo htmlspecialchars($property['identifier']); ?> - <?php echo htmlspecialchars($property['type']); ?>
+                                                <?php echo htmlspecialchars($property['identifier']); ?> - <?php echo ucfirst(htmlspecialchars($property['type'])); ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
@@ -437,6 +446,14 @@ $page_title = __("Edit Payment");
                                         <option value="transfer" <?php echo $payment['payment_method'] === 'transfer' ? 'selected' : ''; ?>><?php echo __("Transfer"); ?></option>
                                         <option value="cheque" <?php echo $payment['payment_method'] === 'cheque' ? 'selected' : ''; ?>><?php echo __("Check"); ?></option>
                                     </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="year"><?php echo __("Year"); ?> <span class="text-danger">*</span></label>
+                                    <input type="number" name="year" id="year" min="2000" max="2100" value="<?php echo isset($payment['year']) ? htmlspecialchars($payment['year']) : date('Y', strtotime($payment['payment_date'])); ?>" required>
+                                    <small class="form-text text-muted"><?php echo __("Year this payment is for (e.g., 2025, 2026)."); ?></small>
                                 </div>
                             </div>
                             
