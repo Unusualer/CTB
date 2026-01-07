@@ -39,6 +39,21 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'true') {
     $items_per_page = 10;
     $offset = ($page - 1) * $items_per_page;
     
+    // Handle sorting
+    $sort_column = $_GET['sort'] ?? 'id';
+    $sort_direction = $_GET['dir'] ?? 'asc';
+    
+    // Validate sort column (whitelist allowed columns)
+    $allowed_columns = ['id', 'name', 'email', 'role', 'status', 'created_at'];
+    if (!in_array($sort_column, $allowed_columns)) {
+        $sort_column = 'id';
+    }
+    
+    // Validate sort direction
+    if (!in_array(strtolower($sort_direction), ['asc', 'desc'])) {
+        $sort_direction = 'asc';
+    }
+    
     try {
         $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -50,8 +65,8 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'true') {
         
         // Apply filters
         if (!empty($search)) {
-            $query .= " AND (name LIKE :search OR email LIKE :search OR id LIKE :search OR role LIKE :search)";
-            $count_query .= " AND (name LIKE :search OR email LIKE :search OR id LIKE :search OR role LIKE :search)";
+            $query .= " AND name LIKE :search";
+            $count_query .= " AND name LIKE :search";
             $params[':search'] = "%$search%";
         }
         
@@ -67,8 +82,8 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'true') {
             $params[':status'] = $status_filter;
         }
         
-        // Add ordering
-        $query .= " ORDER BY id ASC LIMIT :offset, :limit";
+        // Add ordering (column name is validated against whitelist, so safe to use)
+        $query .= " ORDER BY `" . $sort_column . "` " . strtoupper($sort_direction) . " LIMIT :offset, :limit";
         
         // Get total count
         $count_stmt = $db->prepare($count_query);
@@ -102,7 +117,16 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'true') {
                 <table class="table">
                     <thead>
                         <tr>
-                            <th><?php echo __("ID"); ?></th>
+                            <th class="sortable" data-column="id">
+                                <?php echo __("ID"); ?>
+                                <span class="sort-icon">
+                                    <?php if ($sort_column === 'id'): ?>
+                                        <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
+                                    <?php else: ?>
+                                        <i class="fas fa-sort"></i>
+                                    <?php endif; ?>
+                                </span>
+                            </th>
                             <th><?php echo __("Name"); ?></th>
                             <th><?php echo __("Email"); ?></th>
                             <th><?php echo __("Role"); ?></th>
@@ -174,24 +198,24 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'true') {
             <!-- Pagination -->
             <?php if ($total_pages > 1): ?>
                 <div class="pagination">
-                    <?php if ($page > 1): ?>
-                        <a href="javascript:void(0);" onclick="loadUsers(<?php echo $page - 1; ?>)" class="pagination-link">
-                            <i class="fas fa-chevron-left"></i>
-                        </a>
-                    <?php endif; ?>
-                    
-                    <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
-                        <a href="javascript:void(0);" onclick="loadUsers(<?php echo $i; ?>)"
-                        class="pagination-link <?php echo $i === $page ? 'active' : ''; ?>">
-                            <?php echo $i; ?>
-                        </a>
-                    <?php endfor; ?>
-                    
-                    <?php if ($page < $total_pages): ?>
-                        <a href="javascript:void(0);" onclick="loadUsers(<?php echo $page + 1; ?>)" class="pagination-link">
-                            <i class="fas fa-chevron-right"></i>
-                        </a>
-                    <?php endif; ?>
+                                <?php if ($page > 1): ?>
+                                    <a href="javascript:void(0);" onclick="loadUsers(<?php echo $page - 1; ?>, '<?php echo $sort_column; ?>', '<?php echo $sort_direction; ?>')" class="pagination-link">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                <?php endif; ?>
+                                
+                                <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
+                                    <a href="javascript:void(0);" onclick="loadUsers(<?php echo $i; ?>, '<?php echo $sort_column; ?>', '<?php echo $sort_direction; ?>')"
+                                    class="pagination-link <?php echo $i === $page ? 'active' : ''; ?>">
+                                        <?php echo $i; ?>
+                                    </a>
+                                <?php endfor; ?>
+                                
+                                <?php if ($page < $total_pages): ?>
+                                    <a href="javascript:void(0);" onclick="loadUsers(<?php echo $page + 1; ?>, '<?php echo $sort_column; ?>', '<?php echo $sort_direction; ?>')" class="pagination-link">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                <?php endif; ?>
                 </div>
             <?php endif; ?>
         <?php endif;
@@ -221,6 +245,21 @@ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $items_per_page = 10;
 $offset = ($page - 1) * $items_per_page;
 
+// Handle sorting
+$sort_column = $_GET['sort'] ?? 'id';
+$sort_direction = $_GET['dir'] ?? 'asc';
+
+// Validate sort column (whitelist allowed columns)
+$allowed_columns = ['id', 'name', 'email', 'role', 'status', 'created_at'];
+if (!in_array($sort_column, $allowed_columns)) {
+    $sort_column = 'id';
+}
+
+// Validate sort direction
+if (!in_array(strtolower($sort_direction), ['asc', 'desc'])) {
+    $sort_direction = 'asc';
+}
+
 // Get total count and users list
 try {
     $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
@@ -233,8 +272,8 @@ try {
     
     // Apply filters
     if (!empty($search)) {
-        $query .= " AND (name LIKE :search OR email LIKE :search)";
-        $count_query .= " AND (name LIKE :search OR email LIKE :search)";
+        $query .= " AND name LIKE :search";
+        $count_query .= " AND name LIKE :search";
         $params[':search'] = "%$search%";
     }
     
@@ -250,8 +289,8 @@ try {
         $params[':status'] = $status_filter;
     }
     
-    // Add ordering
-    $query .= " ORDER BY id ASC LIMIT :offset, :limit";
+    // Add ordering (column name is validated against whitelist, so safe to use)
+    $query .= " ORDER BY `" . $sort_column . "` " . strtoupper($sort_direction) . " LIMIT :offset, :limit";
     
     // Get total count
     $count_stmt = $db->prepare($count_query);
@@ -329,6 +368,40 @@ $page_title = __("User Management");
         .loading-spinner i {
             font-size: 2rem;
             margin-bottom: 1rem;
+        }
+        
+        /* Sortable table header styles */
+        .table th.sortable {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            padding-right: 30px;
+            transition: background-color 0.2s;
+        }
+        
+        .table th.sortable:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        [data-theme="dark"] .table th.sortable:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .table th.sortable .sort-icon {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            font-size: 0.85em;
+        }
+        
+        .table th.sortable:hover .sort-icon {
+            color: #007bff;
+        }
+        
+        .table th.sortable[data-sorted="true"] .sort-icon {
+            color: #007bff;
         }
     </style>
 </head>
@@ -421,7 +494,7 @@ $page_title = __("User Management");
                                 <div class="search-filter">
                                     <div class="search-bar">
                                         <i class="fas fa-search"></i>
-                                        <input type="text" placeholder="<?php echo __("Search..."); ?>" name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
+                                        <input type="text" placeholder="<?php echo __("Search by name..."); ?>" name="search" value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" autofocus>
                                     </div>
                                 </div>
                                 <div class="filter-group">
@@ -457,7 +530,16 @@ $page_title = __("User Management");
                                 <table class="table">
                                     <thead>
                                         <tr>
-                                            <th><?php echo __("ID"); ?></th>
+                                            <th class="sortable" data-column="id">
+                                                <?php echo __("ID"); ?>
+                                                <span class="sort-icon">
+                                                    <?php if ($sort_column === 'id'): ?>
+                                                        <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
+                                                    <?php else: ?>
+                                                        <i class="fas fa-sort"></i>
+                                                    <?php endif; ?>
+                                                </span>
+                                            </th>
                                             <th><?php echo __("Name"); ?></th>
                                             <th><?php echo __("Email"); ?></th>
                                             <th><?php echo __("Role"); ?></th>
@@ -530,20 +612,20 @@ $page_title = __("User Management");
                             <?php if ($total_pages > 1): ?>
                                 <div class="pagination">
                                     <?php if ($page > 1): ?>
-                                        <a href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&role=<?php echo urlencode($role_filter); ?>&status=<?php echo urlencode($status_filter); ?>" class="pagination-link">
+                                        <a href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&role=<?php echo urlencode($role_filter); ?>&status=<?php echo urlencode($status_filter); ?>&sort=<?php echo urlencode($sort_column); ?>&dir=<?php echo urlencode($sort_direction); ?>" class="pagination-link">
                                             <i class="fas fa-chevron-left"></i>
                                         </a>
                                     <?php endif; ?>
                                     
                                     <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
-                                        <a href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&role=<?php echo urlencode($role_filter); ?>&status=<?php echo urlencode($status_filter); ?>" 
+                                        <a href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&role=<?php echo urlencode($role_filter); ?>&status=<?php echo urlencode($status_filter); ?>&sort=<?php echo urlencode($sort_column); ?>&dir=<?php echo urlencode($sort_direction); ?>" 
                                         class="pagination-link <?php echo $i === $page ? 'active' : ''; ?>">
                                             <?php echo $i; ?>
                                         </a>
                                     <?php endfor; ?>
                                     
                                     <?php if ($page < $total_pages): ?>
-                                        <a href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&role=<?php echo urlencode($role_filter); ?>&status=<?php echo urlencode($status_filter); ?>" class="pagination-link">
+                                        <a href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&role=<?php echo urlencode($role_filter); ?>&status=<?php echo urlencode($status_filter); ?>&sort=<?php echo urlencode($sort_column); ?>&dir=<?php echo urlencode($sort_direction); ?>" class="pagination-link">
                                             <i class="fas fa-chevron-right"></i>
                                         </a>
                                     <?php endif; ?>
@@ -625,17 +707,45 @@ $page_title = __("User Management");
                 });
             }
             
+            // Function to initialize sortable headers
+            function initSortableHeaders() {
+                const sortableHeaders = document.querySelectorAll('.table th.sortable');
+                sortableHeaders.forEach(header => {
+                    header.addEventListener('click', function() {
+                        const column = this.getAttribute('data-column');
+                        let newDir = 'asc';
+                        
+                        // If clicking the same column, toggle direction
+                        if (currentSort === column) {
+                            newDir = currentDir === 'asc' ? 'desc' : 'asc';
+                        }
+                        
+                        // Load users with new sort
+                        loadUsers(1, column, newDir);
+                    });
+                });
+            }
+            
+            // Get current sort parameters from URL or defaults
+            const initialSortParams = new URLSearchParams(window.location.search);
+            let currentSort = initialSortParams.get('sort') || 'id';
+            let currentDir = initialSortParams.get('dir') || 'asc';
+            
             // Function to load users via AJAX
-            window.loadUsers = function(page = 1) {
+            window.loadUsers = function(page = 1, sort = currentSort, dir = currentDir) {
                 const search = searchInput ? searchInput.value : '';
                 const role = roleSelect ? roleSelect.value : '';
                 const status = statusSelect ? statusSelect.value : '';
+                
+                // Update current sort
+                currentSort = sort;
+                currentDir = dir;
                 
                 // Show loading indicator
                 contentContainer.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i><p><?php echo __("Loading..."); ?></p></div>';
                 
                 // Build the AJAX URL
-                const url = `users.php?ajax=true&search=${encodeURIComponent(search)}&role=${encodeURIComponent(role)}&status=${encodeURIComponent(status)}&page=${page}`;
+                const url = `users.php?ajax=true&search=${encodeURIComponent(search)}&role=${encodeURIComponent(role)}&status=${encodeURIComponent(status)}&sort=${encodeURIComponent(sort)}&dir=${encodeURIComponent(dir)}&page=${page}`;
                 
                 // Make the AJAX request
                 fetch(url)
@@ -655,8 +765,11 @@ $page_title = __("User Management");
                             initDeleteButtons();
                             
                             // Update URL with the current filters without reloading
-                            const newUrl = `users.php?search=${encodeURIComponent(search)}&role=${encodeURIComponent(role)}&status=${encodeURIComponent(status)}&page=${page}`;
+                            const newUrl = `users.php?search=${encodeURIComponent(search)}&role=${encodeURIComponent(role)}&status=${encodeURIComponent(status)}&sort=${encodeURIComponent(sort)}&dir=${encodeURIComponent(dir)}&page=${page}`;
                             window.history.pushState({ path: newUrl }, '', newUrl);
+                            
+                            // Initialize sortable headers after content is loaded
+                            initSortableHeaders();
                         }
                     })
                     .catch(error => {
@@ -669,7 +782,7 @@ $page_title = __("User Management");
             if (filterForm) {
                 filterForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    loadUsers(1);
+                    loadUsers(1, currentSort, currentDir);
                 });
             }
             
@@ -687,7 +800,7 @@ $page_title = __("User Management");
                 searchInput.addEventListener('input', function() {
                     clearTimeout(debounceTimer);
                     debounceTimer = setTimeout(() => {
-                        loadUsers(1);
+                        loadUsers(1, currentSort, currentDir);
                     }, 500); // Search after 500ms of typing pause
                 });
                 
@@ -712,7 +825,7 @@ $page_title = __("User Management");
                 // Clear search when button is clicked
                 clearButton.addEventListener('click', function() {
                     searchInput.value = '';
-                    loadUsers(1);
+                    loadUsers(1, currentSort, currentDir);
                     this.style.display = 'none';
                     searchInput.focus();
                 });
@@ -721,13 +834,13 @@ $page_title = __("User Management");
             // Handle select filters
             if (roleSelect) {
                 roleSelect.addEventListener('change', function() {
-                    loadUsers(1);
+                    loadUsers(1, currentSort, currentDir);
                 });
             }
             
             if (statusSelect) {
                 statusSelect.addEventListener('change', function() {
-                    loadUsers(1);
+                    loadUsers(1, currentSort, currentDir);
                 });
             }
             
@@ -742,20 +855,30 @@ $page_title = __("User Management");
                     if (roleSelect) roleSelect.value = '';
                     if (statusSelect) statusSelect.value = '';
                     
+                    // Reset sort to default
+                    currentSort = 'id';
+                    currentDir = 'asc';
+                    
                     // Reload users
-                    loadUsers(1);
+                    loadUsers(1, currentSort, currentDir);
                 });
             }
             
+            // Initialize sortable headers on page load
+            initSortableHeaders();
+            
             // On initial page load, check if we should use AJAX right away
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('ajax') && urlParams.get('ajax') === 'true') {
+            const initialUrlParams = new URLSearchParams(window.location.search);
+            if (initialUrlParams.has('ajax') && initialUrlParams.get('ajax') === 'true') {
                 // If this is an AJAX request, don't do anything
                 return;
-            } else if (urlParams.toString() && !document.referrer.includes('users.php')) {
+            } else if (initialUrlParams.toString() && !document.referrer.includes('users.php')) {
                 // If there are URL parameters and we're not coming from a users.php page,
                 // use AJAX to load the data without a full page reload
-                loadUsers(urlParams.get('page') || 1);
+                const page = initialUrlParams.get('page') || 1;
+                const sort = initialUrlParams.get('sort') || 'id';
+                const dir = initialUrlParams.get('dir') || 'asc';
+                loadUsers(page, sort, dir);
             }
         });
     </script>

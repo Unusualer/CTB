@@ -75,6 +75,33 @@ try {
         $maintenance_items = [];
     }
     
+    // Get total amount due from cotisations (all years)
+    $amount_due_total = 0;
+    try {
+        $cotisation_stmt = $db->prepare("SELECT SUM(amount_due) as total_due FROM cotisations WHERE property_id = :property_id");
+        $cotisation_stmt->bindParam(':property_id', $property_id, PDO::PARAM_INT);
+        $cotisation_stmt->execute();
+        $cotisation_result = $cotisation_stmt->fetch(PDO::FETCH_ASSOC);
+        $amount_due_total = $cotisation_result['total_due'] ?? 0;
+    } catch (PDOException $e) {
+        $amount_due_total = 0;
+    }
+    
+    // Get total amount paid from payments (all years)
+    $amount_paid_total = 0;
+    try {
+        $payment_stmt = $db->prepare("SELECT SUM(amount) as total_paid FROM payments WHERE property_id = :property_id AND status = 'paid'");
+        $payment_stmt->bindParam(':property_id', $property_id, PDO::PARAM_INT);
+        $payment_stmt->execute();
+        $payment_result = $payment_stmt->fetch(PDO::FETCH_ASSOC);
+        $amount_paid_total = $payment_result['total_paid'] ?? 0;
+    } catch (PDOException $e) {
+        $amount_paid_total = 0;
+    }
+    
+    // Calculate balance (amount due - amount paid)
+    $balance = $amount_due_total - $amount_paid_total;
+    
 } catch (PDOException $e) {
     $_SESSION['error'] = __("Database error:") . " " . $e->getMessage();
     header("Location: properties.php");
@@ -171,6 +198,16 @@ $page_title = __("View Property");
                                 <div class="info-group">
                                     <label><i class="fas fa-tag"></i> <?php echo __("Type"); ?>:</label>
                                     <span class="info-value"><?php echo ucfirst(htmlspecialchars(__($property['type']))); ?></span>
+                                </div>
+                                <div class="info-group">
+                                    <label><i class="fas fa-dollar-sign"></i> <?php echo __("Amount Due"); ?> (<?php echo __("All Years"); ?>):</label>
+                                    <span class="info-value amount-due"><?php echo number_format($amount_due_total, 2); ?> <?php echo __("MAD"); ?></span>
+                                </div>
+                                <div class="info-group">
+                                    <label><i class="fas fa-balance-scale"></i> <?php echo __("Balance"); ?>:</label>
+                                    <span class="info-value balance <?php echo $balance <= 0 ? 'balance-paid' : ($balance < $amount_due_total * 0.5 ? 'balance-pending' : 'balance-overdue'); ?>">
+                                        <?php echo number_format($balance, 2); ?> <?php echo __("MAD"); ?>
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -425,6 +462,63 @@ $page_title = __("View Property");
         
         [data-theme="dark"] .empty-state p {
             color: #b0b0b0;
+        }
+        
+        /* Amount Due Styling */
+        .amount-due {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .amount-paid {
+            font-weight: 600;
+            color: #28a745;
+        }
+        
+        .balance {
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 4px 12px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        
+        .balance.balance-paid {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .balance.balance-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .balance.balance-overdue {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        [data-theme="dark"] .amount-due {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .amount-paid {
+            color: #2ecc71;
+        }
+        
+        [data-theme="dark"] .balance.balance-paid {
+            background-color: rgba(40, 167, 69, 0.2);
+            color: #2ecc71;
+        }
+        
+        [data-theme="dark"] .balance.balance-pending {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #f39c12;
+        }
+        
+        [data-theme="dark"] .balance.balance-overdue {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #e74c3c;
         }
     </style>
 </body>

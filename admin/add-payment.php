@@ -44,6 +44,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $payment_id = 'PAY-' . date('YmdHis') . '-' . substr(md5(uniqid()), 0, 6);
         
         // Validate required fields
+        if (empty($property_id)) {
+            throw new Exception(__("Property is required."));
+        }
+        
         if (empty($user_id) || empty($amount) || $amount <= 0) {
             throw new Exception(__("User and amount are required fields. Amount must be greater than zero."));
         }
@@ -148,10 +152,15 @@ try {
     $users_stmt->execute();
     $users = $users_stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    $properties_query = "SELECT id, identifier, type FROM properties ORDER BY identifier";
+    $properties_query = "SELECT id, identifier, type, user_id FROM properties";
     $properties_stmt = $db->prepare($properties_query);
     $properties_stmt->execute();
     $properties = $properties_stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Sort properties by identifier using natural sort (numerical order)
+    usort($properties, function($a, $b) {
+        return strnatcasecmp($a['identifier'], $b['identifier']);
+    });
     
 } catch (PDOException $e) {
     $error = "Database error: " . $e->getMessage();
@@ -452,11 +461,13 @@ $page_title = __("Add Payment");
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="property_id"><?php echo __("Property"); ?></label>
-                                    <select name="property_id" id="property_id">
-                                        <option value=""><?php echo __("Select a property"); ?> (<?php echo __("Optional"); ?>)</option>
+                                    <label for="property_id"><?php echo __("Property"); ?> <span class="text-danger">*</span></label>
+                                    <select name="property_id" id="property_id" required>
+                                        <option value=""><?php echo __("-- Select a Property --"); ?></option>
                                         <?php foreach ($properties as $property): ?>
-                                            <option value="<?php echo $property['id']; ?>" <?php echo $payment['property_id'] == $property['id'] ? 'selected' : ''; ?>>
+                                            <option value="<?php echo $property['id']; ?>" 
+                                                    data-user-id="<?php echo $property['user_id'] ?? ''; ?>"
+                                                    <?php echo $payment['property_id'] == $property['id'] ? 'selected' : ''; ?>>
                                                 <?php echo htmlspecialchars($property['identifier']); ?> - <?php echo ucfirst(htmlspecialchars($property['type'])); ?>
                                             </option>
                                         <?php endforeach; ?>
@@ -540,6 +551,65 @@ $page_title = __("Add Payment");
     </div>
 
     <script src="js/dark-mode.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userSelect = document.getElementById('user_id');
+            const propertySelect = document.getElementById('property_id');
+            
+            if (!userSelect || !propertySelect) return;
+            
+            // Store all property options
+            const allPropertyOptions = Array.from(propertySelect.options).slice(1); // Skip first empty option
+            
+            // When user is selected, filter properties
+            userSelect.addEventListener('change', function() {
+                const selectedUserId = this.value;
+                
+                // Clear current property selection
+                propertySelect.value = '';
+                
+                // Remove all property options except the first empty one
+                while (propertySelect.options.length > 1) {
+                    propertySelect.remove(1);
+                }
+                
+                if (selectedUserId) {
+                    // Add properties that belong to the selected user
+                    allPropertyOptions.forEach(function(option) {
+                        const propertyUserId = option.getAttribute('data-user-id');
+                        if (propertyUserId == selectedUserId) {
+                            propertySelect.appendChild(option.cloneNode(true));
+                        }
+                    });
+                } else {
+                    // If no user selected, show all properties
+                    allPropertyOptions.forEach(function(option) {
+                        propertySelect.appendChild(option.cloneNode(true));
+                    });
+                }
+            });
+            
+            // When property is selected, automatically select the user
+            propertySelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                if (selectedOption && selectedOption.value) {
+                    const propertyUserId = selectedOption.getAttribute('data-user-id');
+                    if (propertyUserId && userSelect.value !== propertyUserId) {
+                        userSelect.value = propertyUserId;
+                        // Trigger change event to update property list
+                        userSelect.dispatchEvent(new Event('change'));
+                        // Re-select the property
+                        propertySelect.value = selectedOption.value;
+                    }
+                }
+            });
+            
+            // Initialize: if a user is already selected, filter properties
+            if (userSelect.value) {
+                userSelect.dispatchEvent(new Event('change'));
+            }
+        });
+    </script>
     
     <style>
         /* Breadcrumb styling for dark mode */

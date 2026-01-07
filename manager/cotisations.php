@@ -16,6 +16,21 @@ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $items_per_page = 10;
 $offset = ($page - 1) * $items_per_page;
 
+// Handle sorting
+$sort_column = $_GET['sort'] ?? 'year';
+$sort_direction = $_GET['dir'] ?? 'desc';
+
+// Validate sort column (whitelist allowed columns)
+$allowed_columns = ['id', 'property_identifier', 'property_type', 'user_name', 'year', 'amount_due', 'amount_paid'];
+if (!in_array($sort_column, $allowed_columns)) {
+    $sort_column = 'year';
+}
+
+// Validate sort direction
+if (!in_array(strtolower($sort_direction), ['asc', 'desc'])) {
+    $sort_direction = 'desc';
+}
+
 // Get total count and cotisations list
 try {
     $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
@@ -51,8 +66,20 @@ try {
     // Group by for aggregate functions
     $query .= " GROUP BY c.id, c.property_id, c.year, c.amount_due, c.created_at, c.updated_at, p.identifier, p.type, u.name";
     
-    // Add ordering
-    $query .= " ORDER BY c.year DESC, p.identifier ASC LIMIT :offset, :limit";
+    // Add ordering (column name is validated against whitelist, so safe to use)
+    $order_by = '';
+    if ($sort_column === 'property_identifier') {
+        $order_by = 'p.identifier';
+    } elseif ($sort_column === 'property_type') {
+        $order_by = 'p.type';
+    } elseif ($sort_column === 'user_name') {
+        $order_by = 'u.name';
+    } elseif ($sort_column === 'amount_paid') {
+        $order_by = 'amount_paid';
+    } else {
+        $order_by = 'c.' . $sort_column;
+    }
+    $query .= " ORDER BY " . $order_by . " " . strtoupper($sort_direction) . " LIMIT :offset, :limit";
     
     // Get total count
     $count_stmt = $db->prepare($count_query);
@@ -164,6 +191,40 @@ $page_title = __("Cotisations Management");
             padding: 10px 16px;
         }
         
+        /* Sortable table header styles */
+        .table th.sortable {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            padding-right: 30px;
+            transition: background-color 0.2s;
+        }
+        
+        .table th.sortable:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        [data-theme="dark"] .table th.sortable:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .table th.sortable .sort-icon {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            font-size: 0.85em;
+        }
+        
+        .table th.sortable:hover .sort-icon {
+            color: #007bff;
+        }
+        
+        .table th.sortable[data-sorted="true"] .sort-icon {
+            color: #007bff;
+        }
+        
         .table tbody tr td .property-link {
             display: block;
             margin-bottom: 4px;
@@ -260,10 +321,46 @@ $page_title = __("Cotisations Management");
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th><?php echo __("Property"); ?></th>
-                                        <th><?php echo __("Year"); ?></th>
-                                        <th><?php echo __("Amount Due"); ?></th>
-                                        <th><?php echo __("Amount Paid"); ?></th>
+                                        <th class="sortable" data-column="property_identifier">
+                                            <?php echo __("Property"); ?>
+                                            <span class="sort-icon">
+                                                <?php if ($sort_column === 'property_identifier'): ?>
+                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
+                                                <?php else: ?>
+                                                    <i class="fas fa-sort"></i>
+                                                <?php endif; ?>
+                                            </span>
+                                        </th>
+                                        <th class="sortable" data-column="year">
+                                            <?php echo __("Year"); ?>
+                                            <span class="sort-icon">
+                                                <?php if ($sort_column === 'year'): ?>
+                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
+                                                <?php else: ?>
+                                                    <i class="fas fa-sort"></i>
+                                                <?php endif; ?>
+                                            </span>
+                                        </th>
+                                        <th class="sortable" data-column="amount_due">
+                                            <?php echo __("Amount Due"); ?>
+                                            <span class="sort-icon">
+                                                <?php if ($sort_column === 'amount_due'): ?>
+                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
+                                                <?php else: ?>
+                                                    <i class="fas fa-sort"></i>
+                                                <?php endif; ?>
+                                            </span>
+                                        </th>
+                                        <th class="sortable" data-column="amount_paid">
+                                            <?php echo __("Amount Paid"); ?>
+                                            <span class="sort-icon">
+                                                <?php if ($sort_column === 'amount_paid'): ?>
+                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
+                                                <?php else: ?>
+                                                    <i class="fas fa-sort"></i>
+                                                <?php endif; ?>
+                                            </span>
+                                        </th>
                                         <th><?php echo __("Balance"); ?></th>
                                     </tr>
                                 </thead>
@@ -304,20 +401,20 @@ $page_title = __("Cotisations Management");
                         <?php if ($total_pages > 1): ?>
                             <div class="pagination">
                                 <?php if ($page > 1): ?>
-                                    <a href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&year=<?php echo urlencode($year_filter); ?>" class="pagination-link">
+                                    <a href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&year=<?php echo urlencode($year_filter); ?>&sort=<?php echo urlencode($sort_column); ?>&dir=<?php echo urlencode($sort_direction); ?>" class="pagination-link">
                                         <i class="fas fa-chevron-left"></i>
                                     </a>
                                 <?php endif; ?>
                                 
                                 <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
-                                    <a href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&year=<?php echo urlencode($year_filter); ?>" 
+                                    <a href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&year=<?php echo urlencode($year_filter); ?>&sort=<?php echo urlencode($sort_column); ?>&dir=<?php echo urlencode($sort_direction); ?>" 
                                        class="pagination-link <?php echo $i === $page ? 'active' : ''; ?>">
                                         <?php echo $i; ?>
                                     </a>
                                 <?php endfor; ?>
                                 
                                 <?php if ($page < $total_pages): ?>
-                                    <a href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&year=<?php echo urlencode($year_filter); ?>" class="pagination-link">
+                                    <a href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&year=<?php echo urlencode($year_filter); ?>&sort=<?php echo urlencode($sort_column); ?>&dir=<?php echo urlencode($sort_direction); ?>" class="pagination-link">
                                         <i class="fas fa-chevron-right"></i>
                                     </a>
                                 <?php endif; ?>
@@ -354,6 +451,38 @@ $page_title = __("Cotisations Management");
                 filterForm.submit();
             }
         });
+        
+        // Sortable headers functionality
+        const urlParams = new URLSearchParams(window.location.search);
+        let currentSort = urlParams.get('sort') || 'year';
+        let currentDir = urlParams.get('dir') || 'desc';
+        
+        function initSortableHeaders() {
+            const sortableHeaders = document.querySelectorAll('.table th.sortable');
+            sortableHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const column = this.getAttribute('data-column');
+                    let newDir = 'desc';
+                    
+                    // If clicking the same column, toggle direction
+                    if (currentSort === column) {
+                        newDir = currentDir === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        newDir = 'asc';
+                    }
+                    
+                    // Build new URL with sort parameters
+                    const newUrl = new URL(window.location.href);
+                    newUrl.searchParams.set('sort', column);
+                    newUrl.searchParams.set('dir', newDir);
+                    newUrl.searchParams.set('page', '1'); // Reset to first page
+                    window.location.href = newUrl.toString();
+                });
+            });
+        }
+        
+        // Initialize sortable headers on page load
+        initSortableHeaders();
     </script>
 </body>
 </html>

@@ -20,6 +20,21 @@ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $items_per_page = 10;
 $offset = ($page - 1) * $items_per_page;
 
+// Handle sorting
+$sort_column = $_GET['sort'] ?? 'payment_date';
+$sort_direction = $_GET['dir'] ?? 'desc';
+
+// Validate sort column (whitelist allowed columns)
+$allowed_columns = ['id', 'property_identifier', 'year', 'amount', 'type', 'status', 'payment_date'];
+if (!in_array($sort_column, $allowed_columns)) {
+    $sort_column = 'payment_date';
+}
+
+// Validate sort direction
+if (!in_array(strtolower($sort_direction), ['asc', 'desc'])) {
+    $sort_direction = 'desc';
+}
+
 // Get total count and payments list
 try {
     $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
@@ -68,8 +83,12 @@ try {
         $params[':date_to'] = $date_to;
     }
     
-    // Add ordering
-    $query .= " ORDER BY p.payment_date DESC LIMIT :offset, :limit";
+    // Add ordering (column name is validated against whitelist, so safe to use)
+    $order_by = 'p.' . $sort_column;
+    if ($sort_column === 'property_identifier') {
+        $order_by = 'pr.identifier';
+    }
+    $query .= " ORDER BY " . $order_by . " " . strtoupper($sort_direction) . " LIMIT :offset, :limit";
     
     // Get total count
     $count_stmt = $db->prepare($count_query);
@@ -338,13 +357,76 @@ $page_title = __("Payment Management");
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th><?php echo __("ID"); ?></th>
-                                        <th><?php echo __("Property"); ?></th>
-                                        <th><?php echo __("Year"); ?></th>
-                                        <th><?php echo __("Amount"); ?></th>
-                                        <th><?php echo __("Method"); ?></th>
-                                        <th><?php echo __("Status"); ?></th>
-                                        <th><?php echo __("Date"); ?></th>
+                                        <th class="sortable" data-column="id">
+                                            <?php echo __("ID"); ?>
+                                            <span class="sort-icon">
+                                                <?php if ($sort_column === 'id'): ?>
+                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
+                                                <?php else: ?>
+                                                    <i class="fas fa-sort"></i>
+                                                <?php endif; ?>
+                                            </span>
+                                        </th>
+                                        <th class="sortable" data-column="property_identifier">
+                                            <?php echo __("Property"); ?>
+                                            <span class="sort-icon">
+                                                <?php if ($sort_column === 'property_identifier'): ?>
+                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
+                                                <?php else: ?>
+                                                    <i class="fas fa-sort"></i>
+                                                <?php endif; ?>
+                                            </span>
+                                        </th>
+                                        <th class="sortable" data-column="year">
+                                            <?php echo __("Year"); ?>
+                                            <span class="sort-icon">
+                                                <?php if ($sort_column === 'year'): ?>
+                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
+                                                <?php else: ?>
+                                                    <i class="fas fa-sort"></i>
+                                                <?php endif; ?>
+                                            </span>
+                                        </th>
+                                        <th class="sortable" data-column="amount">
+                                            <?php echo __("Amount"); ?>
+                                            <span class="sort-icon">
+                                                <?php if ($sort_column === 'amount'): ?>
+                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
+                                                <?php else: ?>
+                                                    <i class="fas fa-sort"></i>
+                                                <?php endif; ?>
+                                            </span>
+                                        </th>
+                                        <th class="sortable" data-column="type">
+                                            <?php echo __("Method"); ?>
+                                            <span class="sort-icon">
+                                                <?php if ($sort_column === 'type'): ?>
+                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
+                                                <?php else: ?>
+                                                    <i class="fas fa-sort"></i>
+                                                <?php endif; ?>
+                                            </span>
+                                        </th>
+                                        <th class="sortable" data-column="status">
+                                            <?php echo __("Status"); ?>
+                                            <span class="sort-icon">
+                                                <?php if ($sort_column === 'status'): ?>
+                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
+                                                <?php else: ?>
+                                                    <i class="fas fa-sort"></i>
+                                                <?php endif; ?>
+                                            </span>
+                                        </th>
+                                        <th class="sortable" data-column="payment_date">
+                                            <?php echo __("Date"); ?>
+                                            <span class="sort-icon">
+                                                <?php if ($sort_column === 'payment_date'): ?>
+                                                    <i class="fas fa-sort-<?php echo $sort_direction === 'asc' ? 'up' : 'down'; ?>"></i>
+                                                <?php else: ?>
+                                                    <i class="fas fa-sort"></i>
+                                                <?php endif; ?>
+                                            </span>
+                                        </th>
                                         <th><?php echo __("Actions"); ?></th>
                                     </tr>
                                 </thead>
@@ -426,20 +508,20 @@ $page_title = __("Payment Management");
                         <?php if ($total_pages > 1): ?>
                             <div class="pagination">
                                 <?php if ($page > 1): ?>
-                                    <a href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status_filter); ?>&payment_method=<?php echo urlencode($payment_method_filter); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>" class="pagination-link">
+                                    <a href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status_filter); ?>&payment_method=<?php echo urlencode($payment_method_filter); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>&sort=<?php echo urlencode($sort_column); ?>&dir=<?php echo urlencode($sort_direction); ?>" class="pagination-link">
                                         <i class="fas fa-chevron-left"></i>
                                     </a>
                                 <?php endif; ?>
                                 
                                 <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
-                                    <a href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status_filter); ?>&payment_method=<?php echo urlencode($payment_method_filter); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>" 
+                                    <a href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status_filter); ?>&payment_method=<?php echo urlencode($payment_method_filter); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>&sort=<?php echo urlencode($sort_column); ?>&dir=<?php echo urlencode($sort_direction); ?>" 
                                        class="pagination-link <?php echo $i === $page ? 'active' : ''; ?>">
                                         <?php echo $i; ?>
                                     </a>
                                 <?php endfor; ?>
                                 
                                 <?php if ($page < $total_pages): ?>
-                                    <a href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status_filter); ?>&payment_method=<?php echo urlencode($payment_method_filter); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>" class="pagination-link">
+                                    <a href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status_filter); ?>&payment_method=<?php echo urlencode($payment_method_filter); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>&sort=<?php echo urlencode($sort_column); ?>&dir=<?php echo urlencode($sort_direction); ?>" class="pagination-link">
                                         <i class="fas fa-chevron-right"></i>
                                     </a>
                                 <?php endif; ?>
@@ -517,6 +599,38 @@ $page_title = __("Payment Management");
                 modal.style.display = 'none';
             }
         });
+        
+        // Sortable headers functionality
+        const urlParams = new URLSearchParams(window.location.search);
+        let currentSort = urlParams.get('sort') || 'payment_date';
+        let currentDir = urlParams.get('dir') || 'desc';
+        
+        function initSortableHeaders() {
+            const sortableHeaders = document.querySelectorAll('.table th.sortable');
+            sortableHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const column = this.getAttribute('data-column');
+                    let newDir = 'desc';
+                    
+                    // If clicking the same column, toggle direction
+                    if (currentSort === column) {
+                        newDir = currentDir === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        newDir = 'asc';
+                    }
+                    
+                    // Build new URL with sort parameters
+                    const newUrl = new URL(window.location.href);
+                    newUrl.searchParams.set('sort', column);
+                    newUrl.searchParams.set('dir', newDir);
+                    newUrl.searchParams.set('page', '1'); // Reset to first page
+                    window.location.href = newUrl.toString();
+                });
+            });
+        }
+        
+        // Initialize sortable headers on page load
+        initSortableHeaders();
     </script>
 </body>
 </html> 

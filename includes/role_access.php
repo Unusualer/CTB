@@ -64,5 +64,4 @@ function getCurrentRole() {
         return $_SESSION['user_role'];
     }
     return null;
-}
-?> 
+} 

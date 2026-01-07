@@ -73,6 +73,54 @@ try {
         $assigned_properties = $prop_stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
+    // Get activity log for this user
+    $log_stmt = $db->prepare("SELECT * FROM activity_log WHERE user_id = :user_id ORDER BY created_at DESC LIMIT 20");
+    $log_stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $log_stmt->execute();
+    $activity_logs = $log_stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Get payment history for this user (through their properties)
+    $payment_stmt = $db->prepare("
+        SELECT p.*, pr.identifier as property_identifier, pr.type as property_type
+        FROM payments p
+        INNER JOIN properties pr ON p.property_id = pr.id
+        WHERE pr.user_id = :user_id
+        ORDER BY p.payment_date DESC, p.created_at DESC
+        LIMIT 20
+    ");
+    $payment_stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $payment_stmt->execute();
+    $payments = $payment_stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Combine activity logs and payments into a single array
+    $all_activities = [];
+    
+    // Add activity logs
+    foreach ($activity_logs as $log) {
+        $all_activities[] = [
+            'type' => 'activity',
+            'date' => $log['created_at'],
+            'data' => $log
+        ];
+    }
+    
+    // Add payments
+    foreach ($payments as $payment) {
+        $all_activities[] = [
+            'type' => 'payment',
+            'date' => $payment['payment_date'] ?? $payment['created_at'] ?? date('Y-m-d H:i:s'),
+            'data' => $payment
+        ];
+    }
+    
+    // Sort by date (most recent first)
+    usort($all_activities, function($a, $b) {
+        return strtotime($b['date']) - strtotime($a['date']);
+    });
+    
+    // Limit to 15 most recent items
+    $all_activities = array_slice($all_activities, 0, 15);
+    
 } catch (PDOException $e) {
     $_SESSION['error'] = __("Database error") . ": " . $e->getMessage();
     header("Location: users.php");
@@ -212,6 +260,58 @@ $page_title = __("My Profile");
                         </div>
                     <?php endif; ?>
 
+                    <!-- Activity Log Card -->
+                    <div class="card activity-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-history"></i> <?php echo __("Recent Activity"); ?></h3>
+                        </div>
+                        <div class="card-body">
+                            <?php if (empty($all_activities)): ?>
+                                <div class="no-data">
+                                    <i class="far fa-clock"></i>
+                                    <p><?php echo __("No recent activity found."); ?></p>
+                                </div>
+                            <?php else: ?>
+                                <div class="activity-timeline">
+                                    <?php foreach ($all_activities as $activity): ?>
+                                        <div class="activity-item">
+                                            <div class="activity-icon <?php echo $activity['type'] === 'payment' ? 'payment-icon' : ''; ?>">
+                                                <?php if ($activity['type'] === 'payment'): ?>
+                                                    <i class="fas fa-credit-card"></i>
+                                                <?php else: ?>
+                                                    <i class="fas fa-circle"></i>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="activity-content">
+                                                <?php if ($activity['type'] === 'payment'): ?>
+                                                    <?php 
+                                                        $payment = $activity['data'];
+                                                        $status_class = strtolower($payment['status']);
+                                                        $amount = number_format($payment['amount'], 2);
+                                                        $property_info = htmlspecialchars($payment['property_identifier']) . ' (' . __(ucfirst($payment['property_type'])) . ')';
+                                                        $year_info = isset($payment['year']) ? ' - ' . __("Year") . ' ' . $payment['year'] : '';
+                                                    ?>
+                                                    <p class="activity-text">
+                                                        <strong><?php echo __("Payment"); ?>:</strong> 
+                                                        <?php echo $amount; ?> <?php echo __("MAD"); ?> 
+                                                        <?php echo __("for"); ?> <?php echo $property_info; ?><?php echo $year_info; ?>
+                                                        <span class="status-badge-small status-<?php echo $status_class; ?>">
+                                                            <?php echo __(ucfirst($status_class)); ?>
+                                                        </span>
+                                                    </p>
+                                                    <p class="activity-time"><?php echo date('d M Y H:i', strtotime($activity['date'])); ?></p>
+                                                <?php else: ?>
+                                                    <?php $log = $activity['data']; ?>
+                                                    <p class="activity-text"><?php echo isset($log['description']) ? htmlspecialchars($log['description']) : __("No description available"); ?></p>
+                                                    <p class="activity-time"><?php echo isset($log['created_at']) ? date('d M Y H:i', strtotime($log['created_at'])) : __("Unknown date"); ?></p>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -347,6 +447,154 @@ $page_title = __("My Profile");
         
         [data-theme="dark"] .breadcrumb a {
             color: #ffffff;
+        }
+        
+        /* Activity Card Scrollable */
+        .activity-card {
+            display: flex;
+            flex-direction: column;
+            height: 97%;
+        }
+        
+        .activity-card .card-body {
+            flex: 1;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        
+        .activity-card .card-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .activity-card .card-body::-webkit-scrollbar-track {
+            background: var(--light-color);
+            border-radius: 8px;
+        }
+        
+        .activity-card .card-body::-webkit-scrollbar-thumb {
+            background-color: var(--border-color);
+            border-radius: 8px;
+        }
+        
+        [data-theme="dark"] .activity-card .card-body::-webkit-scrollbar-track {
+            background: var(--dark-card-bg);
+        }
+        
+        [data-theme="dark"] .activity-card .card-body::-webkit-scrollbar-thumb {
+            background-color: #4a5568;
+        }
+        
+        .activity-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            background-color: var(--light-color);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .activity-item:hover {
+            transform: translateX(4px);
+        }
+        
+        .activity-icon {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            color: white;
+        }
+        
+        .activity-icon i {
+            font-size: 10px;
+        }
+        
+        .activity-icon.payment-icon {
+            background-color: #28a745;
+        }
+        
+        .activity-icon.payment-icon i {
+            font-size: 14px;
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-text {
+            margin: 0 0 4px 0;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+        
+        .activity-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .status-badge-small {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-left: 8px;
+            text-transform: capitalize;
+        }
+        
+        .status-badge-small.status-paid,
+        .status-badge-small.status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-badge-small.status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-badge-small.status-failed,
+        .status-badge-small.status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        [data-theme="dark"] .activity-item {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+        }
+        
+        [data-theme="dark"] .activity-text {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .status-badge-small.status-paid,
+        [data-theme="dark"] .status-badge-small.status-completed {
+            background-color: rgba(40, 167, 69, 0.2);
+            color: #2ecc71;
+        }
+        
+        [data-theme="dark"] .status-badge-small.status-pending {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #f39c12;
+        }
+        
+        [data-theme="dark"] .status-badge-small.status-failed,
+        [data-theme="dark"] .status-badge-small.status-cancelled {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #e74c3c;
         }
     </style>
 </body>

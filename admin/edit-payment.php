@@ -123,19 +123,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch properties for dropdown
+// Fetch users and properties for dropdowns
 try {
     $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    $properties_query = "SELECT id, identifier, type FROM properties ORDER BY identifier";
+    $users_query = "SELECT id, name, email FROM users ORDER BY name";
+    $users_stmt = $db->prepare($users_query);
+    $users_stmt->execute();
+    $users = $users_stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    $properties_query = "SELECT id, identifier, type, user_id FROM properties";
     $properties_stmt = $db->prepare($properties_query);
     $properties_stmt->execute();
     $properties = $properties_stmt->fetchAll(PDO::FETCH_ASSOC);
     
+    // Sort properties by identifier using natural sort (numerical order)
+    usort($properties, function($a, $b) {
+        return strnatcasecmp($a['identifier'], $b['identifier']);
+    });
+    
+    // Get the user_id for the current payment's property
+    $current_user_id = null;
+    if (!empty($payment['property_id'])) {
+        foreach ($properties as $prop) {
+            if ($prop['id'] == $payment['property_id']) {
+                $current_user_id = $prop['user_id'];
+                break;
+            }
+        }
+    }
+    
 } catch (PDOException $e) {
     $error = __("Database error:") . " " . $e->getMessage();
+    $users = [];
     $properties = [];
+    $current_user_id = null;
 }
 
 // Page title
@@ -420,11 +443,27 @@ $page_title = __("Edit Payment");
                             
                             <div class="form-row">
                                 <div class="form-group">
+                                    <label for="user_id"><?php echo __("User"); ?> <span class="text-danger">*</span></label>
+                                    <select name="user_id" id="user_id" required>
+                                        <option value=""><?php echo __("Select a user"); ?></option>
+                                        <?php foreach ($users as $user): ?>
+                                            <option value="<?php echo $user['id']; ?>" <?php echo ($current_user_id == $user['id']) ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($user['name']); ?> (<?php echo htmlspecialchars($user['email']); ?>)
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
                                     <label for="property_id"><?php echo __("Property"); ?> <span class="text-danger">*</span></label>
                                     <select name="property_id" id="property_id" required>
                                         <option value=""><?php echo __("-- Select a Property --"); ?></option>
                                         <?php foreach ($properties as $property): ?>
-                                            <option value="<?php echo $property['id']; ?>" <?php echo $payment['property_id'] == $property['id'] ? 'selected' : ''; ?>>
+                                            <option value="<?php echo $property['id']; ?>" 
+                                                    data-user-id="<?php echo $property['user_id'] ?? ''; ?>"
+                                                    <?php echo $payment['property_id'] == $property['id'] ? 'selected' : ''; ?>>
                                                 <?php echo htmlspecialchars($property['identifier']); ?> - <?php echo ucfirst(htmlspecialchars($property['type'])); ?>
                                             </option>
                                         <?php endforeach; ?>
@@ -498,5 +537,64 @@ $page_title = __("Edit Payment");
     </div>
 
     <script src="js/dark-mode.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userSelect = document.getElementById('user_id');
+            const propertySelect = document.getElementById('property_id');
+            
+            if (!userSelect || !propertySelect) return;
+            
+            // Store all property options
+            const allPropertyOptions = Array.from(propertySelect.options).slice(1); // Skip first empty option
+            
+            // When user is selected, filter properties
+            userSelect.addEventListener('change', function() {
+                const selectedUserId = this.value;
+                
+                // Clear current property selection
+                propertySelect.value = '';
+                
+                // Remove all property options except the first empty one
+                while (propertySelect.options.length > 1) {
+                    propertySelect.remove(1);
+                }
+                
+                if (selectedUserId) {
+                    // Add properties that belong to the selected user
+                    allPropertyOptions.forEach(function(option) {
+                        const propertyUserId = option.getAttribute('data-user-id');
+                        if (propertyUserId == selectedUserId) {
+                            propertySelect.appendChild(option.cloneNode(true));
+                        }
+                    });
+                } else {
+                    // If no user selected, show all properties
+                    allPropertyOptions.forEach(function(option) {
+                        propertySelect.appendChild(option.cloneNode(true));
+                    });
+                }
+            });
+            
+            // When property is selected, automatically select the user
+            propertySelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                if (selectedOption && selectedOption.value) {
+                    const propertyUserId = selectedOption.getAttribute('data-user-id');
+                    if (propertyUserId && userSelect.value !== propertyUserId) {
+                        userSelect.value = propertyUserId;
+                        // Trigger change event to update property list
+                        userSelect.dispatchEvent(new Event('change'));
+                        // Re-select the property
+                        propertySelect.value = selectedOption.value;
+                    }
+                }
+            });
+            
+            // Initialize: if a user is already selected, filter properties
+            if (userSelect.value) {
+                userSelect.dispatchEvent(new Event('change'));
+            }
+        });
+    </script>
 </body>
 </html> 
