@@ -18,9 +18,9 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Database connection constants
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'ctb_db');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_NAME', 'gardenci_ctb_db');
+define('DB_USER', 'gardenci_root');
+define('DB_PASS', 'nNbmJR8uCCzbZjC');
 define('DB_CHARSET', 'utf8mb4');
 
 // Error reporting and display settings
